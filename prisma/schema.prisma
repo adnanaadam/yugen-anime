@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AnimeStatus {
+  WATCHING
+  COMPLETED
+  PLAN_TO_WATCH
+  PAUSED
+  DROPPED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  image     String?
+  username  String?  @unique
+
+  xp        Int      @default(0)
+  level     Int      @default(1)
+  streak    Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  animeList AnimeList[]
+  badges    UserBadge[]
+}
+
+model AnimeList {
+  id        String      @id @default(cuid())
+
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  animeId   Int         // AniList ID
+
+  status    AnimeStatus @default(PLAN_TO_WATCH)
+  progress  Int         @default(0)
+  score     Int?
+
+  startedAt DateTime?
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, animeId])
+}
+
+model Badge {
+  id    String @id @default(cuid())
+  name  String
+  icon  String?
+
+  createdAt DateTime @default(now())
+
+  users UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+
+  userId   String
+  badgeId  String
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+}
