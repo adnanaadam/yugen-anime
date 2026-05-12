@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -24,10 +25,12 @@ export default function DashboardLayout({
       <aside className="flex w-64 flex-col border-r">
         <div className="flex items-center gap-3 border-b p-4">
           {session?.user?.image ? (
-            <img
-              src={session.user.image}
-              alt={session.user.name ?? "Avatar"}
+            <Image
+              src='/vercel.svg'
+              alt="Avatar"
               className="h-10 w-10 rounded-full"
+              width={40}
+              height={40}
             />
           ) : (
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 text-sm font-medium dark:bg-zinc-800">

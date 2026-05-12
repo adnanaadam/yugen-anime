@@ -4,7 +4,7 @@ import Discord from "next-auth/providers/discord";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
 
   providers: [
@@ -19,16 +19,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
 
   session: {
-    strategy: "database",
+    strategy: "jwt" as const,
   },
 
-   callbacks: {
+  pages: {
+    signIn: "/signin",
+    newUser: "/signup",
+  },
+
+  callbacks: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, user }: { session: any; user: any }) {
-      if (session.user) {
-        session.user.id = user.id;
+    async session({ session, token }: { session: any; token: any }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
       }
       return session;
     },
   },
-});
+};
+
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };
