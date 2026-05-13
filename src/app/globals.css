@@ -22,3 +22,18 @@ body {
   color: #ededed;
   font-family: var(--font-sans);
 }
+
+.mask-panel {
+  mask: url("/shapes/panel.svg") center / cover no-repeat;
+  -webkit-mask: url("/shapes/panel.svg") center / cover no-repeat;
+
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+

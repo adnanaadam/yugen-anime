@@ -27,7 +27,7 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop nav */}
-      <nav className={`hidden items-center text-black gap-8 md:flex fixed top-2/5 -translate-y-1/2 z-30 flex-col ${scrolled ? "bg-white/80 p-4 rounded-full left-6" : "left-16"} transition-all`}>
+      <nav className={`hidden items-center text-black gap-4 md:flex fixed top-2/5 -translate-y-1/2 z-30 flex-col ${scrolled ? "bg-white/80 p-4 rounded-full left-6" : "left-16"} transition-all`}>
         {navLinks.map((link) => (
           <Link
             key={link.href}
@@ -38,46 +38,6 @@ export default function Navbar() {
           </Link>
         ))}
       </nav>
-
-      {/* Desktop auth buttons */}
-      {/* <div className="hidden items-center gap-3 md:flex">
-          {status === "loading" ? (
-            <div className="h-8 w-20 animate-pulse rounded-full bg-zinc-800" />
-          ) : session ? (
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white transition-all hover:bg-white/10"
-            >
-              {session.user?.image ? (
-                <img
-                  src={session.user.image}
-                  alt=""
-                  className="h-5 w-5 rounded-full"
-                />
-              ) : (
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-[10px] font-medium">
-                  {session.user?.name?.charAt(0) ?? "?"}
-                </div>
-              )}
-              Dashboard
-            </Link>
-          ) : (
-            <>
-              <button
-                onClick={() => signIn()}
-                className="text-sm text-zinc-400 transition-colors hover:text-white"
-              >
-                Log in
-              </button>
-              <button
-                onClick={() => signIn()}
-                className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-indigo-500"
-              >
-                Get Started
-              </button>
-            </>
-          )}
-        </div> */}
 
       {/* Mobile hamburger */}
       {/* <button
