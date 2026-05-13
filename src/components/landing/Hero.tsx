@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
+import { lordJuusai } from "@/fonts/fonts";
 
 export default function Hero() {
   const { data: session, status } = useSession();
@@ -92,7 +93,7 @@ export default function Hero() {
 
             {/* TEXT LEFT */}
             <div className="pl-28 pt-8 z-20">
-              <h1 className="max-w-75 text-5xl font-black uppercase leading-[0.9] tracking-tight sm:text-6xl">
+              <h1 className={`max-w-75 uppercase text-6xl tracking-wide ${lordJuusai.className}`}>
                 IMMERSE IN
                 <br />
                 ANIME
