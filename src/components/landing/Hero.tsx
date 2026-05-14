@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Search, ArrowUpRight, Sun, Moon } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -13,6 +13,14 @@ export default function Hero() {
   const { data: session, status } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  const [ripple, setRipple] = useState(false);
+
+  const handleToggle = () => {
+    setRipple(true);
+    toggleTheme();
+    setTimeout(() => setRipple(false), 300);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -31,10 +39,14 @@ export default function Hero() {
       {/* Blurred Background */}
       <div className="absolute inset-0">
         <Image
-          src="/images/anime-girl-bg.jpg"
+          src={
+            theme === "light"
+              ? "/images/anime-bg1.jpg"
+              : "/images/anime-bg2.jpg"
+          }
           alt="anime bg"
           fill
-          className="h-full w-full object-cover blur-xl scale-110"
+          className="h-full w-full object-cover blur-xl scale-110 transition-opacity duration-3000"
         />
         <div
           className="absolute inset-0 backdrop-blur-[2px]"
@@ -48,7 +60,7 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
-          className="relative overflow-hidden h-full rounded-[32px] md:rounded-[50px] shadow-[0_20px_80px_rgba(0,0,0,0.15)] backdrop-blur-2xl"
+          className="relative overflow-hidden h-full rounded-4xl md:rounded-[50px] shadow-[0_20px_80px_rgba(0,0,0,0.15)] backdrop-blur-2xl"
           style={{
             backgroundColor: "var(--glass-surface)",
             border: "1px solid var(--glass-border)",
@@ -66,9 +78,9 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                src="/images/anime-char.png"
+                src="/images/anime-char2.png"
                 alt="anime character"
-                className="h-[200px] md:h-[320px] lg:h-[800px] object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
+                className="h-50 md:h-80 lg:h-200 object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
               />
             </div>
 
@@ -76,7 +88,7 @@ export default function Hero() {
             <header className="flex items-center justify-between">
               {/* title */}
               <h1
-                className="text-xl md:text-2xl font-bold"
+                className="text-xl md:text-2xl font-bold tracking-wide"
                 style={{ color: "var(--color-foreground)" }}
               >
                 Yugen
@@ -92,24 +104,105 @@ export default function Hero() {
                   <input
                     placeholder="Search"
                     className="ml-2 bg-transparent text-sm outline-none w-20 md:w-auto"
-                    style={{ color: "var(--color-foreground)", caretColor: "var(--color-foreground)" }}
+                    style={{
+                      color: "var(--color-foreground)",
+                      caretColor: "var(--color-foreground)",
+                    }}
                   />
                 </div>
 
                 {/* Theme toggle */}
                 <button
-                  onClick={toggleTheme}
-                  className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full backdrop-blur-xl"
+                  onClick={handleToggle}
+                  className="relative flex h-8 w-20 md:h-10 md:w-24 items-center rounded-full backdrop-blur-xl overflow-hidden"
                   style={{ backgroundColor: "var(--glass-surface)" }}
                   aria-label="Toggle theme"
                 >
-                  {theme === "dark" ? (
-                    <Sun className="h-3.5 w-3.5 md:h-4 md:w-4" style={{ color: "var(--color-foreground)" }} />
-                  ) : (
-                    <Moon className="h-3.5 w-3.5 md:h-4 md:w-4" style={{ color: "var(--color-foreground)" }} />
+                  {ripple && (
+                    <motion.span
+                      initial={{ scale: 0, opacity: 0.6 }}
+                      animate={{ scale: 4, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      className="absolute inset-0 rounded-full bg-current"
+                    />
                   )}
-                </button>
 
+                  <div className="flex w-full h-full relative">
+                    {/* Sliding background indicator */}
+                    <motion.div
+                      layout
+                      animate={{
+                        x: theme === "dark" ? "100%" : "0%",
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 30,
+                        mass: 0.8,
+                      }}
+                      className="absolute inset-y-0 w-1/2 rounded-full"
+                      style={{ backgroundColor: "var(--color-accent)" }}
+                    />
+
+                    {/* Light option */}
+                    <motion.div
+                      className="flex-1 flex items-center justify-center rounded-full z-10 cursor-pointer"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <motion.div
+                        animate={{
+                          scale: theme === "light" ? 1 : 0.85,
+                          opacity: theme === "light" ? 1 : 0.5,
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25,
+                        }}
+                      >
+                        <Sun
+                          className="h-2.5 w-2.5 md:h-3 md:w-3"
+                          style={{
+                            color:
+                              theme === "light"
+                                ? "white"
+                                : "var(--color-foreground)",
+                          }}
+                        />
+                      </motion.div>
+                    </motion.div>
+
+                    {/* Dark option */}
+                    <motion.div
+                      className="flex-1 flex items-center justify-center rounded-full z-10 cursor-pointer"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <motion.div
+                        animate={{
+                          scale: theme === "dark" ? 1 : 0.85,
+                          opacity: theme === "dark" ? 1 : 0.5,
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25,
+                        }}
+                      >
+                        <Moon
+                          className="h-2.5 w-2.5 md:h-3 md:w-3"
+                          style={{
+                            color:
+                              theme === "dark"
+                                ? "white"
+                                : "var(--color-foreground)",
+                          }}
+                        />
+                      </motion.div>
+                    </motion.div>
+                  </div>
+                </button>
                 {/* profile */}
                 <div className="flex items-center gap-2 md:gap-3">
                   {status === "loading" ? (
@@ -137,7 +230,10 @@ export default function Hero() {
                         ) : (
                           <div
                             className="flex h-7 w-7 md:h-9 md:w-9 items-center justify-center rounded-full text-[10px] font-medium"
-                            style={{ backgroundColor: "var(--color-accent)", color: "#000" }}
+                            style={{
+                              backgroundColor: "var(--color-accent)",
+                              color: "#000",
+                            }}
                           >
                             {session.user?.name?.charAt(0) ?? "?"}
                           </div>
@@ -148,7 +244,10 @@ export default function Hero() {
                     <button
                       onClick={() => signIn()}
                       className="flex h-10 px-4 md:h-12 md:px-6 cursor-pointer rounded-full items-center justify-center backdrop-blur-xl text-sm font-medium"
-                      style={{ backgroundColor: "var(--glass-surface)", color: "var(--color-foreground)" }}
+                      style={{
+                        backgroundColor: "var(--glass-surface)",
+                        color: "var(--color-foreground)",
+                      }}
                     >
                       Log in
                     </button>
@@ -174,9 +273,8 @@ export default function Hero() {
             {/* bottom cards — stack vertically on mobile */}
             <div className="w-full z-20 mt-auto flex flex-col md:flex-row gap-4 relative justify-between items-stretch md:items-end">
               {/* LEFT CARD */}
-              <motion.div
-                whileHover={{ y: -4 }}
-                className="flex-1 rounded-[32px] md:rounded-[40px] py-4 px-5 md:px-6 backdrop-blur-2xl"
+              <div
+                className="flex-1 rounded-4xl md:rounded-[40px] py-4 px-5 md:px-6 backdrop-blur-2xl"
                 style={{
                   backgroundColor: "var(--glass-surface)",
                   border: "1px solid var(--glass-border)",
@@ -194,26 +292,34 @@ export default function Hero() {
                 >
                   watchlist
                 </h2>
-                <button className="mt-4 md:mt-6 gap-2 flex w-full items-center justify-between rounded-full px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-medium shadow-lg"
-                  style={{ backgroundColor: "var(--glass-surface)", color: "var(--color-foreground)" }}
+                <Link
+                  href="/explore"
+                  className="group mt-4 md:mt-6 gap-2 flex w-full items-center justify-between rounded-full px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-medium shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                  style={{
+                    backgroundColor: "var(--glass-surface)",
+                    color: "var(--color-foreground)",
+                    backdropFilter: "blur(10px)",
+                  }}
                 >
-                  Explore Anime
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">
+                    Explore Anime
+                  </span>
                   <span
-                    className="flex size-8 md:size-10 items-center justify-center rounded-full"
+                    className="flex size-8 md:size-10 items-center justify-center rounded-full transition-all duration-300 group-hover:rotate-12 group-hover:scale-110"
                     style={{ backgroundColor: "var(--color-accent)" }}
                   >
-                    <ArrowUpRight className="size-4" style={{ color: "#000" }} />
+                    <ArrowUpRight
+                      className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      style={{ color: "#000" }}
+                    />
                   </span>
-                </button>
-              </motion.div>
+                </Link>
+              </div>
 
               {/* CENTER STATS */}
-              <motion.div
-                whileHover={{ y: -4 }}
-                className="flex-1 flex items-end justify-center flex-col md:flex-row gap-4"
-              >
+              <div className="flex-1 flex items-end justify-center flex-col md:flex-row gap-4">
                 <div
-                  className="flex-1 rounded-[32px] md:rounded-[40px] p-4 md:p-5"
+                  className="flex-1 rounded-4xl md:rounded-[40px] p-4 md:p-5"
                   style={{
                     backgroundColor: "var(--glass-surface)",
                     border: "1px solid var(--glass-border)",
@@ -240,17 +346,21 @@ export default function Hero() {
                         Episodes
                       </p>
                     </div>
-                    <button
-                      className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full"
+                    <Link
+                      href="/dashboard"
+                      className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 hover:rotate-12"
                       style={{ backgroundColor: "var(--color-accent)" }}
                     >
-                      <ArrowUpRight className="h-3.5 w-3.5 md:h-4 md:w-4" style={{ color: "#000" }} />
-                    </button>
+                      <ArrowUpRight
+                        className="h-3.5 w-3.5 md:h-4 md:w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        style={{ color: "#000" }}
+                      />
+                    </Link>
                   </div>
                 </div>
 
                 <div
-                  className="flex-1 rounded-[32px] md:rounded-[40px] p-4 md:p-5"
+                  className="flex-1 rounded-4xl md:rounded-[40px] p-4 md:p-5"
                   style={{
                     backgroundColor: "var(--glass-surface)",
                     border: "1px solid var(--glass-border)",
@@ -271,20 +381,23 @@ export default function Hero() {
                         Chapters Read
                       </p>
                     </div>
-                    <button
-                      className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full"
+                    <Link
+                      href="/dashboard"
+                      className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 hover:rotate-12"
                       style={{ backgroundColor: "var(--color-accent)" }}
                     >
-                      <ArrowUpRight className="h-3.5 w-3.5 md:h-4 md:w-4" style={{ color: "#000" }} />
-                    </button>
+                      <ArrowUpRight
+                        className="h-3.5 w-3.5 md:h-4 md:w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        style={{ color: "#000" }}
+                      />
+                    </Link>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* RIGHT CARD */}
-              <motion.div
-                whileHover={{ y: -4 }}
-                className="flex flex-col justify-between rounded-[32px] md:rounded-[40px] px-5 md:px-6 py-4 backdrop-blur-2xl"
+              <div
+                className="flex flex-col justify-between rounded-4xl md:rounded-[40px] px-5 md:px-6 py-4 backdrop-blur-2xl"
                 style={{
                   backgroundColor: "var(--glass-surface)",
                   border: "1px solid var(--glass-border)",
@@ -304,18 +417,29 @@ export default function Hero() {
                     Watching
                   </h2>
                 </div>
-                <button className="mt-4 md:mt-6 flex gap-2 w-full items-center justify-between rounded-full px-4 md:px-6 py-3 md:py-5 text-base md:text-lg font-medium shadow-lg"
-                  style={{ backgroundColor: "var(--glass-surface)", color: "var(--color-foreground)" }}
+
+                <Link
+                  href="/explore"
+                  className="group mt-4 md:mt-6 flex gap-2 w-full items-center justify-between rounded-full px-4 md:px-6 py-3 md:py-5 text-base md:text-lg font-medium shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl"
+                  style={{
+                    backgroundColor: "var(--glass-surface)",
+                    color: "var(--color-foreground)",
+                  }}
                 >
-                  Watch Now
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">
+                    Watch Now
+                  </span>
                   <span
-                    className="flex size-8 md:size-10 items-center justify-center rounded-full"
+                    className="flex size-8 md:size-10 items-center justify-center rounded-full transition-all duration-300 group-hover:rotate-12 group-hover:scale-110"
                     style={{ backgroundColor: "var(--color-accent)" }}
                   >
-                    <ArrowUpRight className="h-4 w-4 md:h-5 md:w-5" style={{ color: "#000" }} />
+                    <ArrowUpRight
+                      className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      style={{ color: "#000" }}
+                    />
                   </span>
-                </button>
-              </motion.div>
+                </Link>
+              </div>
             </div>
           </div>
         </motion.div>

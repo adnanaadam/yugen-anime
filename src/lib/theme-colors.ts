@@ -26,7 +26,8 @@ export const themeColors = {
 
     glass: {
       surface: "rgba(255,255,255,0.06)",
-      border: "rgba(255,255,255,0.08)",
+    //   border: "rgba(255,255,255,0.08)",
+      border: "rgba(255,255,255,0.4)",
     },
 
     text: {
@@ -34,7 +35,7 @@ export const themeColors = {
       secondary: "rgba(255,255,255,0.6)",
     },
 
-    accent: "#F2C94C",
+    accent: "#fc7931",
 
     glow: {
       purple: "#7C3AED",

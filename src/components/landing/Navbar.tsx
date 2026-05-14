@@ -29,11 +29,12 @@ export default function Navbar() {
       <nav
         className={`hidden items-center gap-3 md:flex fixed top-2/5 -translate-y-1/2 z-30 flex-col transition-all duration-300 ${
           scrolled
-            ? "rounded-full left-4 backdrop-blur-xl"
+            ? "rounded-full left-4 backdrop-blur-xl p-2"
             : "left-18"
         }`}
         style={{
           backgroundColor: scrolled ? "var(--glass-surface)" : "transparent",
+          border: scrolled ? "0.5px solid var(--glass-border)" : "transparent",
         }}
       >
         {navLinks.map((link) => (
