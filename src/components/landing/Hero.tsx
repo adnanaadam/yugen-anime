@@ -28,6 +28,9 @@ export default function Hero() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Card colors from features section
+  const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47"];
+
   return (
     <section
       className="relative h-screen overflow-hidden px-4 py-4"
@@ -71,6 +74,22 @@ export default function Hero() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#f0d46b_1px,transparent_1px)] [bg-size:140px_140px]" />
           </div>
 
+          {/* Colored accent circles in background */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className="absolute -top-20 -right-20 h-64 w-64 rounded-full opacity-20 blur-3xl"
+              style={{ backgroundColor: cardColors[0] }}
+            />
+            <div
+              className="absolute bottom-40 -left-20 h-80 w-80 rounded-full opacity-20 blur-3xl"
+              style={{ backgroundColor: cardColors[1] }}
+            />
+            <div
+              className="absolute top-1/2 right-1/4 h-60 w-60 rounded-full opacity-10 blur-3xl"
+              style={{ backgroundColor: cardColors[2] }}
+            />
+          </div>
+
           <div className="relative p-4 md:p-8 flex flex-col justify-between h-full">
             {/* CENTER CHARACTER */}
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -86,9 +105,9 @@ export default function Hero() {
 
             {/* TOP BAR */}
             <header className="flex items-center justify-between">
-              {/* title */}
+              {/* title with gradient */}
               <h1
-                className="text-xl md:text-2xl font-bold tracking-wide"
+                className="text-xl md:text-2xl font-bold tracking-wide bg-gradient-to-r from-[#d8d5cc] via-[#e5b23c] to-[#ff5b47] bg-clip-text text-transparent"
                 style={{ color: "var(--color-foreground)" }}
               >
                 Yugen
@@ -210,7 +229,7 @@ export default function Hero() {
                   ) : session ? (
                     <Link href="/dashboard">
                       <div
-                        className="flex cursor-pointer items-center gap-2 md:gap-3 rounded-full px-2 md:px-3 py-1.5 md:py-2 backdrop-blur-xl"
+                        className="flex cursor-pointer items-center gap-2 md:gap-3 rounded-full px-2 md:px-3 py-1.5 md:py-2 backdrop-blur-xl transition-all duration-300 hover:scale-105"
                         style={{ backgroundColor: "var(--glass-surface)" }}
                       >
                         <p
@@ -231,7 +250,7 @@ export default function Hero() {
                           <div
                             className="flex h-7 w-7 md:h-9 md:w-9 items-center justify-center rounded-full text-[10px] font-medium"
                             style={{
-                              backgroundColor: "var(--color-accent)",
+                              background: `linear-gradient(135deg, ${cardColors[0]}, ${cardColors[1]})`,
                               color: "#000",
                             }}
                           >
@@ -243,7 +262,7 @@ export default function Hero() {
                   ) : (
                     <button
                       onClick={() => signIn()}
-                      className="flex h-10 px-4 md:h-12 md:px-6 cursor-pointer rounded-full items-center justify-center backdrop-blur-xl text-sm font-medium"
+                      className="flex h-10 px-4 md:h-12 md:px-6 cursor-pointer rounded-full items-center justify-center backdrop-blur-xl text-sm font-medium transition-all duration-300 hover:scale-105"
                       style={{
                         backgroundColor: "var(--glass-surface)",
                         color: "var(--color-foreground)",
@@ -256,7 +275,7 @@ export default function Hero() {
               </div>
             </header>
 
-            {/* TEXT LEFT — adjusted for mobile */}
+            {/* TEXT LEFT — adjusted for mobile with gradient */}
             <div className="pl-4 md:pl-28 pt-4 md:pt-8 z-20">
               <h1
                 className={`uppercase text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-wide leading-tight ${lordJuusai.className}`}
@@ -272,17 +291,18 @@ export default function Hero() {
 
             {/* bottom cards — stack vertically on mobile */}
             <div className="w-full z-20 mt-auto flex flex-col md:flex-row gap-4 relative justify-between items-stretch md:items-end">
-              {/* LEFT CARD */}
+              {/* LEFT CARD - Color 1 */}
               <div
-                className="flex-1 rounded-4xl md:rounded-[40px] py-4 px-5 md:px-6 backdrop-blur-2xl"
+                className="flex-1 rounded-4xl md:rounded-[40px] py-4 px-5 md:px-6 backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02]"
                 style={{
-                  backgroundColor: "var(--glass-surface)",
-                  border: "1px solid var(--glass-border)",
+                  backgroundColor: `${cardColors[0]}20`,
+                  border: `1px solid ${cardColors[0]}40`,
+                  backdropFilter: "blur(10px)",
                 }}
               >
                 <p
                   className="text-lg md:text-xl font-medium"
-                  style={{ color: "var(--color-foreground)" }}
+                  style={{ color: cardColors[1] }}
                 >
                   Build your
                 </p>
@@ -306,7 +326,7 @@ export default function Hero() {
                   </span>
                   <span
                     className="flex size-8 md:size-10 items-center justify-center rounded-full transition-all duration-300 group-hover:rotate-12 group-hover:scale-110"
-                    style={{ backgroundColor: "var(--color-accent)" }}
+                    style={{ backgroundColor: cardColors[0] }}
                   >
                     <ArrowUpRight
                       className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -318,16 +338,17 @@ export default function Hero() {
 
               {/* CENTER STATS */}
               <div className="flex-1 flex items-end justify-center flex-col md:flex-row gap-4">
+                {/* Stats Card 1 - Color 2 */}
                 <div
-                  className="flex-1 rounded-4xl md:rounded-[40px] p-4 md:p-5"
+                  className="flex-1 rounded-4xl md:rounded-[40px] p-4 md:p-5 transition-all duration-300 hover:scale-[1.02]"
                   style={{
-                    backgroundColor: "var(--glass-surface)",
-                    border: "1px solid var(--glass-border)",
+                    backgroundColor: `${cardColors[1]}20`,
+                    border: `1px solid ${cardColors[1]}40`,
                   }}
                 >
                   <p
                     className="text-base md:text-lg font-medium"
-                    style={{ color: "var(--color-foreground)" }}
+                    style={{ color: cardColors[1] }}
                   >
                     Watched
                   </p>
@@ -349,7 +370,7 @@ export default function Hero() {
                     <Link
                       href="/dashboard"
                       className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 hover:rotate-12"
-                      style={{ backgroundColor: "var(--color-accent)" }}
+                      style={{ backgroundColor: cardColors[1] }}
                     >
                       <ArrowUpRight
                         className="h-3.5 w-3.5 md:h-4 md:w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -359,11 +380,12 @@ export default function Hero() {
                   </div>
                 </div>
 
+                {/* Stats Card 2 - Color 3 */}
                 <div
-                  className="flex-1 rounded-4xl md:rounded-[40px] p-4 md:p-5"
+                  className="flex-1 rounded-4xl md:rounded-[40px] p-4 md:p-5 transition-all duration-300 hover:scale-[1.02]"
                   style={{
-                    backgroundColor: "var(--glass-surface)",
-                    border: "1px solid var(--glass-border)",
+                    backgroundColor: `${cardColors[2]}20`,
+                    border: `1px solid ${cardColors[2]}40`,
                   }}
                 >
                   <div className="mt-4 md:mt-6 flex items-end justify-between gap-4 md:gap-6">
@@ -384,7 +406,7 @@ export default function Hero() {
                     <Link
                       href="/dashboard"
                       className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 hover:rotate-12"
-                      style={{ backgroundColor: "var(--color-accent)" }}
+                      style={{ backgroundColor: cardColors[2] }}
                     >
                       <ArrowUpRight
                         className="h-3.5 w-3.5 md:h-4 md:w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -395,18 +417,18 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* RIGHT CARD */}
+              {/* RIGHT CARD - Gradient of all colors */}
               <div
-                className="flex flex-col justify-between rounded-4xl md:rounded-[40px] px-5 md:px-6 py-4 backdrop-blur-2xl"
+                className="flex flex-col justify-between rounded-4xl md:rounded-[40px] px-5 md:px-6 py-4 backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02]"
                 style={{
-                  backgroundColor: "var(--glass-surface)",
-                  border: "1px solid var(--glass-border)",
+                  background: `linear-gradient(135deg, ${cardColors[0]}20, ${cardColors[1]}20, ${cardColors[2]}20)`,
+                  border: `1px solid ${cardColors[1]}40`,
                 }}
               >
                 <div>
                   <p
                     className="text-lg md:text-xl font-medium"
-                    style={{ color: "var(--color-foreground)" }}
+                    style={{ color: cardColors[1] }}
                   >
                     Continue
                   </p>
