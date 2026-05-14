@@ -33,7 +33,7 @@ export default function Hero() {
 
   return (
     <section
-      className="relative h-screen overflow-hidden px-4 py-4"
+      className="relative h-screen overflow-hidden p-0"
       style={{
         backgroundColor: "var(--color-background)",
         color: "var(--color-foreground)",
@@ -41,7 +41,7 @@ export default function Hero() {
     >
       {/* Blurred Background */}
       <div className="absolute inset-0">
-        <Image
+        {/* <Image
           src={
             theme === "light"
               ? "/images/anime-bg1.jpg"
@@ -50,7 +50,7 @@ export default function Hero() {
           alt="anime bg"
           fill
           className="h-full w-full object-cover blur-xl scale-110 transition-opacity duration-3000"
-        />
+        /> */}
         <div
           className="absolute inset-0 backdrop-blur-[2px]"
           style={{ backgroundColor: "var(--glass-surface)" }}
@@ -63,32 +63,19 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
-          className="relative overflow-hidden h-full rounded-4xl md:rounded-[50px] shadow-[0_20px_80px_rgba(0,0,0,0.15)] backdrop-blur-2xl"
-          style={{
-            backgroundColor: "var(--glass-surface)",
-            border: "1px solid var(--glass-border)",
-          }}
+          className="relative overflow-hidden h-full"
+          // className="relative overflow-hidden h-full rounded-4xl md:rounded-[50px] shadow-[0_20px_80px_rgba(0,0,0,0.15)] backdrop-blur-2xl"
+          // style={{
+          //   backgroundColor: "var(--glass-surface)",
+          //   border: "1px solid var(--glass-border)",
+          // }}
         >
           {/* decorative lines */}
-          <div className="pointer-events-none absolute inset-0 opacity-40">
+          {/* <div className="pointer-events-none absolute inset-0 opacity-40">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#f0d46b_1px,transparent_1px)] [bg-size:140px_140px]" />
-          </div>
+          </div> */}
 
-          {/* Colored accent circles in background */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div
-              className="absolute -top-20 -right-20 h-64 w-64 rounded-full opacity-20 blur-3xl"
-              style={{ backgroundColor: cardColors[0] }}
-            />
-            <div
-              className="absolute bottom-40 -left-20 h-80 w-80 rounded-full opacity-20 blur-3xl"
-              style={{ backgroundColor: cardColors[1] }}
-            />
-            <div
-              className="absolute top-1/2 right-1/4 h-60 w-60 rounded-full opacity-10 blur-3xl"
-              style={{ backgroundColor: cardColors[2] }}
-            />
-          </div>
+        
 
           <div className="relative p-4 md:p-8 flex flex-col justify-between h-full">
             {/* CENTER CHARACTER */}
@@ -421,8 +408,9 @@ export default function Hero() {
               <div
                 className="flex flex-col justify-between rounded-4xl md:rounded-[40px] px-5 md:px-6 py-4 backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02]"
                 style={{
-                  background: `linear-gradient(135deg, ${cardColors[0]}20, ${cardColors[1]}20, ${cardColors[2]}20)`,
-                  border: `1px solid ${cardColors[1]}40`,
+                  backgroundColor: `${cardColors[0]}20`,
+                  border: `1px solid ${cardColors[0]}40`,
+                  backdropFilter: "blur(10px)",
                 }}
               >
                 <div>
