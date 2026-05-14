@@ -1,25 +1,25 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #0a0a0a;
-  --color-foreground: #ededed;
+  --color-background: var(--color-background, #070707);
+  --color-foreground: var(--color-foreground, #FFFFFF);
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-heading: var(--font-geist-sans), system-ui, sans-serif;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #27272a #0a0a0a;
+  scrollbar-color: #27272a var(--color-background);
 }
 
 html {
-  background-color: #0a0a0a;
+  background-color: var(--color-background);
   color-scheme: dark;
 }
 
 body {
-  background: #0a0a0a;
-  color: #ededed;
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-sans);
 }
 
@@ -36,4 +36,3 @@ body {
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
 }
-

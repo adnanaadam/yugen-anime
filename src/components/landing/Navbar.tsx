@@ -3,14 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
-import { Menu, X } from "lucide-react";
+import { Info, ListChecks, Menu, Telescope, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Bookmark, Search, Bell, ArrowUpRight } from "lucide-react";
 
 const navLinks = [
-  { label: "Features", href: "#features", icon: Home },
-  { label: "Explore", href: "/explore", icon: Search },
-  { label: "About", href: "#about", icon: Bookmark },
+  { label: "Features", href: "#features", icon: ListChecks },
+  { label: "Explore", href: "/explore", icon: Telescope },
+  { label: "About", href: "#about", icon: Info },
 ];
 
 export default function Navbar() {
@@ -26,77 +25,90 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop nav */}
-      <nav className={`hidden items-center text-black gap-4 md:flex fixed top-2/5 -translate-y-1/2 z-30 flex-col ${scrolled ? "bg-white/80 p-4 rounded-full left-6" : "left-16"} transition-all`}>
+      {/* Desktop nav — vertical side panel */}
+      <nav
+        className={`hidden items-center gap-3 md:flex fixed top-2/5 -translate-y-1/2 z-30 flex-col transition-all duration-300 ${
+          scrolled
+            ? "rounded-full left-4 backdrop-blur-xl"
+            : "left-18"
+        }`}
+        style={{
+          backgroundColor: scrolled ? "var(--glass-surface)" : "transparent",
+        }}
+      >
         {navLinks.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="flex size-14 items-center justify-center rounded-full bg-white"
+            className="flex size-12 items-center justify-center rounded-full shadow-sm transition-transform hover:scale-110"
+            style={{ backgroundColor: "var(--glass-surface)" }}
+            title={link.label}
           >
-            <link.icon className="size-5" />
+            <link.icon className="size-5" style={{ color: "var(--color-foreground)" }} />
           </Link>
         ))}
       </nav>
 
       {/* Mobile hamburger */}
-      {/* <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="text-zinc-400 md:hidden"
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button> */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="fixed top-4 right-4 z-50 flex size-12 items-center justify-center rounded-full shadow-md md:hidden"
+        style={{ backgroundColor: "var(--glass-surface)" }}
+        aria-label="Toggle menu"
+      >
+        {mobileOpen ? <X size={22} style={{ color: "var(--color-foreground)" }} /> : <Menu size={22} style={{ color: "var(--color-foreground)" }} />}
+      </button>
 
       {/* Mobile menu */}
-      {/* <AnimatePresence>
+      <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden border-t border-white/5 bg-[#0a0a0a] md:hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 z-40 backdrop-blur-xl md:hidden"
+            style={{ backgroundColor: "var(--glass-surface)" }}
           >
-            <div className="space-y-1 px-4 py-4">
+            <div className="flex flex-col items-center justify-center h-full gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block rounded-md px-3 py-2 text-sm text-zinc-400 transition-colors hover:text-white"
+                  className="flex items-center gap-4 rounded-2xl px-6 py-4 shadow-sm"
+                  style={{ backgroundColor: "var(--glass-surface)" }}
                 >
-                  {link.label}
+                  <link.icon className="size-6" style={{ color: "var(--color-foreground)" }} />
+                  <span className="text-lg font-medium" style={{ color: "var(--color-foreground)" }}>
+                    {link.label}
+                  </span>
                 </Link>
               ))}
-              <hr className="my-3 border-white/5" />
+
+              <hr className="w-32" style={{ borderColor: "var(--glass-border)" }} />
+
               {session ? (
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileOpen(false)}
-                  className="block rounded-md px-3 py-2 text-sm text-white"
+                  className="flex items-center gap-3 rounded-full px-6 py-3 text-lg font-medium"
+                  style={{ backgroundColor: "var(--color-accent)", color: "#000" }}
                 >
-                  Dashboard
+                  Go to Dashboard
                 </Link>
               ) : (
-                <>
-                  <button
-                    onClick={() => { setMobileOpen(false); signIn(); }}
-                    className="block w-full rounded-md px-3 py-2 text-left text-sm text-zinc-400 transition-colors hover:text-white"
-                  >
-                    Log in
-                  </button>
-                  <button
-                    onClick={() => { setMobileOpen(false); signIn(); }}
-                    className="mt-2 w-full rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white"
-                  >
-                    Get Started
-                  </button>
-                </>
+                <button
+                  onClick={() => { setMobileOpen(false); signIn(); }}
+                  className="flex items-center gap-3 rounded-full px-6 py-3 text-lg font-medium"
+                  style={{ backgroundColor: "var(--color-accent)", color: "#000" }}
+                >
+                  Log in
+                </button>
               )}
             </div>
           </motion.div>
         )}
-      </AnimatePresence> */}
+      </AnimatePresence>
     </>
   );
 }
