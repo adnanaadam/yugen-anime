@@ -2,11 +2,6 @@ export const themeColors = {
   light: {
     background: "#F5F5F2",
 
-    glass: {
-      surface: "rgba(255,255,255,0.35)",
-      border: "rgba(255,255,255,0.4)",
-    },
-
     text: {
       primary: "#111111",
       secondary: "#6B7280",
@@ -14,33 +9,37 @@ export const themeColors = {
 
     accent: "#F2C94C",
 
-    glow: {
-      purple: "#7C3AED",
-      blue: "#2563EB",
-      pink: "#EC4899",
-    },
+    cards: [
+      "#d8d5cc", // Card 1
+      "#e5b23c", // Card 2  
+      "#ff5b47", // Card 3
+      "#6C5CE7", // Card 4
+    ],
+
+    surface: "#FFFFFF",
+    surfaceHover: "#F5F5F5",
+    border: "#E5E5E5",
   },
 
   dark: {
-    background: "#070707",
-
-    glass: {
-      surface: "rgba(255,255,255,0.06)",
-    //   border: "rgba(255,255,255,0.08)",
-      border: "rgba(255,255,255,0.4)",
-    },
+    background: "#0A0A0A",
 
     text: {
       primary: "#FFFFFF",
-      secondary: "rgba(255,255,255,0.6)",
+      secondary: "#A1A1AA",
     },
 
-    accent: "#fc7931",
+    accent: "#F2C94C",
 
-    glow: {
-      purple: "#7C3AED",
-      blue: "#2563EB",
-      pink: "#EC4899",
-    },
+    cards: [
+      "#d8d5cc", // Card 1
+      "#e5b23c", // Card 2
+      "#ff5b47", // Card 3
+      "#6C5CE7", // Card 4
+    ],
+
+    surface: "#1A1A1A",
+    surfaceHover: "#27272A",
+    border: "#27272A",
   },
 };

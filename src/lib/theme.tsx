@@ -21,10 +21,6 @@ function setThemeVariables(theme: Theme) {
   // Background
   root.style.setProperty("--color-background", colors.background);
 
-  // Glass
-  root.style.setProperty("--glass-surface", colors.glass.surface);
-  root.style.setProperty("--glass-border", colors.glass.border);
-
   // Text
   root.style.setProperty("--color-foreground", colors.text.primary);
   root.style.setProperty("--color-text-secondary", colors.text.secondary);
@@ -32,10 +28,16 @@ function setThemeVariables(theme: Theme) {
   // Accent
   root.style.setProperty("--color-accent", colors.accent);
 
-  // Glow
-  root.style.setProperty("--glow-purple", colors.glow.purple);
-  root.style.setProperty("--glow-blue", colors.glow.blue);
-  root.style.setProperty("--glow-pink", colors.glow.pink);
+  // Card backgrounds
+  root.style.setProperty("--card-bg-1", colors.cards[0]);
+  root.style.setProperty("--card-bg-2", colors.cards[1]);
+  root.style.setProperty("--card-bg-3", colors.cards[2]);
+  root.style.setProperty("--card-bg-4", colors.cards[3]);
+
+  // Surface colors (simplified, no glass)
+  root.style.setProperty("--surface", colors.surface);
+  root.style.setProperty("--surface-hover", colors.surfaceHover);
+  root.style.setProperty("--border", colors.border);
 }
 
 function getInitialTheme(): Theme {

@@ -65,10 +65,10 @@ export default function CTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-4xl md:rounded-[50px] backdrop-blur-2xl shadow-2xl"
+          className="relative overflow-hidden rounded-4xl md:rounded-[50px] shadow-2xl"
           style={{
-            backgroundColor: "var(--glass-surface)",
-            border: "1px solid var(--glass-border)",
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border)",
           }}
         >
           {/* Decorative header bar */}
@@ -91,7 +91,7 @@ export default function CTA() {
             {/* Mini badges */}
             <div className="mb-6 flex justify-center gap-2">
               <div 
-                className="rounded-full px-3 py-1 text-xs font-medium backdrop-blur-sm"
+                className="rounded-full px-3 py-1 text-xs font-medium"
                 style={{
                   backgroundColor: `${cardColors[1]}20`,
                   color: cardColors[1],
@@ -104,7 +104,7 @@ export default function CTA() {
                 </span>
               </div>
               <div 
-                className="rounded-full px-3 py-1 text-xs font-medium backdrop-blur-sm"
+                className="rounded-full px-3 py-1 text-xs font-medium"
                 style={{
                   backgroundColor: `${cardColors[2]}20`,
                   color: cardColors[2],
@@ -128,13 +128,13 @@ export default function CTA() {
               Your Anime Journey
             </h2>
 
-            {/* Description with gradient text */}
+            {/* Description */}
             <p 
               className="mx-auto mt-4 max-w-md text-sm md:text-base"
               style={{ color: "var(--color-text-secondary)" }}
             >
               Track anime, earn achievements, and discover your next favorite series. 
-              Join thousands of anime fans already using Yugen.
+              Join anime fans already using Yugen.
             </p>
 
             {/* Stats row */}
@@ -174,7 +174,7 @@ export default function CTA() {
               </div>
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons - All working */}
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               {session ? (
                 <motion.div
@@ -201,9 +201,9 @@ export default function CTA() {
                   >
                     <button
                       onClick={() => signIn()}
-                      className="group inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-medium transition-all duration-300 hover:gap-3"
+                      className="group inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-medium transition-all duration-300 hover:gap-3 cursor-pointer"
                       style={{
-                        background: `linear-gradient(135deg, ${cardColors[1]}, ${cardColors[2]})`,
+                        background: `${cardColors[1]}`,
                         color: "#000",
                       }}
                     >
@@ -220,9 +220,9 @@ export default function CTA() {
                       href="/explore"
                       className="group inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-medium transition-all duration-300 hover:gap-3"
                       style={{
-                        backgroundColor: "var(--glass-surface)",
+                        backgroundColor: "var(--surface)",
                         color: "var(--color-foreground)",
-                        border: "1px solid var(--glass-border)",
+                        border: "1px solid var(--border)",
                       }}
                     >
                       Explore Anime
@@ -232,14 +232,6 @@ export default function CTA() {
                 </>
               )}
             </div>
-
-            {/* Trust text */}
-            {/* <p 
-              className="mt-6 text-xs"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              ⚡ No credit card required • Free forever • Cancel anytime
-            </p> */}
           </div>
         </motion.div>
       </div>

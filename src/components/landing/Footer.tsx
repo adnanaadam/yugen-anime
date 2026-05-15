@@ -12,14 +12,12 @@ import DiscordIcon from "@/assets/icons/discord.svg";
 
 // Import decorative game icons
 import SwordIcon from "@/assets/icons/sword.svg";
-import DragonIcon from "@/assets/icons/dragon.svg";
-import MagicIcon from "@/assets/icons/magic.svg";
 import ScrollIcon from "@/assets/icons/scroll.svg";
 
 const socialLinks = [
-  { name: "Twitter", icon: TwitterIcon, href: "#", color: "#1DA1F2" },
-  { name: "GitHub", icon: GithubIcon, href: "#", color: "#6e5494" },
-  { name: "Discord", icon: DiscordIcon, href: "#", color: "#5865F2" },
+  { name: "Twitter", icon: TwitterIcon, href: "https://twitter.com/yourusername", color: "#1DA1F2" },
+  { name: "GitHub", icon: GithubIcon, href: "https://github.com/yourusername", color: "#6e5494" },
+  { name: "Discord", icon: DiscordIcon, href: "https://discord.gg/yourserver", color: "#5865F2" },
 ];
 
 export default function Footer() {
@@ -27,55 +25,15 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden border-t" style={{ borderColor: "var(--glass-border)" }}>
-      {/* Background decoration */}
-      <div className="pointer-events-none absolute inset-0">
-        <div 
-          className="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-full blur-3xl"
-          style={{ backgroundColor: `${cardColors[1]}05` }}
-        />
-        <div 
-          className="absolute top-20 right-0 h-[200px] w-[200px] rounded-full blur-3xl"
-          style={{ backgroundColor: `${cardColors[2]}05` }}
-        />
-      </div>
-
-      {/* Animated floating icons */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-[5%] top-[20%] opacity-10"
-        >
-          <SwordIcon className="h-16 w-16" style={{ color: cardColors[1] }} />
-        </motion.div>
-        <motion.div
-          animate={{ y: [0, 15, 0], rotate: [0, -5, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute right-[8%] bottom-[30%] opacity-10"
-        >
-          <DragonIcon className="h-20 w-20" style={{ color: cardColors[2] }} />
-        </motion.div>
-        <motion.div
-          animate={{ y: [0, -10, 0], rotate: [0, 8, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute left-[15%] bottom-[10%] opacity-10"
-        >
-          <MagicIcon className="h-12 w-12" style={{ color: cardColors[3] }} />
-        </motion.div>
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
+    <footer className="relative bg-black">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
         {/* Simple footer content - single row on desktop */}
         <div className="flex flex-col items-center justify-between gap-8 text-center sm:flex-row sm:text-left">
           {/* Brand */}
           <Link href="/" className="group inline-flex items-center gap-2">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
-              <ScrollIcon className="h-6 w-6" style={{ color: cardColors[1] }} />
-            </div>
             <h2 
-              className={`text-xl font-bold tracking-wide ${lordJuusai.className}`}
-              style={{ color: "var(--color-foreground)" }}
+              className={`text-4xl tracking-widest ${lordJuusai.className}`}
+              style={{ color: "#FFFFFF" }}
             >
               Yugen
             </h2>
@@ -85,31 +43,21 @@ export default function Footer() {
           <div className="flex flex-wrap items-center justify-center gap-6">
             <Link
               href="#features"
-              className="text-sm transition-all duration-300 hover:translate-x-0.5"
-              style={{ color: "var(--color-text-secondary)" }}
+              className="text-sm transition-all duration-300 hover:text-white text-gray-400"
             >
               Features
             </Link>
             <Link
               href="/explore"
-              className="text-sm transition-all duration-300 hover:translate-x-0.5"
-              style={{ color: "var(--color-text-secondary)" }}
+              className="text-sm transition-all duration-300 hover:text-white text-gray-400"
             >
               Explore
             </Link>
             <Link
               href="/dashboard"
-              className="text-sm transition-all duration-300 hover:translate-x-0.5"
-              style={{ color: "var(--color-text-secondary)" }}
+              className="text-sm transition-all duration-300 hover:text-white text-gray-400"
             >
               Dashboard
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-sm transition-all duration-300 hover:translate-x-0.5"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              Pricing
             </Link>
           </div>
 
@@ -140,42 +88,38 @@ export default function Footer() {
         {/* Bottom bar */}
         <div 
           className="mt-8 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row"
-          style={{ borderColor: "var(--glass-border)" }}
+          style={{ borderColor: "#272727" }}
         >
           <div className="flex items-center gap-2">
             <SwordIcon className="h-3 w-3" style={{ color: cardColors[1] }} />
-            <p 
-              className="text-xs"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
+            <p className="text-xs text-gray-500">
               &copy; {currentYear} Yugen Anime. All rights reserved.
             </p>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <Link 
               href="/privacy" 
-              className="text-xs transition-all duration-300 hover:translate-x-0.5"
-              style={{ color: "var(--color-text-secondary)" }}
+              className="text-xs text-gray-500 transition-all duration-300 hover:text-gray-300"
             >
               Privacy
             </Link>
             <Link 
               href="/terms" 
-              className="text-xs transition-all duration-300 hover:translate-x-0.5"
-              style={{ color: "var(--color-text-secondary)" }}
+              className="text-xs text-gray-500 transition-all duration-300 hover:text-gray-300"
             >
               Terms
             </Link>
-            {/* <div className="flex items-center gap-1">
-              <Heart className="h-3 w-3 animate-pulse" style={{ color: cardColors[2] }} />
-              <span 
-                className="text-xs"
-                style={{ color: "var(--color-text-secondary)" }}
+            <div className="flex items-center gap-2">
+              <a
+                href="https://twitter.com/addy_devx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 transition-all duration-300 hover:text-gray-300"
               >
-                Made with anime love
-              </span>
-            </div> */}
+                Made by @addy_devx 
+              </a>
+            </div>
           </div>
         </div>
       </div>
