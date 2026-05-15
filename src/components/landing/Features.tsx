@@ -43,7 +43,7 @@ const cards = [
     bg: "#ff5b47",
     circle: "#f3f3f3",
     icon: Trophy,
-    image: "/images/anime-char3.png",
+    image: "/images/jiraiya.png",
     link: "/dashboard",
     linkTitle: "Start earning",
     tooltip: "Earn XP points and badges by watching anime, completing challenges, and being active.",
@@ -54,7 +54,7 @@ const cards = [
     bg: "#6C5CE7",
     circle: "#5B4BC7",
     icon: Compass,
-    image: "/images/anime-char3.png",
+    image: "/images/sasuke.png",
     link: "/explore",
     linkTitle: "Discover more",
     tooltip: "Explore trending anime, seasonal releases, and get personalized recommendations.",
@@ -149,13 +149,13 @@ export default function Features() {
                   />
 
                   {/* character */}
-                  <Image
-                    src={card.image}
-                    alt={card.title}
-                    width={320}
-                    height={420}
-                    className="relative -mt-14 z-10 h-[360px] w-auto object-contain transition-transform duration-500 group-hover:scale-105"
-                  />
+                    <Image
+                      src={card.image}
+                      alt={card.title}
+                      width={320}
+                      height={420}
+                      className="relative -mt-14 z-10 h-[360px] w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                    />
                 </div>
 
                 {/* content */}

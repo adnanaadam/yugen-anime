@@ -2,98 +2,101 @@
 
 import { motion } from "framer-motion";
 import { 
-  Zap, 
-  Flame, 
-  Star, 
-  Shield, 
-  Target, 
-  Crown, 
   ArrowUpRight,
   TrendingUp,
-  Award,
-  Sparkles,
   Gift
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { lordJuusai } from "@/fonts/fonts";
 
+// Import game-icons.net SVG icons - now they work as React components!
+import SwordIcon from "@/assets/icons/sword.svg";
+import NinjaIcon from "@/assets/icons/ninja.svg";
+import MagicIcon from "@/assets/icons/magic.svg";
+import CyberpunkIcon from "@/assets/icons/cyberpunk.svg";
+import RPGIcon from "@/assets/icons/rpg.svg";
+import AchievementIcon from "@/assets/icons/achievements.svg";
+import InventoryIcon from "@/assets/icons/inventory.svg";
+import BattleIcon from "@/assets/icons/battle.svg";
+import QuestsIcon from "@/assets/icons/quests.svg";
+import DragonIcon from "@/assets/icons/dragon.svg";
+import ScrollIcon from "@/assets/icons/scroll.svg";
+import CrownIcon from "@/assets/icons/crown.svg";
+
 const badges = [
   {
     label: "First Anime",
-    icon: Star,
+    icon: ScrollIcon,
     color: "#e5b23c",
-    bgGradient: "from-amber-500/20 to-yellow-500/10",
     description: "Started your journey",
     rarity: "Common",
+    image: "/images/anime-char3.png",
   },
   {
     label: "7-Day Streak",
-    icon: Flame,
+    icon: DragonIcon,
     color: "#ff5b47",
-    bgGradient: "from-orange-500/20 to-red-500/10",
     description: "7 days of watching",
     rarity: "Rare",
+    image: "/images/anime-char3.png",
   },
   {
     label: "Episode Master",
-    icon: Zap,
+    icon: SwordIcon,
     color: "#6C5CE7",
-    bgGradient: "from-cyan-500/20 to-blue-500/10",
     description: "100 episodes watched",
     rarity: "Epic",
+    image: "/images/anime-char3.png",
   },
   {
     label: "Anime Veteran",
-    icon: Crown,
+    icon: CrownIcon,
     color: "#d8d5cc",
-    bgGradient: "from-purple-500/20 to-pink-500/10",
     description: "50 anime completed",
     rarity: "Legendary",
+    image: "/images/anime-char3.png",
   },
   {
     label: "Genre Explorer",
-    icon: Target,
+    icon: MagicIcon,
     color: "#00b894",
-    bgGradient: "from-green-500/20 to-emerald-500/10",
     description: "10 genres explored",
     rarity: "Rare",
+    image: "/images/anime-char3.png",
   },
   {
     label: "No Lif3r",
-    icon: Shield,
+    icon: NinjaIcon,
     color: "#ff7675",
-    bgGradient: "from-rose-500/20 to-red-500/10",
     description: "500+ hours watched",
     rarity: "Mythic",
+    image: "/images/anime-char3.png",
   },
 ];
 
 const recentActivity = [
-  { action: "Completed Solo Leveling", xp: "+50 XP", time: "2 hours ago", icon: Crown },
-  { action: "Watched 3 episodes", xp: "+30 XP", time: "Yesterday", icon: Zap },
-  { action: "Maintained streak", xp: "+25 XP", time: "Yesterday", icon: Flame },
-  { action: "Rated 5 anime", xp: "+25 XP", time: "2 days ago", icon: Star },
+  { action: "Completed Solo Leveling", xp: "+50 XP", time: "2 hours ago", icon: CrownIcon, image: "/images/anime-char3.png" },
+  { action: "Watched 3 episodes", xp: "+30 XP", time: "Yesterday", icon: SwordIcon, image: "/images/anime-char3.png" },
+  { action: "Maintained streak", xp: "+25 XP", time: "Yesterday", icon: DragonIcon, image: "/images/anime-char3.png" },
+  { action: "Rated 5 anime", xp: "+25 XP", time: "2 days ago", icon: MagicIcon, image: "/images/anime-char3.png" },
 ];
 
+const levelBadges = [
+  { level: 1, icon: NinjaIcon, color: "#d8d5cc" },
+  { level: 5, icon: SwordIcon, color: "#e5b23c" },
+  { level: 10, icon: DragonIcon, color: "#ff5b47" },
+  { level: 25, icon: CrownIcon, color: "#6C5CE7" },
+];
+
+
+console.log(SwordIcon);
+
 export default function Gamification() {
-  const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47"];
+  const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47", "#6C5CE7"];
 
   return (
     <section className="relative overflow-hidden px-4 py-24">
-      {/* Background decoration */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-1/2 right-0 h-[500px] w-[500px] -translate-y-1/2 rounded-full blur-3xl" 
-          style={{ backgroundColor: `${cardColors[2]}10` }} 
-        />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full blur-3xl" 
-          style={{ backgroundColor: `${cardColors[1]}10` }} 
-        />
-        <div className="absolute top-20 left-1/2 h-1 w-1 rounded-full opacity-50" 
-          style={{ backgroundColor: cardColors[1] }}
-        />
-      </div>
-
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <motion.div
@@ -138,14 +141,8 @@ export default function Gamification() {
               border: "1px solid var(--glass-border)",
             }}
           >
-            {/* Decorative gradient bar */}
-            <div 
-              className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r"
-              style={{ background: `linear-gradient(90deg, ${cardColors[0]}, ${cardColors[1]}, ${cardColors[2]})` }}
-            />
-
             <div className="p-6 sm:p-8">
-              {/* Level Header */}
+              {/* Level Header with Image */}
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="relative">
@@ -153,14 +150,19 @@ export default function Gamification() {
                       className="absolute inset-0 rounded-2xl blur-xl opacity-50"
                       style={{ backgroundColor: cardColors[1] }}
                     />
-                    <div 
-                      className="relative flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold shadow-lg"
-                      style={{
-                        background: `linear-gradient(135deg, ${cardColors[1]}, ${cardColors[2]})`,
-                        color: "#000",
-                      }}
-                    >
-                      7
+                    <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl overflow-hidden shadow-lg">
+                      <Image
+                        src="/images/anime-char3.png"
+                        alt="Level character"
+                        width={80}
+                        height={80}
+                        className="object-cover"
+                      />
+                      <div 
+                        className="absolute inset-0 flex items-center justify-center bg-black/40"
+                      >
+                        <span className="text-2xl font-bold text-white">7</span>
+                      </div>
                     </div>
                   </div>
                   <div>
@@ -171,7 +173,7 @@ export default function Gamification() {
                       Level 7 Otaku
                     </h3>
                     <div className="mt-1 flex items-center gap-2">
-                      <Sparkles size={12} style={{ color: cardColors[1] }} />
+                      <SwordIcon className="h-3 w-3" style={{ fill: cardColors[1], color: cardColors[1] }} />
                       <p 
                         className="text-xs"
                         style={{ color: "var(--color-text-secondary)" }}
@@ -209,16 +211,39 @@ export default function Gamification() {
                     viewport={{ once: true }}
                     transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
                     className="relative h-full rounded-full"
-                    style={{
-                      background: `linear-gradient(90deg, ${cardColors[1]}, ${cardColors[2]})`,
-                    }}
-                  >
-                    <div className="absolute inset-0 animate-pulse bg-white/20" />
-                  </motion.div>
+                    style={{ backgroundColor: cardColors[1] }}
+                  />
                 </div>
               </div>
 
-              {/* Current Streak */}
+              {/* Level Badges */}
+              <div className="mb-8">
+                <div className="mb-3 flex items-center gap-2">
+                  <InventoryIcon className="h-4 w-4" style={{ fill: cardColors[1], color: cardColors[1] }} />
+                  <h4 className="text-sm font-semibold" style={{ color: "var(--color-foreground)" }}>
+                    Level Rewards
+                  </h4>
+                </div>
+                <div className="flex gap-3">
+                  {levelBadges.map((badge) => (
+                    <div
+                      key={badge.level}
+                      className="flex flex-col items-center gap-2 rounded-xl p-3 flex-1"
+                      style={{
+                        backgroundColor: `${badge.color}15`,
+                        border: `1px solid ${badge.color}30`,
+                      }}
+                    >
+                      <badge.icon className="h-6 w-6" style={{ fill: badge.color, color: badge.color }} />
+                      <span className="text-xs font-medium" style={{ color: badge.color }}>
+                        Level {badge.level}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Current Streak with Image */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 className="relative mb-8 overflow-hidden rounded-2xl p-4 transition-all duration-300"
@@ -228,14 +253,16 @@ export default function Gamification() {
                 }}
               >
                 <div className="absolute top-0 right-0 opacity-10">
-                  <Flame size={80} />
+                  <DragonIcon className="h-20 w-20" />
                 </div>
                 <div className="relative flex items-center gap-4">
-                  <div 
-                    className="flex h-14 w-14 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: `${cardColors[1]}20` }}
-                  >
-                    <Flame size={28} style={{ color: cardColors[1] }} />
+                  <div className="relative h-14 w-14 overflow-hidden rounded-xl">
+                    <Image
+                      src="/images/anime-char3.png"
+                      alt="Streak character"
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                   <div>
                     <p className="text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>
@@ -255,17 +282,17 @@ export default function Gamification() {
               {/* XP Milestones */}
               <div>
                 <div className="mb-4 flex items-center gap-2">
-                  <TrendingUp size={14} style={{ color: cardColors[1] }} />
+                  <BattleIcon className="h-4 w-4" style={{ fill: cardColors[1], color: cardColors[1] }} />
                   <h4 className="text-sm font-semibold" style={{ color: "var(--color-foreground)" }}>
                     Ways to Earn XP
                   </h4>
                 </div>
                 <div className="space-y-2">
                   {[
-                    { label: "Watching episodes", xp: "+10 XP", icon: Zap },
-                    { label: "Completing anime", xp: "+50 XP", icon: Crown },
-                    { label: "Daily login streak", xp: "+25 XP", icon: Flame },
-                    { label: "Rating anime", xp: "+5 XP", icon: Star },
+                    { label: "Watching episodes", xp: "+10 XP", icon: SwordIcon },
+                    { label: "Completing anime", xp: "+50 XP", icon: CrownIcon },
+                    { label: "Daily login streak", xp: "+25 XP", icon: DragonIcon },
+                    { label: "Rating anime", xp: "+5 XP", icon: MagicIcon },
                   ].map((milestone, i) => (
                     <motion.div
                       key={milestone.label}
@@ -284,7 +311,7 @@ export default function Gamification() {
                           className="flex h-8 w-8 items-center justify-center rounded-lg"
                           style={{ backgroundColor: `${cardColors[1]}15` }}
                         >
-                          <milestone.icon size={14} style={{ color: cardColors[1] }} />
+                          <milestone.icon className="h-4 w-4" style={{ fill: cardColors[1], color: cardColors[1] }} />
                         </div>
                         <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
                           {milestone.label}
@@ -326,7 +353,7 @@ export default function Gamification() {
                       Badges earned through your anime journey
                     </p>
                   </div>
-                  <Award size={24} style={{ color: cardColors[1] }} />
+                  <AchievementIcon className="h-6 w-6" style={{ fill: cardColors[1], color: cardColors[1] }} />
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
@@ -343,7 +370,7 @@ export default function Gamification() {
                       <div 
                         className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:shadow-xl"
                         style={{
-                          background: `linear-gradient(135deg, ${badge.color}15, ${badge.color}05)`,
+                          backgroundColor: `${badge.color}15`,
                           border: `1px solid ${badge.color}30`,
                         }}
                       >
@@ -360,7 +387,7 @@ export default function Gamification() {
                             className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110"
                             style={{ backgroundColor: `${badge.color}20` }}
                           >
-                            <badge.icon size={20} style={{ color: badge.color }} />
+                            <badge.icon className="h-6 w-6" style={{ fill: badge.color, color: badge.color }} />
                           </div>
                           <p 
                             className="text-xs font-medium"
@@ -402,7 +429,7 @@ export default function Gamification() {
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Recent Activity with Images */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -417,7 +444,7 @@ export default function Gamification() {
               <div className="p-6 sm:p-8">
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Gift size={18} style={{ color: cardColors[1] }} />
+                    <QuestsIcon className="h-5 w-5" style={{ fill: cardColors[1], color: cardColors[1] }} />
                     <h4 className="font-semibold" style={{ color: "var(--color-foreground)" }}>
                       Recent Activity
                     </h4>
@@ -443,11 +470,13 @@ export default function Gamification() {
                       className="flex items-center justify-between rounded-xl p-3 transition-all duration-300 hover:bg-white/[0.03]"
                     >
                       <div className="flex items-center gap-3">
-                        <div 
-                          className="flex h-10 w-10 items-center justify-center rounded-lg"
-                          style={{ backgroundColor: `${cardColors[1]}15` }}
-                        >
-                          <activity.icon size={16} style={{ color: cardColors[1] }} />
+                        <div className="relative h-10 w-10 overflow-hidden rounded-lg">
+                          <Image
+                            src={activity.image}
+                            alt={activity.action}
+                            fill
+                            className="object-cover"
+                          />
                         </div>
                         <div>
                           <p className="text-sm" style={{ color: "var(--color-foreground)" }}>
@@ -458,9 +487,12 @@ export default function Gamification() {
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs font-medium" style={{ color: cardColors[1] }}>
-                        {activity.xp}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <activity.icon className="h-4 w-4" style={{ fill: cardColors[1], color: cardColors[1] }} />
+                        <span className="text-xs font-medium" style={{ color: cardColors[1] }}>
+                          {activity.xp}
+                        </span>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -468,12 +500,12 @@ export default function Gamification() {
                 {/* Level Up Preview */}
                 <div className="mt-6 rounded-xl p-3 text-center"
                   style={{
-                    background: `linear-gradient(135deg, ${cardColors[1]}10, ${cardColors[2]}10)`,
+                    backgroundColor: `${cardColors[1]}10`,
                     border: `1px solid ${cardColors[1]}30`,
                   }}
                 >
                   <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-                     Next milestone: <span style={{ color: cardColors[1] }}>Level 8</span> unlocks &quot;Anime Master&quot; badge
+                    🎯 Next milestone: <span style={{ color: cardColors[1] }}>Level 8</span> unlocks &quot;Anime Master&quot; badge
                   </p>
                 </div>
               </div>

@@ -41,20 +41,16 @@ export default function Hero() {
     >
       {/* Blurred Background */}
       <div className="absolute inset-0">
-        {/* <Image
-          src={
-            theme === "light"
-              ? "/images/anime-bg1.jpg"
-              : "/images/anime-bg2.jpg"
-          }
+        <Image
+          src="/images/kakashi.png"
           alt="anime bg"
           fill
-          className="h-full w-full object-cover blur-xl scale-110 transition-opacity duration-3000"
-        /> */}
-        <div
+          className="h-full w-full object-cover"
+        />
+        {/* <div
           className="absolute inset-0 backdrop-blur-[2px]"
           style={{ backgroundColor: "var(--glass-surface)" }}
-        />
+        /> */}
       </div>
 
       <div className="relative h-full z-10 mx-auto max-w-7xl">
@@ -79,16 +75,16 @@ export default function Hero() {
 
           <div className="relative p-4 md:p-8 flex flex-col justify-between h-full">
             {/* CENTER CHARACTER */}
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            {/* <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <motion.img
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                src="/images/anime-char2.png"
+                src="/images/itachi.jpg"
                 alt="anime character"
                 className="h-50 md:h-80 lg:h-200 object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
               />
-            </div>
+            </div> */}
 
             {/* TOP BAR */}
             <header className="flex items-center justify-between">
@@ -118,7 +114,7 @@ export default function Hero() {
                 </div>
 
                 {/* Theme toggle */}
-                <button
+                {/* <button
                   onClick={handleToggle}
                   className="relative flex h-8 w-20 md:h-10 md:w-24 items-center rounded-full backdrop-blur-xl overflow-hidden"
                   style={{ backgroundColor: "var(--glass-surface)" }}
@@ -134,7 +130,6 @@ export default function Hero() {
                   )}
 
                   <div className="flex w-full h-full relative">
-                    {/* Sliding background indicator */}
                     <motion.div
                       layout
                       animate={{
@@ -150,7 +145,6 @@ export default function Hero() {
                       style={{ backgroundColor: "var(--color-accent)" }}
                     />
 
-                    {/* Light option */}
                     <motion.div
                       className="flex-1 flex items-center justify-center rounded-full z-10 cursor-pointer"
                       whileHover={{ scale: 1.05 }}
@@ -179,7 +173,6 @@ export default function Hero() {
                       </motion.div>
                     </motion.div>
 
-                    {/* Dark option */}
                     <motion.div
                       className="flex-1 flex items-center justify-center rounded-full z-10 cursor-pointer"
                       whileHover={{ scale: 1.05 }}
@@ -208,7 +201,10 @@ export default function Hero() {
                       </motion.div>
                     </motion.div>
                   </div>
-                </button>
+                </button> */}
+
+
+
                 {/* profile */}
                 <div className="flex items-center gap-2 md:gap-3">
                   {status === "loading" ? (
