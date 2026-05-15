@@ -6,19 +6,21 @@ import {
   CheckCircle,
   Pause,
   Bookmark,
-  Eye,
-  ListTodo,
-  TrendingUp,
-  Clock,
   ArrowUpRight,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { lordJuusai } from "@/fonts/fonts";
 
-// Import game-icons.net SVGs for variety
+// Import game-icons.net SVGs
 import SwordIcon from "@/assets/icons/sword.svg";
 import ScrollIcon from "@/assets/icons/scroll.svg";
+import CrownIcon from "@/assets/icons/crown.svg";
+import DragonIcon from "@/assets/icons/dragon.svg";
+import MagicIcon from "@/assets/icons/magic.svg";
+import AchievementIcon from "@/assets/icons/achievements.svg";
+import BookIcon from "@/assets/icons/book.svg";
+import ListIcon from "@/assets/icons/list.svg";
 
 const animeList = [
   {
@@ -50,10 +52,10 @@ const animeList = [
   },
 ];
 
-// Stats that match MVP capabilities
+// Stats with game-icons.net SVG icons
 const stats = [
   { 
-    icon: Eye, 
+    icon: ScrollIcon, 
     label: "Anime Watched", 
     value: "48", 
     unit: "anime",
@@ -61,7 +63,7 @@ const stats = [
     bgColor: "#d8d5cc20",
   },
   { 
-    icon: Clock, 
+    icon: BookIcon, 
     label: "Episodes Watched", 
     value: "1,247", 
     unit: "eps",
@@ -69,7 +71,7 @@ const stats = [
     bgColor: "#e5b23c20",
   },
   { 
-    icon: TrendingUp, 
+    icon: CrownIcon, 
     label: "Current Level", 
     value: "7", 
     unit: "Otaku",
@@ -113,7 +115,7 @@ export default function TrackingPreview() {
           </h2>
         </motion.div>
 
-        {/* Colorful Stats */}
+        {/* Colorful Stats with Game Icons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -129,7 +131,7 @@ export default function TrackingPreview() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -5 }}
-              className="relative overflow-hidden rounded-2xl p-5 transition-all duration-300"
+              className="group relative overflow-hidden rounded-2xl p-5 transition-all duration-300"
               style={{
                 backgroundColor: stat.bgColor,
                 border: `1px solid ${stat.color}40`,
@@ -165,7 +167,7 @@ export default function TrackingPreview() {
                     color: stat.color,
                   }}
                 >
-                  <stat.icon size={22} />
+                  <stat.icon className="h-6 w-6" style={{ fill: stat.color, color: stat.color }} />
                 </div>
               </div>
 
@@ -190,13 +192,13 @@ export default function TrackingPreview() {
             border: "1px solid var(--border)",
           }}
         >
-          {/* Header */}
+          {/* Header with Game Icon */}
           <div
             className="flex items-center justify-between border-b px-5 py-4"
             style={{ borderColor: "var(--border)" }}
           >
             <div className="flex items-center gap-2">
-              <ListTodo size={16} style={{ color: cardColors[1] }} />
+              <ListIcon className="h-4 w-4" style={{ fill: cardColors[1], color: cardColors[1] }} />
               <span className="text-sm font-medium" style={{ color: "var(--color-foreground)" }}>
                 Currently Watching
               </span>
