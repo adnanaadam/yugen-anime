@@ -6,82 +6,91 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession, signIn } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import { lordJuusai } from "@/fonts/fonts";
-
-// Import game-icons.net SVGs
-import SearchIcon from "@/assets/icons/search.svg";
-import CompassIcon from "@/assets/icons/compass.svg";
-import ScrollIcon from "@/assets/icons/scroll.svg";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47"];
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-800 bg-black/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+    <header
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        scrolled ? "bg-black/80 backdrop-blur-md" : "bg-transparent"
+      }`}
+    >
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#e5b23c] to-[#ff5b47]">
-            <ScrollIcon className="h-4 w-4 text-black" />
-          </div>
-          <span
-            className={`text-xl font-bold tracking-wide ${lordJuusai.className} text-white`}
+          <h1
+            className={`md:text-4xl tracking-wide ${lordJuusai.className}`}
+            style={{ color: "var(--color-foreground)" }}
           >
             Yugen
-          </span>
+          </h1>
         </Link>
 
         {/* Navigation */}
-        <nav className="flex items-center gap-6">
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Explore Link */}
           <Link
             href="/explore"
-            className={`flex items-center gap-2 text-sm transition-colors ${
+            className={`hidden md:flex items-center h-12 gap-2 rounded-full px-8 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 ${
               pathname === "/explore"
-                ? "text-[#e5b23c]"
-                : "text-gray-400 hover:text-white"
+                ? "bg-[#e5b23c] text-black"
+                : "bg-black/5 dark:bg-white/10 border border-white/40 text-white"
             }`}
           >
-            <span className="flex items-center justify-center size-6">
-              <CompassIcon className="h-4 w-4" />
-            </span>
             Explore
           </Link>
 
           {/* Auth Button */}
           {status === "loading" ? (
-            <div className="h-8 w-20 animate-pulse rounded-lg bg-gray-800" />
+            <div className="h-10 w-20 animate-pulse rounded-full bg-zinc-800" />
           ) : session ? (
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-1.5 text-sm text-gray-300 transition-all hover:border-gray-600 hover:text-white"
-            >
-              {session.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt=""
-                  className="h-6 w-6 rounded-full object-cover"
-                  width={24}
-                  height={24}
-                />
-              ) : (
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#e5b23c] text-xs font-bold text-black">
-                  {session.user?.name?.charAt(0) ?? "?"}
-                </div>
-              )}
-              Dashboard
+            <Link href="/dashboard">
+              <div className="flex cursor-pointer items-center gap-2 md:gap-3 rounded-full px-2 md:px-3 py-1.5 transition-all duration-300 hover:scale-105 bg-black/5 dark:bg-white/10 border border-white/40">
+                <p className="hidden sm:block text-xs md:text-sm font-medium text-white">
+                  Hi, {session.user?.name?.split(" ")[0] ?? "User"}
+                </p>
+                {session.user?.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt="avatar"
+                    width={32}
+                    height={32}
+                    className="h-7 w-7 md:h-9 md:w-9 rounded-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="flex h-7 w-7 md:h-9 md:w-9 items-center justify-center rounded-full text-[10px] font-medium"
+                    style={{
+                      background: `linear-gradient(135deg, ${cardColors[0]}, ${cardColors[1]})`,
+                      color: "#000",
+                    }}
+                  >
+                    {session.user?.name?.charAt(0) ?? "?"}
+                  </div>
+                )}
+              </div>
             </Link>
           ) : (
             <button
               onClick={() => signIn()}
-              className="rounded-lg bg-[#e5b23c] px-4 py-1.5 text-sm font-medium text-black transition-all hover:scale-105"
+              className="flex h-10 px-4 md:h-12 md:px-6 cursor-pointer rounded-full items-center justify-center text-sm font-medium transition-all duration-300 hover:scale-105 bg-black/5 dark:bg-white/10 border border-white/40 text-white"
             >
-              Sign In
+              Log in
             </button>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   );

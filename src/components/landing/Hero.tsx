@@ -70,12 +70,12 @@ export default function Hero() {
       }}
     >
       {/* Background Image */}
-      <div className="absolute inset-0">
+      <div className="absolute -right-60 top-0 h-full w-full">
         <Image
-          src="/images/kakashi.png"
+          src="/images/anime-char2.png"
           alt="anime bg"
           fill
-          className="h-full w-full object-cover opacity-50"
+          className="h-full w-full object-contain"
         />
       </div>
 
@@ -209,7 +209,7 @@ export default function Hero() {
             {/* TEXT LEFT */}
             <div className="pl-4 md:pl-38 pt-4 md:pt-18 z-20">
               <h1
-                className={`uppercase text-4xl md:text-3xl font-bold tracking-wide leading-tight`}
+                className={`uppercase text-4xl md:text-6xl tracking-wide leading-tight ${lordJuusai.className}`}
               >
                 your anime universe
               </h1>

@@ -185,7 +185,7 @@ export default function CTA() {
                     href="/dashboard"
                     className="group inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-medium transition-all duration-300 hover:gap-3"
                     style={{
-                      background: `linear-gradient(135deg, ${cardColors[1]}, ${cardColors[2]})`,
+                      background: `${cardColors[1]}`,
                       color: "#000",
                     }}
                   >
