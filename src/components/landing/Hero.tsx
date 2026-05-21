@@ -5,6 +5,7 @@ import { Search, ArrowUpRight, Sun, Moon } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { lordJuusai } from "@/fonts/fonts";
 import { useTheme } from "@/lib/theme";
@@ -13,18 +14,27 @@ import { useTheme } from "@/lib/theme";
 import SwordIcon from "@/assets/icons/sword.svg";
 import CrownIcon from "@/assets/icons/crown.svg";
 import DragonIcon from "@/assets/icons/dragon.svg";
+import StarIcon from "@/assets/icons/star.svg";
+import TrophyIcon from "@/assets/icons/trophy.svg";
 
 export default function Hero() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
-
+  const [searchQuery, setSearchQuery] = useState("");
   const [ripple, setRipple] = useState(false);
 
   const handleToggle = () => {
     setRipple(true);
     toggleTheme();
     setTimeout(() => setRipple(false), 300);
+  };
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      router.push(`/explore?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   useEffect(() => {
@@ -36,28 +46,27 @@ export default function Hero() {
   // Card colors from features section
   const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47"];
 
-  // Features data with different icon colors
+  // Features data with new design
   const features = [
-    // {
-    //   title: "Track Anime",
-    //   subtitle: "Watch progress",
-    //   icon: SwordIcon,
-    //   bgColor: cardColors[0],
-    //   iconColor: "#6C5CE7",
-    // },
     {
       title: "Earn XP",
       subtitle: "Level system",
-      icon: CrownIcon,
+      description: "Watch anime, complete episodes, and level up your otaku rank",
+      icon: TrophyIcon,
       bgColor: cardColors[1],
       iconColor: "#ff5b47",
+      statLabel: "Current Level",
+      statValue: "7",
     },
     {
       title: "Build Profile",
       subtitle: "Anime identity",
-      icon: DragonIcon,
+      description: "Showcase your taste, favorites, and anime achievements",
+      icon: StarIcon,
       bgColor: cardColors[2],
       iconColor: "#e5b23c",
+      statLabel: "Badges Earned",
+      statValue: "6",
     },
   ];
 
@@ -70,12 +79,12 @@ export default function Hero() {
       }}
     >
       {/* Background Image */}
-      <div className="absolute -right-60 top-0 h-full w-full">
+      <div className="absolute inset-0">
         <Image
-          src="/images/anime-char2.png"
+          src="/images/luffy.jpg"
           alt="anime bg"
           fill
-          className="h-full w-full object-contain"
+          className="h-full w-full object-cover object-center opacity-50"
         />
       </div>
 
@@ -100,6 +109,9 @@ export default function Hero() {
                   <Search className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   <input
                     placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearch}
                     className="ml-2 bg-transparent text-sm outline-none w-20 md:w-auto"
                     style={{
                       color: "var(--color-foreground)",
@@ -250,47 +262,69 @@ export default function Hero() {
                 </Link>
               </div>
 
-              {/* FEATURE CARDS */}
+              {/* FEATURE CARDS - New Design */}
               <div className="flex-1 flex items-end justify-center flex-row gap-4">
                 {features.map((feature) => (
                   <div
                     key={feature.title}
-                    className="flex-1 relative rounded-4xl md:rounded-[40px] p-4 md:p-5 transition-all duration-300 hover:scale-[1.02] group"
+                    className="flex-1 relative rounded-4xl md:rounded-[40px] p-4 md:p-5 transition-all duration-300 hover:scale-[1.02] group overflow-hidden"
                     style={{
                       backgroundColor: feature.bgColor,
                     }}
                   >
-                    <div>
-                      <Link
-                        href="/dashboard"
-                        className="group absolute bottom-5 right-4 flex items-center justify-between text-black"
-                      >
-                        <span className="flex size-8 md:size-10 items-center justify-center rounded-full transition-all duration-300 group-hover:rotate-12 group-hover:scale-110 bg-black/40">
-                          <ArrowUpRight className="size-4 text-white" />
-                        </span>
-                      </Link>
-                    </div>
-                    <div className="flex flex-col items-start gap-3">
-                      <div
-                        className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
-                        style={{ backgroundColor: `${feature.iconColor}20` }}
-                      >
-                        <feature.icon
-                          className="h-5 w-5 md:h-6 md:w-6"
-                          style={{
-                            color: feature.iconColor,
-                            fill: feature.iconColor,
-                            stroke: feature.iconColor,
-                          }}
-                        />
+                    {/* Decorative circle in background */}
+                    <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-black/10" />
+                    
+                    <div className="relative z-10 flex flex-col h-full">
+                      {/* Top section with icon and stat */}
+                      <div className="flex items-start justify-between">
+                        <div
+                          className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg"
+                          style={{ backgroundColor: `${feature.iconColor}20` }}
+                        >
+                          <feature.icon
+                            className="h-6 w-6 md:h-7 md:w-7"
+                            style={{
+                              color: feature.iconColor,
+                              fill: feature.iconColor,
+                              stroke: feature.iconColor,
+                            }}
+                          />
+                        </div>
+                        
+                        {/* Stat badge */}
+                        <div className="text-right">
+                          <p className="text-xs text-white/50 uppercase tracking-wider">
+                            {feature.statLabel}
+                          </p>
+                          <p className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                            {feature.statValue}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs md:text-sm font-medium text-black/70">
+
+                      {/* Content */}
+                      <div className="mt-4">
+                        <p className="text-xs md:text-sm font-medium text-white/60 uppercase tracking-wide">
                           {feature.subtitle}
                         </p>
-                        <h3 className="text-lg md:text-xl font-bold mt-1 text-black">
+                        <h3 className="text-xl md:text-2xl font-bold mt-1 text-white">
                           {feature.title}
                         </h3>
+                        {/* <p className="text-xs md:text-sm text-black/60 mt-2 line-clamp-2">
+                          {feature.description}
+                        </p> */}
+                      </div>
+
+                      {/* CTA Link */}
+                      <div className="mt-4 pt-2">
+                        <Link
+                          href="#features"
+                          className="group inline-flex items-center gap-1 text-sm font-medium text-black/70 hover:text-black transition-all duration-300 hover:gap-2"
+                        >
+                          Learn More
+                          <ArrowUpRight className="size-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </Link>
                       </div>
                     </div>
                   </div>

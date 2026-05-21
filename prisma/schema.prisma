@@ -12,6 +12,7 @@ enum AnimeStatus {
   PLAN_TO_WATCH
   PAUSED
   DROPPED
+  REWATCHING 
 }
 
 model User {

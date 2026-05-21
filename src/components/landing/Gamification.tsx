@@ -91,7 +91,7 @@ export default function Gamification() {
   const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47", "#6C5CE7"];
 
   return (
-    <section className="relative overflow-hidden px-4 py-24">
+    <section id="gamification" className="relative overflow-hidden px-4 py-24">
       <div className="mx-auto max-w-7xl">
         {/* Header - kept same */}
         <motion.div

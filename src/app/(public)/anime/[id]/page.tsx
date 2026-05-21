@@ -19,8 +19,6 @@ import StarIcon from "@/assets/icons/star.svg";
 import CalendarIcon from "@/assets/icons/calendar.svg";
 import ClockIcon from "@/assets/icons/clock.svg";
 import UsersIcon from "@/assets/icons/users.svg";
-import GenreIcon from "@/assets/icons/genre.svg";
-import StudioIcon from "@/assets/icons/studio.svg";
 
 // Types
 interface Anime {
@@ -46,43 +44,19 @@ interface Anime {
   format: string;
   duration: number;
   source: string;
-  studios: {
-    edges: Array<{
-      node: {
-        name: string;
-      };
-      isMain: boolean;
-    }>;
-  };
-  characters: {
-    edges: Array<{
-      node: {
-        name: {
-          full: string;
-        };
-        image: {
-          medium: string;
-        };
-      };
-      role: string;
-    }>;
-  };
-  recommendations: {
-    edges: Array<{
-      node: {
-        mediaRecommendation: {
-          id: number;
-          title: {
-            romaji: string;
-          };
-          coverImage: {
-            medium: string;
-          };
-          averageScore: number;
-        };
-      };
-    }>;
-  };
+  studios: Array<{ name: string; isMain: boolean }>;
+  characters: Array<{
+    id: number;
+    name: string;
+    image: string;
+    role: string;
+  }>;
+  recommendations: Array<{
+    id: number;
+    title: string;
+    coverImage: string;
+    score: number;
+  }>;
 }
 
 type AnimeStatus = "WATCHING" | "COMPLETED" | "PLAN_TO_WATCH" | "PAUSED" | "DROPPED";
@@ -95,6 +69,103 @@ const statusConfig = {
   DROPPED: { label: "Dropped", icon: SkullIcon, color: "#ff7675" },
 };
 
+// Move StatusButtons outside of the main component
+function StatusButtons({ 
+  userStatus, 
+  updating, 
+  updateStatus 
+}: { 
+  userStatus: AnimeStatus | null;
+  updating: boolean;
+  updateStatus: (status: AnimeStatus) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {Object.entries(statusConfig).map(([key, config]) => {
+        const Icon = config.icon;
+        const isActive = userStatus === key;
+        return (
+          <motion.button
+            key={key}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => updateStatus(key as AnimeStatus)}
+            disabled={updating}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+              isActive
+                ? "bg-gradient-to-r from-[#e5b23c] to-[#ff5b47] text-black"
+                : "border border-gray-700 bg-[#0A0A0A] text-gray-400 hover:border-gray-600"
+            }`}
+          >
+            <span className="size-6 flex items-center justify-center">
+              <Icon className="h-4 w-4" />
+            </span>
+            {config.label}
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Helper function to transform Jikan response to our Anime interface
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformJikanToAnime(jikanAnime: any): Anime {
+  // Get studio names
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const studios = jikanAnime.studios?.map((studio: any) => ({
+    name: studio.name,
+    isMain: true,
+  })) || [];
+
+  // Transform characters
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const characters = jikanAnime.characters?.slice(0, 12).map((char: any) => ({
+    id: char.character.mal_id,
+    name: char.character.name,
+    image: char.character.images.jpg.image_url,
+    role: char.role,
+  })) || [];
+
+  // Transform recommendations
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recommendations = jikanAnime.recommendations?.slice(0, 10).map((rec: any) => ({
+    id: rec.entry.mal_id,
+    title: rec.entry.title,
+    coverImage: rec.entry.images.jpg.image_url,
+    score: 0,
+  })) || [];
+
+  return {
+    id: jikanAnime.mal_id,
+    title: {
+      romaji: jikanAnime.title,
+      english: jikanAnime.title_english,
+      native: jikanAnime.title_japanese,
+    },
+    coverImage: {
+      large: jikanAnime.images.jpg.large_image_url,
+      extraLarge: jikanAnime.images.jpg.large_image_url,
+    },
+    bannerImage: jikanAnime.images.jpg.large_image_url,
+    description: jikanAnime.synopsis || "No description available.",
+    episodes: jikanAnime.episodes || 0,
+    status: jikanAnime.status || "Unknown",
+   averageScore: jikanAnime.score ? jikanAnime.score * 10 : 0,
+    popularity: jikanAnime.popularity || 0,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    genres: jikanAnime.genres?.map((g: any) => g.name) || [],
+    seasonYear: jikanAnime.year || null,
+    season: jikanAnime.season || "",
+    format: jikanAnime.type || "",
+    duration: jikanAnime.duration ? parseInt(jikanAnime.duration) || 24 : 24,
+    source: jikanAnime.source || "",
+    studios,
+    characters,
+    recommendations,
+  };
+}
+
 export default function AnimeDetailPage() {
   const { id } = useParams();
   const { data: session } = useSession();
@@ -105,84 +176,39 @@ export default function AnimeDetailPage() {
   const [userScore, setUserScore] = useState<number | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  // Fetch anime details from AniList
+  // Fetch anime details from Jikan API
   useEffect(() => {
     const fetchAnime = async () => {
       setLoading(true);
-      const query = `
-        query ($id: Int) {
-          Media(id: $id, type: ANIME) {
-            id
-            title {
-              romaji
-              english
-              native
-            }
-            coverImage {
-              large
-              extraLarge
-            }
-            bannerImage
-            description
-            episodes
-            status
-            averageScore
-            popularity
-            genres
-            seasonYear
-            season
-            format
-            duration
-            source
-            studios {
-              edges {
-                node {
-                  name
-                }
-                isMain
-              }
-            }
-            characters {
-              edges {
-                node {
-                  name {
-                    full
-                  }
-                  image {
-                    medium
-                  }
-                }
-                role
-              }
-            }
-            recommendations {
-              edges {
-                node {
-                  mediaRecommendation {
-                    id
-                    title {
-                      romaji
-                    }
-                    coverImage {
-                      medium
-                    }
-                    averageScore
-                  }
-                }
-              }
-            }
-          }
-        }
-      `;
-
+      
       try {
-        const response = await fetch("https://graphql.anilist.co", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query, variables: { id: parseInt(id as string) } }),
-        });
+        // Rate limiting for Jikan API (max 3 requests per second)
+        await new Promise(resolve => setTimeout(resolve, 350));
+        
+        // Fetch main anime details
+        const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
         const data = await response.json();
-        setAnime(data.data.Media);
+        
+        if (!data.data) {
+          throw new Error("Anime not found");
+        }
+        
+        // Fetch characters separately
+        const charactersResponse = await fetch(`https://api.jikan.moe/v4/anime/${id}/characters`);
+        const charactersData = await charactersResponse.json();
+        
+        // Fetch recommendations separately
+        const recResponse = await fetch(`https://api.jikan.moe/v4/anime/${id}/recommendations`);
+        const recData = await recResponse.json();
+        
+        // Combine all data
+        const animeData = {
+          ...data.data,
+          characters: charactersData.data,
+          recommendations: recData.data,
+        };
+        
+        setAnime(transformJikanToAnime(animeData));
       } catch (error) {
         console.error("Error fetching anime:", error);
       } finally {
@@ -301,34 +327,6 @@ export default function AnimeDetailPage() {
     );
   }
 
-  const StatusButtons = () => (
-    <div className="flex flex-wrap gap-2">
-      {Object.entries(statusConfig).map(([key, config]) => {
-        const Icon = config.icon;
-        const isActive = userStatus === key;
-        return (
-          <motion.button
-            key={key}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => updateStatus(key as AnimeStatus)}
-            disabled={updating}
-            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
-              isActive
-                ? "bg-gradient-to-r from-[#e5b23c] to-[#ff5b47] text-black"
-                : "border border-gray-700 bg-[#0A0A0A] text-gray-400 hover:border-gray-600"
-            }`}
-          >
-            <span className="size-6 flex items-center justify-center">
-              <Icon className="h-4 w-4" />
-            </span>
-            {config.label}
-          </motion.button>
-        );
-      })}
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-black">
       {/* Banner Image */}
@@ -368,7 +366,9 @@ export default function AnimeDetailPage() {
             <h1 className={`text-3xl font-bold md:text-4xl ${lordJuusai.className} text-white`}>
               {anime.title.english || anime.title.romaji}
             </h1>
-            <p className="mt-2 text-gray-400">{anime.title.native}</p>
+            {anime.title.native && (
+              <p className="mt-2 text-gray-400">{anime.title.native}</p>
+            )}
 
             {/* Stats */}
             <div className="mt-6 flex flex-wrap gap-4">
@@ -380,7 +380,7 @@ export default function AnimeDetailPage() {
                   <span className="text-white">{(anime.averageScore / 10).toFixed(1)}</span>
                 </div>
               )}
-              {anime.popularity && (
+              {anime.popularity > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="size-6 flex items-center justify-center">
                     <UsersIcon className="h-5 w-5 text-[#6C5CE7]" />
@@ -388,7 +388,7 @@ export default function AnimeDetailPage() {
                   <span className="text-white">{anime.popularity.toLocaleString()}</span>
                 </div>
               )}
-              {anime.episodes && (
+              {anime.episodes > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="size-6 flex items-center justify-center">
                     <PlayIcon className="h-5 w-5 text-[#ff5b47]" />
@@ -396,7 +396,7 @@ export default function AnimeDetailPage() {
                   <span className="text-white">{anime.episodes} episodes</span>
                 </div>
               )}
-              {anime.duration && (
+              {anime.duration > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="size-6 flex items-center justify-center">
                     <ClockIcon className="h-5 w-5 text-[#d8d5cc]" />
@@ -410,7 +410,7 @@ export default function AnimeDetailPage() {
                     <CalendarIcon className="h-5 w-5 text-white" />
                   </span>
                   <span className="text-white">
-                    {anime.season} {anime.seasonYear}
+                    {anime.season || ""} {anime.seasonYear}
                   </span>
                 </div>
               )}
@@ -440,13 +440,13 @@ export default function AnimeDetailPage() {
             </div>
 
             {/* Studios */}
-            {anime.studios?.edges.length > 0 && (
+            {anime.studios.length > 0 && (
               <div className="mt-6">
                 <h3 className="mb-2 text-lg font-semibold text-white">Studios</h3>
                 <div className="flex flex-wrap gap-2">
-                  {anime.studios.edges.map((studio, i) => (
+                  {anime.studios.map((studio, i) => (
                     <span key={i} className="text-sm text-gray-400">
-                      {studio.node.name}
+                      {studio.name}
                       {studio.isMain && " (Main)"}
                     </span>
                   ))}
@@ -458,9 +458,13 @@ export default function AnimeDetailPage() {
             {session && (
               <div className="mt-8 rounded-xl border border-gray-800 bg-[#0A0A0A] p-6">
                 <h3 className="mb-4 text-lg font-semibold text-white">Your Progress</h3>
-                <StatusButtons />
+                <StatusButtons 
+                  userStatus={userStatus}
+                  updating={updating}
+                  updateStatus={updateStatus}
+                />
                 
-                {userStatus === "WATCHING" && anime.episodes && (
+                {userStatus === "WATCHING" && anime.episodes > 0 && (
                   <div className="mt-4">
                     <div className="flex items-center justify-between text-sm text-gray-400">
                       <span>Progress</span>
@@ -494,21 +498,23 @@ export default function AnimeDetailPage() {
             )}
 
             {/* Characters Section */}
-            {anime.characters?.edges.length > 0 && (
+            {anime.characters.length > 0 && (
               <div className="mt-8">
                 <h3 className="mb-4 text-lg font-semibold text-white">Characters</h3>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                  {anime.characters.edges.slice(0, 8).map((char, i) => (
-                    <div key={i} className="flex items-center gap-3 rounded-lg bg-[#0A0A0A] p-3">
-                      <Image
-                        src={char.node.image.medium}
-                        alt={char.node.name.full}
-                        width={48}
-                        height={48}
-                        className="rounded-full object-cover"
-                      />
+                  {anime.characters.slice(0, 8).map((char, i) => (
+                    <div key={char.id || i} className="flex items-center gap-3 rounded-lg bg-[#0A0A0A] p-3">
+                      {char.image && (
+                        <Image
+                          src={char.image}
+                          alt={char.name}
+                          width={48}
+                          height={48}
+                          className="rounded-full object-cover"
+                        />
+                      )}
                       <div>
-                        <p className="text-sm font-medium text-white">{char.node.name.full}</p>
+                        <p className="text-sm font-medium text-white">{char.name}</p>
                         <p className="text-xs text-gray-500">{char.role}</p>
                       </div>
                     </div>
@@ -518,29 +524,26 @@ export default function AnimeDetailPage() {
             )}
 
             {/* Recommendations */}
-            {anime.recommendations?.edges.length > 0 && (
+            {anime.recommendations.length > 0 && (
               <div className="mt-8">
-                <h3 className="mb-4 text-lg font-semibold text-white">Recommendations</h3>
+                <h3 className="mb-4 text-lg font-semibold text-white">You Might Also Like</h3>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                  {anime.recommendations.edges.slice(0, 10).map((rec, i) => {
-                    const recAnime = rec.node.mediaRecommendation;
-                    return (
-                      <Link key={i} href={`/anime/${recAnime.id}`}>
-                        <div className="group cursor-pointer">
-                          <Image
-                            src={recAnime.coverImage.medium}
-                            alt={recAnime.title.romaji}
-                            width={200}
-                            height={300}
-                            className="rounded-lg transition-transform group-hover:scale-105"
-                          />
-                          <p className="mt-2 line-clamp-1 text-sm text-gray-300 group-hover:text-[#e5b23c]">
-                            {recAnime.title.romaji}
-                          </p>
-                        </div>
-                      </Link>
-                    );
-                  })}
+                  {anime.recommendations.slice(0, 10).map((rec, i) => (
+                    <Link key={rec.id || i} href={`/anime/${rec.id}`}>
+                      <div className="group cursor-pointer">
+                        <Image
+                          src={rec.coverImage}
+                          alt={rec.title}
+                          width={200}
+                          height={300}
+                          className="rounded-lg transition-transform group-hover:scale-105"
+                        />
+                        <p className="mt-2 line-clamp-1 text-sm text-gray-300 group-hover:text-[#e5b23c]">
+                          {rec.title}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             )}

@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
-import { Info, ListChecks, Menu, Telescope, X } from "lucide-react";
+import { Home, Info, ListChecks, Menu, Telescope, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
+  { label: "Home", href: "#home", icon: Home },
   { label: "Features", href: "#features", icon: ListChecks },
   { label: "Explore", href: "/explore", icon: Telescope },
-  { label: "About", href: "#about", icon: Info },
+  { label: "About", href: "#gamification", icon: Info },
 ];
 
 export default function Navbar() {
@@ -34,7 +35,6 @@ export default function Navbar() {
         }`}
         style={{
           backgroundColor: scrolled ? "var(--surface)" : "transparent",
-          border: scrolled ? "1px solid var(--border)" : "none",
         }}
       >
         {navLinks.map((link) => (

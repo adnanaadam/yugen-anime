@@ -1,10 +1,19 @@
+// src/app/(public)/explore/page.tsx
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Plus, Play, Check } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Play,
+  BookMarked,
+  ArrowUp,
+  Info,
+} from "lucide-react";
 
 import { lordJuusai } from "@/fonts/fonts";
 
@@ -34,128 +43,166 @@ interface Anime {
   seasonYear?: number;
 }
 
+interface PageInfo {
+  hasNextPage: boolean;
+  total: number;
+  currentPage: number;
+  lastPage: number;
+}
+
 const categories = [
   {
     id: "trending",
     label: "Trending",
     icon: FireIcon,
-    color: "[#ff5b47]",
+    color: "#ff5b47",
+    endpoint: "trending",
   },
   {
     id: "popular",
     label: "Popular",
     icon: StarIcon,
-    color: "[#e5b23c]",
+    color: "#e5b23c",
+    endpoint: "popular",
   },
   {
     id: "seasonal",
     label: "Seasonal",
     icon: CalendarIcon,
-    color: "[#9810fa]",
+    color: "#9810fa",
+    endpoint: "seasonal",
   },
 ];
 
-const CATEGORY_SORT: Record<string, string> = {
-  trending: "TRENDING_DESC",
-  popular: "POPULARITY_DESC",
-  seasonal: "START_DATE_DESC",
-};
-
-const SEARCH_QUERY = `
-  query ($search: String) {
-    Page(page: 1, perPage: 24) {
-      media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
-        id
-        title {
-          romaji
-          english
-          native
-        }
-        coverImage {
-          large
-          medium
-        }
-        bannerImage
-        description
-        episodes
-        status
-        averageScore
-        popularity
-        genres
-        seasonYear
-      }
-    }
-  }
-`;
-
-const CATEGORY_QUERY = `
-  query ($sort: [MediaSort]) {
-    Page(page: 1, perPage: 24) {
-      media(sort: $sort, type: ANIME) {
-        id
-        title {
-          romaji
-          english
-          native
-        }
-        coverImage {
-          large
-          medium
-        }
-        bannerImage
-        description
-        episodes
-        status
-        averageScore
-        popularity
-        genres
-        seasonYear
-      }
-    }
-  }
-`;
+// Helper function to transform Jikan response to our Anime interface
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformJikanToAnime(jikanAnime: any): Anime {
+  return {
+    id: jikanAnime.mal_id,
+    title: {
+      romaji: jikanAnime.title,
+      english: jikanAnime.title_english,
+      native: jikanAnime.title_japanese,
+    },
+    coverImage: {
+      large: jikanAnime.images.jpg.large_image_url,
+      medium: jikanAnime.images.jpg.image_url,
+    },
+    bannerImage: jikanAnime.images.jpg.large_image_url,
+    description: jikanAnime.synopsis,
+    episodes: jikanAnime.episodes,
+    status: jikanAnime.status,
+    averageScore: jikanAnime.score ? jikanAnime.score * 10 : undefined,
+    popularity: jikanAnime.popularity,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    genres: jikanAnime.genres?.map((g: any) => g.name) || [],
+    seasonYear: jikanAnime.year,
+  };
+}
 
 async function fetchAnimeData({
   searchQuery,
   activeCategory,
+  page = 1,
+  perPage = 24,
 }: {
   searchQuery: string;
   activeCategory: string;
+  page?: number;
+  perPage?: number;
 }) {
   const isSearching = Boolean(searchQuery.trim());
 
-  const query = isSearching ? SEARCH_QUERY : CATEGORY_QUERY;
+  // Rate limiting for Jikan API (max 3 requests per second)
+  await new Promise(resolve => setTimeout(resolve, 350));
 
-  const variables = isSearching
-    ? { search: searchQuery }
-    : {
-        sort: CATEGORY_SORT[activeCategory],
+  try {
+    if (isSearching) {
+      // Search endpoint
+      const response = await fetch(
+        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchQuery)}&page=${page}&limit=${perPage}&order_by=popularity&sort=desc`
+      );
+      const data = await response.json();
+      
+      return {
+        media: data.data?.map(transformJikanToAnime) || [],
+        pageInfo: {
+          hasNextPage: !!data.pagination?.has_next_page,
+          total: data.pagination?.items?.total || 0,
+          currentPage: data.pagination?.current_page || page,
+          lastPage: data.pagination?.last_visible_page || page,
+        },
       };
+    } else {
+      // Category-based endpoint
+      let url = "";
+      switch (activeCategory) {
+        case "trending":
+          url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=airing`;
+          break;
+        case "popular":
+          url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=bypopularity`;
+          break;
+        case "seasonal":
+          // Get current season
+          const now = new Date();
+          const year = now.getFullYear();
+          const season = getCurrentSeason();
+          url = `https://api.jikan.moe/v4/seasons/${year}/${season}?page=${page}&limit=${perPage}`;
+          break;
+        default:
+          url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}`;
+      }
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      return {
+        media: data.data?.map(transformJikanToAnime) || [],
+        pageInfo: {
+          hasNextPage: !!data.pagination?.has_next_page,
+          total: data.pagination?.items?.total || 0,
+          currentPage: data.pagination?.current_page || page,
+          lastPage: data.pagination?.last_visible_page || page,
+        },
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching from Jikan API:", error);
+    return {
+      media: [],
+      pageInfo: { hasNextPage: false, total: 0, currentPage: 1, lastPage: 1 },
+    };
+  }
+}
 
-  const response = await fetch("https://graphql.anilist.co", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query, variables }),
-    cache: "no-store",
-  });
-
-  const data = await response.json();
-
-  return data?.data?.Page?.media || [];
+function getCurrentSeason(): string {
+  const month = new Date().getMonth();
+  if (month >= 0 && month <= 2) return "winter";
+  if (month >= 3 && month <= 5) return "spring";
+  if (month >= 6 && month <= 8) return "summer";
+  return "fall";
 }
 
 function AnimeCard({ anime, index }: { anime: Anime; index: number }) {
   const [isHovered, setIsHovered] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [actionStatus, setActionStatus] = useState<"idle" | "plan" | "watching">("idle");
 
   const handleQuickAction = (e: React.MouseEvent, action: "plan" | "watching") => {
     e.preventDefault();
     e.stopPropagation();
     setActionStatus(action);
-    // Here you would call your API to add to user's list
+    setShowDropdown(false);
     console.log(`Added ${anime.title.romaji} to ${action}`);
+  };
+
+  const toggleDropdown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (actionStatus === "idle") {
+      setShowDropdown(!showDropdown);
+    }
   };
 
   return (
@@ -163,13 +210,11 @@ function AnimeCard({ anime, index }: { anime: Anime; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.03, 0.25) }}
-      whileHover={{ y: -4 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       className="group"
     >
       <div className="relative">
-        {/* Card Image */}
         <Link href={`/anime/${anime.id}`}>
           <div className="relative overflow-hidden rounded-2xl bg-[#0A0A0A]">
             <Image
@@ -180,14 +225,12 @@ function AnimeCard({ anime, index }: { anime: Anime; index: number }) {
               className="aspect-[2/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
 
-            {/* Score Badge */}
             {anime.averageScore && (
               <div className="absolute left-3 top-3 z-10 rounded-full bg-black/70 px-2 py-0.5 text-xs font-semibold text-[#e5b23c] backdrop-blur-sm">
                 ★ {(anime.averageScore / 10).toFixed(1)}
               </div>
             )}
 
-            {/* Hover Overlay with Details */}
             <AnimatePresence>
               {isHovered && (
                 <motion.div
@@ -200,7 +243,7 @@ function AnimeCard({ anime, index }: { anime: Anime; index: number }) {
                   <h3 className="text-sm font-bold text-white line-clamp-2">
                     {anime.title.english || anime.title.romaji}
                   </h3>
-                  
+
                   <div className="mt-2 flex flex-wrap gap-1">
                     {anime.genres?.slice(0, 2).map((genre) => (
                       <span
@@ -219,7 +262,7 @@ function AnimeCard({ anime, index }: { anime: Anime; index: number }) {
 
                   {anime.description && (
                     <p className="mt-2 line-clamp-2 text-[10px] leading-relaxed text-gray-300">
-                      {anime.description.replace(/<[^>]*>/g, "").slice(0, 100)}...
+                      {anime.description.slice(0, 100)}...
                     </p>
                   )}
                 </motion.div>
@@ -228,36 +271,65 @@ function AnimeCard({ anime, index }: { anime: Anime; index: number }) {
           </div>
         </Link>
 
-        {/* Quick Action Button */}
         <div className="absolute bottom-3 right-3 z-30">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => {
-              if (actionStatus === "idle") {
-                handleQuickAction(e, "plan");
-              }
-            }}
-            className={`flex h-8 w-8 items-center justify-center rounded-full shadow-lg transition-all ${
-              actionStatus === "plan"
-                ? "bg-[#e5b23c] text-black"
-                : actionStatus === "watching"
-                ? "bg-[#ff5b47] text-white"
-                : "bg-black/70 text-white backdrop-blur-sm hover:bg-[#e5b23c] hover:text-black"
-            }`}
-          >
-            {actionStatus === "plan" ? (
-              <Check className="h-4 w-4" />
-            ) : actionStatus === "watching" ? (
-              <Play className="h-4 w-4" />
-            ) : (
-              <Plus className="h-4 w-4" />
-            )}
-          </motion.button>
+          {actionStatus === "idle" ? (
+            <div className="relative">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={toggleDropdown}
+                className="flex h-8 w-8 items-center cursor-pointer justify-center rounded-full bg-black/70 text-white backdrop-blur-sm shadow-lg transition-all hover:bg-[#e5b23c] hover:text-black"
+              >
+                <Plus className="h-4 w-4" />
+              </motion.button>
+
+              <AnimatePresence>
+                {showDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                    transition={{ duration: 0.1 }}
+                    className="absolute bottom-full text-nowrap right-0 mb-2 overflow-hidden rounded-xl border border-white/10 bg-black/95 backdrop-blur-md shadow-xl"
+                  >
+                    <button
+                      onClick={(e) => handleQuickAction(e, "plan")}
+                      className="flex w-full items-center cursor-pointer gap-2 px-4 py-2 text-xs text-white transition-colors hover:bg-white/10"
+                    >
+                      <BookMarked className="h-3.5 w-3.5 text-[#6C5CE7]" />
+                      <span>Plan to Watch</span>
+                    </button>
+                    <button
+                      onClick={(e) => handleQuickAction(e, "watching")}
+                      className="flex w-full items-center cursor-pointer gap-2 px-4 py-2 text-xs text-white transition-colors hover:bg-white/10"
+                    >
+                      <Play className="h-3.5 w-3.5 text-[#e5b23c]" />
+                      <span>Watching</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className={`flex h-8 w-8 items-center justify-center rounded-full shadow-lg ${
+                actionStatus === "plan"
+                  ? "bg-[#6C5CE7] text-white"
+                  : "bg-[#e5b23c] text-black"
+              }`}
+            >
+              {actionStatus === "plan" ? (
+                <BookMarked className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+            </motion.div>
+          )}
         </div>
       </div>
 
-      {/* Title under the card */}
       <Link href={`/anime/${anime.id}`}>
         <div className="mt-2">
           <h3 className="line-clamp-1 text-sm font-medium text-white transition-colors hover:text-[#e5b23c]">
@@ -278,41 +350,92 @@ export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState("trending");
   const [animeList, setAnimeList] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageInfo, setPageInfo] = useState<PageInfo>({
+    hasNextPage: false,
+    total: 0,
+    currentPage: 1,
+    lastPage: 1,
+  });
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showStickyInfo, setShowStickyInfo] = useState(false);
+
+  const [prevSearchQuery, setPrevSearchQuery] = useState(searchQuery);
+  const [prevActiveCategory, setPrevActiveCategory] = useState(activeCategory);
 
   const activeCategoryData = useMemo(() => {
-    return (
-      categories.find((category) => category.id === activeCategory) ||
-      categories[0]
-    );
+    return categories.find((c) => c.id === activeCategory) || categories[0];
   }, [activeCategory]);
 
-  useEffect(() => {
-    const debounce = setTimeout(async () => {
-      try {
-        setLoading(true);
+  // Reset pagination when search or category changes
+  if (searchQuery !== prevSearchQuery || activeCategory !== prevActiveCategory) {
+    setPrevSearchQuery(searchQuery);
+    setPrevActiveCategory(activeCategory);
+    setPage(1);
+    setAnimeList([]);
+  }
 
-        const data = await fetchAnimeData({
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (page === 1) {
+          setLoading(true);
+        } else {
+          setLoadingMore(true);
+        }
+
+        const { media, pageInfo: newPageInfo } = await fetchAnimeData({
           searchQuery,
           activeCategory,
+          page,
         });
 
-        setAnimeList(data);
+        if (page === 1) {
+          setAnimeList(media);
+        } else {
+          setAnimeList((prev) => [...prev, ...media]);
+        }
+
+        setPageInfo(newPageInfo);
       } catch (error) {
         console.error("Failed to fetch anime", error);
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
-    }, 400);
+    };
 
+    const debounce = setTimeout(fetchData, 400);
     return () => clearTimeout(debounce);
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery, activeCategory, page]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 500);
+      setShowStickyInfo(window.scrollY > 300);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleLoadMore = () => {
+    if (pageInfo.hasNextPage && !loadingMore) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="min-h-screen overflow-hidden bg-black text-white">
       {/* Hero Section */}
       <div className="relative isolate overflow-hidden border-b border-white/10">
         <div
-          className={`absolute inset-0 bg-${activeCategoryData.color} opacity-20`}
+          className="absolute inset-0 opacity-20"
+          style={{ backgroundColor: activeCategoryData.color }}
         />
 
         <div className="absolute inset-0">
@@ -323,7 +446,6 @@ export default function ExplorePage() {
             priority
             className="object-cover opacity-35"
           />
-
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/70 to-black" />
         </div>
 
@@ -338,7 +460,6 @@ export default function ExplorePage() {
             >
               Explore Anime
             </h1>
-
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-gray-300 md:text-base">
               Discover trending series, seasonal releases, hidden gems, and your
               next obsession.
@@ -349,7 +470,6 @@ export default function ExplorePage() {
                 <div className="absolute inset-y-0 left-0 flex items-center pl-5">
                   <Search className="h-5 w-5 text-gray-400" />
                 </div>
-
                 <input
                   type="text"
                   placeholder="Search anime titles..."
@@ -373,9 +493,12 @@ export default function ExplorePage() {
                     onClick={() => setActiveCategory(category.id)}
                     className={`relative overflow-hidden cursor-pointer rounded-full border px-5 py-3 text-sm font-medium transition-all ${
                       isActive
-                        ? `border-transparent bg-${category.color} text-black`
-                        : "border-white/10 bg-white/[0.03] text-gray-300 hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
+                        ? "border-transparent text-white"
+                        : "border-white/10 bg-white/[0.03] text-gray-400 hover:border-white/20 hover:bg-white/[0.06] hover:text-white"
                     }`}
+                    style={{
+                      backgroundColor: isActive ? category.color : "transparent",
+                    }}
                   >
                     <div className="relative z-10 flex items-center gap-2">
                       <span className="flex items-center justify-center size-5">
@@ -391,6 +514,29 @@ export default function ExplorePage() {
         </div>
       </div>
 
+      {/* Sticky Page Info */}
+      <AnimatePresence>
+        {showStickyInfo && !loading && animeList.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-20 right-8 z-40"
+          >
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/80 backdrop-blur-md px-4 py-2 shadow-lg">
+              <Info className="h-3.5 w-3.5 text-[#e5b23c]" />
+              <span className="text-xs text-gray-300">
+                Page {pageInfo.currentPage} of {pageInfo.lastPage}
+              </span>
+              <div className="h-3 w-px bg-white/20" />
+              <span className="text-xs text-gray-400">
+                {pageInfo.total} total
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Anime Grid */}
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="mb-8 flex items-center justify-between">
@@ -400,14 +546,12 @@ export default function ExplorePage() {
                 ? `Search Results for "${searchQuery}"`
                 : activeCategoryData.label}
             </h2>
-
             <p className="mt-1 text-sm text-gray-400">
-              {animeList.length} anime discovered
+              {pageInfo.total || animeList.length} anime discovered
             </p>
           </div>
-
           <div className="hidden rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-gray-300 md:flex">
-            Updated live
+            Page {pageInfo.currentPage} of {pageInfo.lastPage}
           </div>
         </div>
 
@@ -426,29 +570,70 @@ export default function ExplorePage() {
         ) : animeList.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.02] py-24 text-center">
             <CompassIcon className="h-16 w-16 text-gray-600" />
-
             <h3 className="mt-6 text-2xl font-semibold text-white">
               No anime found
             </h3>
-
             <p className="mt-2 text-sm text-gray-400">
               Try another title or category.
             </p>
           </div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid grid-cols-2 gap-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-          >
-            <AnimatePresence>
-              {animeList.map((anime, index) => (
-                <AnimeCard key={anime.id} anime={anime} index={index} />
-              ))}
-            </AnimatePresence>
-          </motion.div>
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+            >
+              <AnimatePresence>
+                {animeList.map((anime, index) => (
+                  <AnimeCard key={`${anime.id}-${index}`} anime={anime} index={index} />
+                ))}
+              </AnimatePresence>
+            </motion.div>
+
+            {pageInfo.hasNextPage && (
+              <div className="mt-12 flex justify-center">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50"
+                >
+                  {loadingMore ? (
+                    <>
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4" />
+                      Load More
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      {/* Back to Top Button */}
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 z-50 cursor-pointer flex h-12 w-12 items-center justify-center rounded-full bg-[#e5b23c] text-black shadow-lg transition-all hover:shadow-xl"
+          >
+            <ArrowUp className="h-5 w-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
