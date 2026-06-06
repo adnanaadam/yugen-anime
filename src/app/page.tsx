@@ -1,4 +1,3 @@
-import LandingNavbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
 import TrackingPreview from "@/components/landing/TrackingPreview";
@@ -9,7 +8,6 @@ import Footer from "@/components/landing/Footer";
 export default function HomePage() {
   return (
     <>
-      <LandingNavbar />
       <main className="flex-1">
         <Hero />
         <Features />

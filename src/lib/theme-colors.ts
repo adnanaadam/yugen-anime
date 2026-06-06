@@ -1,45 +1,51 @@
+// src/lib/theme-colors.ts
+
 export const themeColors = {
   light: {
-    background: "#F5F5F2",
-
+    background: "#E0E2DB", // Pure white background
+    
     text: {
-      primary: "#111111",
-      secondary: "#6B7280",
+      primary: "#111111", // Almost black for better contrast
+      secondary: "#666666", // Medium gray for secondary text
     },
-
-    accent: "#F2C94C",
-
+    
+    accent: "#f7b708", // tuscan-sun-500
+    accentSecondary: "#f73c08", // burnt-peach-500
+    accentTertiary: "#00eaff", // electric-aqua-500
+    
     cards: [
-      "#d8d5cc", // Card 1
-      "#e5b23c", // Card 2  
-      "#ff5b47", // Card 3
-      "#6C5CE7", // Card 4
+      "#f5f5f5", // Light gray card
+      "#f7b708", // tuscan-sun-500
+      "#f96339", // burnt-peach-400
+      "#00bbcc", // electric-aqua-600
     ],
-
-    surface: "#FFFFFF",
-    surfaceHover: "#F5F5F5",
-    border: "#E5E5E5",
+    
+    surface: "#f8f9fa", // Very light gray surface
+    surfaceHover: "#f0f0f0", // Slightly darker on hover
+    border: "#e0e0e0", // Light border color
   },
-
+  
   dark: {
-    background: "#0A0A0A",
-
+    background: "#101113", // charcoal-950
+    
     text: {
-      primary: "#FFFFFF",
-      secondary: "#A1A1AA",
+      primary: "#ffffff",
+      secondary: "#9195a1", // charcoal-400
     },
-
-    accent: "#F2C94C",
-
+    
+    accent: "#f7b708", // tuscan-sun-500
+    accentSecondary: "#f73c08", // burnt-peach-500
+    accentTertiary: "#00eaff", // electric-aqua-500
+    
     cards: [
-      "#d8d5cc", // Card 1
-      "#e5b23c", // Card 2
-      "#ff5b47", // Card 3
-      "#6C5CE7", // Card 4
+      "#c8cad0", // charcoal-200
+      "#f7b708", // tuscan-sun-500
+      "#f96339", // burnt-peach-400
+      "#00bbcc", // electric-aqua-600
     ],
-
-    surface: "#1A1A1A",
-    surfaceHover: "#27272A",
-    border: "#27272A",
+    
+    surface: "#17191c", // charcoal-900
+    surfaceHover: "#2f3137", // charcoal-800
+    border: "#464a53", // charcoal-700
   },
 };

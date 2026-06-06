@@ -18,8 +18,8 @@ const cards = [
   {
     title: "Track Anime",
     subtitle: "Watch progress",
-    bg: "#d8d5cc",
-    circle: "#c8c5bc",
+    bg: "var(--color-charcoal-200)",
+    circle: "var(--color-charcoal-300)",
     icon: ListTodo,
     image: "/images/anime-char3.png",
     link: "/dashboard",
@@ -29,8 +29,8 @@ const cards = [
   {
     title: "Build Profile",
     subtitle: "Anime identity",
-    bg: "#e5b23c",
-    circle: "#111111",
+    bg: "var(--color-tuscan-sun-500)",
+    circle: "var(--color-charcoal-950)",
     icon: User,
     image: "/images/anime-char3.png",
     link: "/dashboard",
@@ -40,8 +40,8 @@ const cards = [
   {
     title: "Earn XP & Badges",
     subtitle: "Level system",
-    bg: "#ff5b47",
-    circle: "#f3f3f3",
+    bg: "var(--color-burnt-peach-400)",
+    circle: "var(--color-charcoal-50)",
     icon: Trophy,
     image: "/images/jiraiya.png",
     link: "/dashboard",
@@ -51,8 +51,8 @@ const cards = [
   {
     title: "Discover Anime",
     subtitle: "New releases",
-    bg: "#6C5CE7",
-    circle: "#5B4BC7",
+    bg: "var(--color-electric-aqua-600)",
+    circle: "var(--color-electric-aqua-700)",
     icon: Compass,
     image: "/images/sasuke.png",
     link: "/explore",
@@ -186,7 +186,7 @@ export default function Features() {
                     <span
                       className="flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300 group-hover:rotate-12"
                       style={{
-                        background: "rgba(242, 201, 76, 0.9)",
+                        background: "rgba(247, 183, 8, 0.9)",
                         backdropFilter: "blur(4px)",
                       }}
                     >

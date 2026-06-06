@@ -21,11 +21,16 @@ const socialLinks = [
 ];
 
 export default function Footer() {
-  const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47", "#6C5CE7"];
+  const cardColors = [
+    "var(--color-charcoal-200)",
+    "var(--color-tuscan-sun-500)",
+    "var(--color-burnt-peach-500)",
+    "var(--color-electric-aqua-600)",
+  ];
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative bg-black">
+    <footer className="relative bg-charcoal-950">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
         {/* Simple footer content - single row on desktop */}
         <div className="flex flex-col items-center justify-between gap-8 text-center sm:flex-row sm:text-left">
@@ -43,19 +48,19 @@ export default function Footer() {
           <div className="flex flex-wrap items-center justify-center gap-6">
             <Link
               href="#features"
-              className="text-sm transition-all duration-300 hover:text-white text-gray-400"
+              className="text-sm transition-all duration-300 hover:text-white text-charcoal-400"
             >
               Features
             </Link>
             <Link
               href="/explore"
-              className="text-sm transition-all duration-300 hover:text-white text-gray-400"
+              className="text-sm transition-all duration-300 hover:text-white text-charcoal-400"
             >
               Explore
             </Link>
             <Link
               href="/dashboard"
-              className="text-sm transition-all duration-300 hover:text-white text-gray-400"
+              className="text-sm transition-all duration-300 hover:text-white text-charcoal-400"
             >
               Dashboard
             </Link>
@@ -88,11 +93,11 @@ export default function Footer() {
         {/* Bottom bar */}
         <div 
           className="mt-8 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row"
-          style={{ borderColor: "#272727" }}
+          style={{ borderColor: "var(--color-charcoal-700)" }}
         >
           <div className="flex items-center gap-2">
             <SwordIcon className="h-3 w-3" style={{ color: cardColors[1] }} />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-charcoal-500">
               &copy; {currentYear} Yugen Anime. All rights reserved.
             </p>
           </div>
@@ -100,13 +105,13 @@ export default function Footer() {
           <div className="flex items-center gap-6">
             <Link 
               href="/privacy" 
-              className="text-xs text-gray-500 transition-all duration-300 hover:text-gray-300"
+              className="text-xs text-charcoal-500 transition-all duration-300 hover:text-charcoal-300"
             >
               Privacy
             </Link>
             <Link 
               href="/terms" 
-              className="text-xs text-gray-500 transition-all duration-300 hover:text-gray-300"
+              className="text-xs text-charcoal-500 transition-all duration-300 hover:text-charcoal-300"
             >
               Terms
             </Link>
@@ -115,7 +120,7 @@ export default function Footer() {
                 href="https://twitter.com/addy_devx"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-gray-500 transition-all duration-300 hover:text-gray-300"
+                className="text-xs text-charcoal-500 transition-all duration-300 hover:text-charcoal-300"
               >
                 Made by @addy_devx 
               </a>

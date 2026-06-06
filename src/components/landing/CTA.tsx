@@ -14,7 +14,12 @@ import DragonIcon from "@/assets/icons/dragon.svg";
 
 export default function CTA() {
   const { data: session } = useSession();
-  const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47", "#6C5CE7"];
+  const cardColors = [
+    "var(--color-charcoal-200)",
+    "var(--color-tuscan-sun-500)",
+    "var(--color-burnt-peach-500)",
+    "var(--color-electric-aqua-600)",
+  ];
 
   return (
     <section className="relative overflow-hidden px-4 py-24">

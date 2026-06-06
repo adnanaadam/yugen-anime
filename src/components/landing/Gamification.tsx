@@ -27,7 +27,7 @@ const badges = [
   {
     label: "First Anime",
     icon: ScrollIcon,
-    color: "#e5b23c",
+    color: "var(--color-tuscan-sun-500)",
     description: "Started your journey",
     rarity: "Common",
     image: "/images/anime-char3.png",
@@ -35,7 +35,7 @@ const badges = [
   {
     label: "Episode Master",
     icon: SwordIcon,
-    color: "#6C5CE7",
+    color: "var(--color-electric-aqua-600)",
     description: "100 episodes watched",
     rarity: "Epic",
     image: "/images/anime-char3.png",
@@ -43,7 +43,7 @@ const badges = [
   {
     label: "Anime Veteran",
     icon: CrownIcon,
-    color: "#d8d5cc",
+    color: "var(--color-charcoal-200)",
     description: "50 anime completed",
     rarity: "Legendary",
     image: "/images/anime-char3.png",
@@ -51,7 +51,7 @@ const badges = [
   {
     label: "Genre Explorer",
     icon: MagicIcon,
-    color: "#00b894",
+    color: "var(--color-yellow-green-500)",
     description: "10 genres explored",
     rarity: "Rare",
     image: "/images/anime-char3.png",
@@ -59,7 +59,7 @@ const badges = [
   {
     label: "Completionist",
     icon: CrownIcon,
-    color: "#ff5b47",
+    color: "var(--color-burnt-peach-500)",
     description: "Complete 10 anime",
     rarity: "Epic",
     image: "/images/anime-char3.png",
@@ -67,7 +67,7 @@ const badges = [
   {
     label: "Anime Lover",
     icon: NinjaIcon,
-    color: "#ff7675",
+    color: "var(--color-burnt-peach-300)",
     description: "Watch 500 episodes",
     rarity: "Mythic",
     image: "/images/anime-char3.png",
@@ -81,14 +81,19 @@ const recentActivity = [
 ];
 
 const levelBadges = [
-  { level: 1, icon: NinjaIcon, color: "#d8d5cc" },
-  { level: 5, icon: SwordIcon, color: "#e5b23c" },
-  { level: 10, icon: DragonIcon, color: "#ff5b47" },
-  { level: 25, icon: CrownIcon, color: "#6C5CE7" },
+  { level: 1, icon: NinjaIcon, color: "var(--color-charcoal-200)" },
+  { level: 5, icon: SwordIcon, color: "var(--color-tuscan-sun-500)" },
+  { level: 10, icon: DragonIcon, color: "var(--color-burnt-peach-500)" },
+  { level: 25, icon: CrownIcon, color: "var(--color-electric-aqua-600)" },
 ];
 
 export default function Gamification() {
-  const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47", "#6C5CE7"];
+  const cardColors = [
+    "var(--color-charcoal-200)",
+    "var(--color-tuscan-sun-500)",
+    "var(--color-burnt-peach-500)",
+    "var(--color-electric-aqua-600)",
+  ];
 
   return (
     <section id="gamification" className="relative overflow-hidden px-4 py-24">
@@ -455,7 +460,7 @@ export default function Gamification() {
                   }}
                 >
                   <p className="text-xs flex gap-1 items-center justify-center" style={{ color: "var(--color-text-secondary)" }}>
-                  <span><Target className="text-[#ff5b47] size-4" /></span> Next milestone: <span style={{ color: cardColors[1] }}>Level 8</span> unlocks new badge
+                  <span><Target className="text-[var(--color-burnt-peach-500)] size-4" /></span> Next milestone: <span style={{ color: cardColors[1] }}>Level 8</span> unlocks new badge
                   </p>
                 </div>
               </div>

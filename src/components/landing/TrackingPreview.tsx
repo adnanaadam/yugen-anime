@@ -30,7 +30,7 @@ const animeList = [
     status: "Watching",
     progress: 16,
     total: 20,
-    color: "#e5b23c",
+    color: "var(--color-tuscan-sun-500)",
   },
   {
     title: "Attack on Titan",
@@ -39,7 +39,7 @@ const animeList = [
     status: "Completed",
     progress: 87,
     total: 87,
-    color: "#d8d5cc",
+    color: "var(--color-charcoal-200)",
   },
   {
     title: "Demon Slayer",
@@ -48,7 +48,7 @@ const animeList = [
     status: "Watching",
     progress: 18,
     total: 26,
-    color: "#e5b23c",
+    color: "var(--color-tuscan-sun-500)",
   },
 ];
 
@@ -59,24 +59,24 @@ const stats = [
     label: "Anime Watched", 
     value: "48", 
     unit: "anime",
-    color: "#d8d5cc",
-    bgColor: "#d8d5cc20",
+    color: "var(--color-charcoal-200)",
+    bgColor: "rgba(200, 202, 208, 0.1)",
   },
   { 
     icon: BookIcon, 
     label: "Episodes Watched", 
     value: "1,247", 
     unit: "eps",
-    color: "#e5b23c",
-    bgColor: "#e5b23c20",
+    color: "var(--color-tuscan-sun-500)",
+    bgColor: "rgba(247, 183, 8, 0.1)",
   },
   { 
     icon: CrownIcon, 
     label: "Current Level", 
     value: "7", 
     unit: "Otaku",
-    color: "#ff5b47",
-    bgColor: "#ff5b4720",
+    color: "var(--color-burnt-peach-500)",
+    bgColor: "rgba(247, 60, 8, 0.1)",
   },
 ];
 
@@ -88,7 +88,11 @@ const statusIcons: Record<string, React.ElementType> = {
 };
 
 export default function TrackingPreview() {
-  const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47"];
+  const cardColors = [
+    "var(--color-charcoal-200)",
+    "var(--color-tuscan-sun-500)",
+    "var(--color-burnt-peach-500)",
+  ];
 
   return (
     <section className="px-4 py-24">

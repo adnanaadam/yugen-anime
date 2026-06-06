@@ -432,7 +432,7 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen overflow-hidden bg-black text-white">
       {/* Hero Section */}
-      <div className="relative isolate overflow-hidden border-b border-white/10">
+      <div className="relative isolate overflow-hidden">
         <div
           className="absolute inset-0 opacity-20"
           style={{ backgroundColor: activeCategoryData.color }}
