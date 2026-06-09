@@ -1,3 +1,4 @@
+// src/lib/auth.ts
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Discord from "next-auth/providers/discord";
@@ -38,6 +39,8 @@ export const authOptions = {
   },
 };
 
-const handler = NextAuth(authOptions);
+// Export the auth function for server-side usage
+export const { auth, handlers, signIn, signOut } = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+// Route handlers for the API route
+export const { GET, POST } = handlers;

@@ -1,101 +1,38 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Font Variables */
+  /* Fonts */
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-heading: var(--font-geist-sans), system-ui, sans-serif;
 
-  /* Charcoal Palette */
-  --color-charcoal-50: #f1f2f3;
-  --color-charcoal-100: #e3e5e8;
-  --color-charcoal-200: #c8cad0;
-  --color-charcoal-300: #acb0b9;
-  --color-charcoal-400: #9195a1;
-  --color-charcoal-500: #757b8a;
-  --color-charcoal-600: #5e626e;
-  --color-charcoal-700: #464a53;
-  --color-charcoal-800: #2f3137;
-  --color-charcoal-900: #17191c;
-  --color-charcoal-950: #101113;
+  /* Brand Colors */
+  --color-charcoal: #545863;
+  --color-electric-aqua: #00e8fc;
+  --color-burnt-peach: #f96e46;
+  --color-tuscan-sun: #f9c846;
+  --color-yellow-green: #97cc04;
 
-  /* Electric Aqua Palette */
-  --color-electric-aqua-50: #e5fdff;
-  --color-electric-aqua-100: #ccfbff;
-  --color-electric-aqua-200: #99f7ff;
-  --color-electric-aqua-300: #66f2ff;
-  --color-electric-aqua-400: #33eeff;
-  --color-electric-aqua-500: #00eaff;
-  --color-electric-aqua-600: #00bbcc;
-  --color-electric-aqua-700: #008c99;
-  --color-electric-aqua-800: #005e66;
-  --color-electric-aqua-900: #002f33;
-  --color-electric-aqua-950: #002124;
+  /* Light Theme */
+  --color-background: #fffdf8;
+  --color-foreground: #545863;
+  --color-text-secondary: #7b7f89;
 
-  /* Burnt Peach Palette */
-  --color-burnt-peach-50: #feebe6;
-  --color-burnt-peach-100: #fdd8ce;
-  --color-burnt-peach-200: #fcb19c;
-  --color-burnt-peach-300: #fa8a6b;
-  --color-burnt-peach-400: #f96339;
-  --color-burnt-peach-500: #f73c08;
-  --color-burnt-peach-600: #c63006;
-  --color-burnt-peach-700: #942405;
-  --color-burnt-peach-800: #631803;
-  --color-burnt-peach-900: #310c02;
-  --color-burnt-peach-950: #230801;
+  --color-primary: #f9c846;
+  --color-primary-hover: #f5bd29;
 
-  /* Tuscan Sun Palette */
-  --color-tuscan-sun-50: #fef8e6;
-  --color-tuscan-sun-100: #fdf1ce;
-  --color-tuscan-sun-200: #fce29c;
-  --color-tuscan-sun-300: #fad46b;
-  --color-tuscan-sun-400: #f9c639;
-  --color-tuscan-sun-500: #f7b708;
-  --color-tuscan-sun-600: #c69306;
-  --color-tuscan-sun-700: #946e05;
-  --color-tuscan-sun-800: #634903;
-  --color-tuscan-sun-900: #312502;
-  --color-tuscan-sun-950: #231a01;
+  --color-secondary: #f96e46;
+  --color-info: #00e8fc;
+  --color-success: #97cc04;
 
-  /* Yellow Green Palette */
-  --color-yellow-green-50: #f8fee6;
-  --color-yellow-green-100: #f1fecd;
-  --color-yellow-green-200: #e3fd9b;
-  --color-yellow-green-300: #d5fc69;
-  --color-yellow-green-400: #c7fb37;
-  --color-yellow-green-500: #b9fa05;
-  --color-yellow-green-600: #94c804;
-  --color-yellow-green-700: #6f9603;
-  --color-yellow-green-800: #4a6402;
-  --color-yellow-green-900: #253201;
-  --color-yellow-green-950: #1a2301;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f7f7f7;
 
-  /* Semantic Theme Variables - Default to LIGHT theme */
-  --color-background: #ffffff;
-  --color-foreground: #111111;
-  --color-text-secondary: #666666;
-  --color-accent: var(--color-tuscan-sun-500);
-  --color-accent-secondary: var(--color-burnt-peach-500);
-  --color-accent-tertiary: var(--color-electric-aqua-500);
-  --color-surface: #f8f9fa;
-  --color-surface-hover: #f0f0f0;
-  --color-border: #e0e0e0;
-
-  /* Card Colors (legacy compatibility) */
-  --card-bg-1: #f5f5f5;
-  --card-bg-2: var(--color-tuscan-sun-500);
-  --card-bg-3: var(--color-burnt-peach-400);
-  --card-bg-4: var(--color-electric-aqua-600);
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) var(--color-background);
+  --color-border: #ececec;
 }
 
 html {
-  background-color: var(--color-background);
   color-scheme: light;
+  background: var(--color-background);
 }
 
 body {
@@ -104,23 +41,7 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Smooth transitions for when dark mode is added later */
 * {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-.mask-panel {
-  mask: url("/shapes/panel.svg") center / cover no-repeat;
-  -webkit-mask: url("/shapes/panel.svg") center / cover no-repeat;
-
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-
-  -webkit-mask-position: center;
-  mask-position: center;
-
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-charcoal) transparent;
 }

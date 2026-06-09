@@ -17,11 +17,6 @@ import {
 
 import { lordJuusai } from "@/fonts/fonts";
 
-import CompassIcon from "@/assets/icons/compass.svg";
-import StarIcon from "@/assets/icons/star.svg";
-import FireIcon from "@/assets/icons/fire.svg";
-import CalendarIcon from "@/assets/icons/calendar.svg";
-
 interface Anime {
   id: number;
   title: {
@@ -54,21 +49,18 @@ const categories = [
   {
     id: "trending",
     label: "Trending",
-    icon: FireIcon,
     color: "#ff5b47",
     endpoint: "trending",
   },
   {
     id: "popular",
     label: "Popular",
-    icon: StarIcon,
     color: "#e5b23c",
     endpoint: "popular",
   },
   {
     id: "seasonal",
     label: "Seasonal",
-    icon: CalendarIcon,
     color: "#9810fa",
     endpoint: "seasonal",
   },
@@ -482,7 +474,6 @@ export default function ExplorePage() {
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               {categories.map((category) => {
-                const Icon = category.icon;
                 const isActive = activeCategory === category.id;
 
                 return (
@@ -501,9 +492,7 @@ export default function ExplorePage() {
                     }}
                   >
                     <div className="relative z-10 flex items-center gap-2">
-                      <span className="flex items-center justify-center size-5">
-                        <Icon className="h-4 w-4" />
-                      </span>
+                    
                       <span>{category.label}</span>
                     </div>
                   </motion.button>
@@ -569,7 +558,7 @@ export default function ExplorePage() {
           </div>
         ) : animeList.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.02] py-24 text-center">
-            <CompassIcon className="h-16 w-16 text-gray-600" />
+          
             <h3 className="mt-6 text-2xl font-semibold text-white">
               No anime found
             </h3>

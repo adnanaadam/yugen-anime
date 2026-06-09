@@ -1,258 +1,332 @@
+// src/components/layout/Navbar.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { usePathname } from "next/navigation";
-import { lordJuusai } from "@/fonts/fonts";
-import { useState, useEffect } from "react";
-import { Search, Menu, X, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { signIn, signOut, useSession } from "next-auth/react";
+import { lordJuusai } from "@/fonts/fonts";
+import { ChevronDown, Menu, Search, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
-  const pathname = usePathname();
   const router = useRouter();
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showUserMenu, setShowUserMenu] = useState(false);
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Close user menu on outside click
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Close search on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Focus input when search opens
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  // Close mobile menu on route change (handled by link clicks)
+  const closeMobile = () => setMobileOpen(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/explore?search=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
       setSearchQuery("");
+      closeMobile();
     }
-  };
-
-  const isLandingPage = pathname === "/";
-
-  const getNavbarBg = () => {
-    if (scrolled || !isLandingPage) {
-      return "bg-white/95 backdrop-blur-sm border-b border-gray-200";
-    }
-    return "bg-transparent";
-  };
-
-  const getNavbarTextColor = () => {
-    return "text-gray-900";
-  };
-
-  const getNavbarLinkColor = (isActive: boolean) => {
-    if (isActive) return "text-tuscan-sun-500";
-    return "text-gray-600 hover:text-gray-900";
   };
 
   return (
     <>
-      <header
-        className={`hidden md:block fixed top-0 z-50 w-full transition-all duration-300 ${getNavbarBg()}`}
-      >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <h1
-              className={`text-2xl tracking-wide ${lordJuusai.className} ${getNavbarTextColor()}`}
-            >
-              Yugen
-            </h1>
+      {/* Desktop */}
+      <header className="fixed top-0 left-0 right-0 z-50 hidden md:flex items-center justify-center h-14 bg-[#545863]">
+        {/* Grid layout: 3 equal columns so center stays centered */}
+        <div className="grid grid-cols-3 items-center w-full text-[var(--color-surface)] px-8 lg:px-16">
+          {/* Left: Logo */}
+          <Link href="/" className="justify-self-start">
+            <h1 className={`text-2xl ${lordJuusai.className}`}>Yugen</h1>
           </Link>
 
-          <nav className="flex items-center gap-6">
-            <Link
-              href="/explore"
-              className={`text-sm font-medium transition-colors ${getNavbarLinkColor(pathname === "/explore")}`}
-            >
+          {/* Center: Nav - always centered in its column */}
+          <nav className="flex items-center justify-center gap-8 text-[var(--color-surface)]">
+            <Link href="/explore" className="hover:underline underline-offset-4">
               Explore
             </Link>
           </nav>
 
-          <div className="flex items-center gap-3">
-            {status === "loading" ? (
-              <div className="h-9 w-9 animate-pulse rounded-full bg-gray-200" />
-            ) : session ? (
-              <div className="relative">
+          {/* Right: Search + User - always right-aligned in its column */}
+          <div className="flex items-center justify-end gap-3">
+            {/* Search */}
+            <div ref={searchRef} className="flex items-center">
+              {searchOpen ? (
+                <form onSubmit={handleSearch} className="flex items-center">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search anime..."
+                    className="h-9 w-48 lg:w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-foreground)] outline-none placeholder:text-[var(--color-text-secondary)] focus:border-[var(--color-primary)] transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className="ml-1 flex size-8 items-center cursor-pointer justify-center rounded-lg text-[var(--color-surface)] hover:text-white transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </form>
+              ) : (
                 <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2 py-1.5 transition-all hover:bg-gray-50"
+                  onClick={() => setSearchOpen(true)}
+                  className="flex size-9 items-center justify-center cursor-pointer rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface-hover)]"
+                >
+                  <Search className="text-[var(--color-foreground)]" size={18} />
+                </button>
+              )}
+            </div>
+
+            {/* User */}
+            {status === "loading" ? (
+              <div className="h-10 w-10 animate-pulse rounded-full bg-gray-200" />
+            ) : session ? (
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowUserMenu((prev) => !prev)}
+                  className="flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-white px-2 py-1.5 transition-colors hover:bg-[var(--color-surface-hover)]"
                 >
                   {session.user?.image ? (
                     <Image
                       src={session.user.image}
-                      alt="avatar"
-                      width={28}
-                      height={28}
-                      className="h-7 w-7 rounded-full object-cover"
+                      alt="Avatar"
+                      width={32}
+                      height={32}
+                      className="rounded-lg object-cover"
                     />
                   ) : (
-                    <div
-                      className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium text-white"
-                      style={{
-                        background: `linear-gradient(135deg, var(--card-bg-1), var(--card-bg-2))`,
-                      }}
-                    >
-                      {session.user?.name?.charAt(0) ?? "?"}
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-primary)] text-sm font-semibold">
+                      {session.user?.name?.charAt(0)}
                     </div>
                   )}
-                  <ChevronDown className={`h-3 w-3 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    size={14}
+                    className={`text-[var(--color-foreground)] transition-transform duration-200 ${
+                      showUserMenu ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
-                <AnimatePresence>
-                  {showUserMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 8 }}
-                      className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl"
+                <div
+                  className={`absolute right-0 mt-2 w-56 rounded-2xl border border-[var(--color-border)] bg-white p-2 shadow-lg transition-all duration-200 ${
+                    showUserMenu
+                      ? "visible translate-y-0 opacity-100"
+                      : "invisible -translate-y-2 opacity-0"
+                  }`}
+                >
+                  <div className="border-b border-[var(--color-border)] p-3">
+                    <p className="font-medium text-[var(--color-foreground)]">
+                      {session.user?.name}
+                    </p>
+                    <p className="truncate text-xs text-[var(--color-text-secondary)]">
+                      {session.user?.email}
+                    </p>
+                  </div>
+
+                  <div className="py-2">
+                    <Link
+                      href="/profile"
+                      className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
+                      onClick={() => setShowUserMenu(false)}
                     >
-                      <div className="border-b border-gray-100 p-3">
-                        <p className="text-sm font-medium text-gray-900">{session.user?.name}</p>
-                        <p className="text-xs truncate text-gray-500">{session.user?.email}</p>
-                      </div>
-                      <div className="p-2">
-                        <Link
-                          href="/dashboard"
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Dashboard
-                        </Link>
-                        <Link
-                          href="/profile"
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Profile
-                        </Link>
-                        <Link
-                          href="/settings"
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Settings
-                        </Link>
-                      </div>
-                      <div className="border-t border-gray-100 p-2">
-                        <button
-                          onClick={() => { signOut({ callbackUrl: "/" }); setShowUserMenu(false); }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-burnt-peach-500 transition-colors hover:bg-orange-50"
-                        >
-                          Log Out
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      Profile
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Settings
+                    </Link>
+                  </div>
+
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="w-full rounded-xl px-3 py-2 text-left text-sm text-[var(--color-secondary)] hover:bg-[var(--color-surface)]"
+                  >
+                    Log Out
+                  </button>
+                </div>
               </div>
             ) : (
               <button
                 onClick={() => signIn()}
-                className="flex h-9 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 transition-all hover:bg-gray-50"
+                className="rounded-md cursor-pointer bg-white/50 px-5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
-                Log in
+                Login
               </button>
             )}
           </div>
         </div>
       </header>
 
-      <header
-        className={`md:hidden fixed top-0 z-50 w-full transition-all duration-300 ${
-          scrolled || !isLandingPage
-            ? "bg-white/95 backdrop-blur-md border-b border-gray-200"
-            : "bg-transparent"
-        }`}
-      >
+      {/* Mobile */}
+      <header className="fixed top-0 left-0 right-0 z-50 md:hidden bg-[var(--color-secondary)]">
         <div className="flex h-14 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <h1
-              className={`text-xl tracking-wide ${lordJuusai.className} ${getNavbarTextColor()}`}
-            >
+          {/* Logo */}
+          <Link href="/" onClick={closeMobile}>
+            <h1 className={`text-xl text-[var(--color-surface)] ${lordJuusai.className}`}>
               Yugen
             </h1>
           </Link>
 
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+            {/* Mobile search toggle */}
+            <button
+              onClick={() => {
+                setSearchOpen(!searchOpen);
+                setMobileOpen(false);
+              }}
+              className="flex size-9 items-center justify-center rounded-lg text-[var(--color-surface)]"
+            >
+              {searchOpen ? <X size={20} /> : <Search size={20} />}
+            </button>
+
+            {/* Hamburger */}
+            <button
+              onClick={() => {
+                setMobileOpen(!mobileOpen);
+                setSearchOpen(false);
+              }}
+              className="flex size-9 items-center justify-center rounded-lg text-[var(--color-surface)]"
+            >
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
-      </header>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-white md:hidden"
-          >
-            <div className="flex h-full flex-col items-center justify-center gap-6 p-6">
-              <Link
-                href="/explore"
-                onClick={() => setMobileOpen(false)}
-                className="flex w-full max-w-xs items-center justify-center gap-4 rounded-2xl border border-gray-200 bg-gray-50 px-6 py-4 text-lg font-medium text-gray-900 transition-all hover:scale-105"
-              >
-                Explore
-              </Link>
+        {/* Mobile search bar */}
+        <div
+          className={`overflow-hidden transition-all duration-300 ${
+            searchOpen ? "max-h-16" : "max-h-0"
+          }`}
+        >
+          <form onSubmit={handleSearch} className="px-4 pb-3">
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search anime..."
+              className="h-10 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm text-[var(--color-foreground)] outline-none placeholder:text-[var(--color-text-secondary)]"
+            />
+          </form>
+        </div>
 
-              <form onSubmit={handleSearch} className="w-full max-w-xs">
-                <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-3">
-                  <Search className="h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search anime..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400"
-                  />
-                </div>
-              </form>
+        {/* Mobile nav menu */}
+        <div
+          className={`overflow-hidden border-t border-[var(--color-surface)]/10 transition-all duration-300 ${
+            mobileOpen ? "max-h-96" : "max-h-0"
+          }`}
+        >
+          <nav className="flex flex-col p-4 bg-[var(--color-secondary)]">
+            <Link
+              href="/explore"
+              className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+              onClick={closeMobile}
+            >
+              Explore
+            </Link>
 
-              <hr className="w-32 border-gray-200" />
+            {session && (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+                  onClick={closeMobile}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/profile"
+                  className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+                  onClick={closeMobile}
+                >
+                  Profile
+                </Link>
+                <Link
+                  href="/settings"
+                  className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+                  onClick={closeMobile}
+                >
+                  Settings
+                </Link>
+              </>
+            )}
 
-              {status === "loading" ? (
-                <div className="h-12 w-32 animate-pulse rounded-full bg-gray-200" />
-              ) : session ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex w-full max-w-xs items-center justify-center gap-3 rounded-full bg-tuscan-sun-500 px-6 py-3 text-lg font-medium text-black transition-all hover:scale-105"
-                  >
-                    Go to Dashboard
-                  </Link>
-                  <button
-                    onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/" }); }}
-                    className="flex w-full max-w-xs items-center justify-center gap-3 rounded-full border border-gray-200 bg-gray-50 px-6 py-3 text-lg font-medium text-burnt-peach-500 transition-all hover:scale-105"
-                  >
-                    Log Out
-                  </button>
-                </>
+            <div className="mt-3 pt-3 border-t border-[var(--color-surface)]/10">
+              {session ? (
+                <button
+                  onClick={() => {
+                    closeMobile();
+                    signOut({ callbackUrl: "/" });
+                  }}
+                  className="w-full rounded-xl px-3 py-3 text-left text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+                >
+                  Log Out
+                </button>
               ) : (
                 <button
-                  onClick={() => { setMobileOpen(false); signIn(); }}
-                  className="flex w-full max-w-xs items-center justify-center gap-3 rounded-full bg-tuscan-sun-500 px-6 py-3 text-lg font-medium text-black transition-all hover:scale-105"
+                  onClick={() => {
+                    closeMobile();
+                    signIn();
+                  }}
+                  className="w-full rounded-xl bg-[var(--color-primary)] px-3 py-3 text-center font-medium text-[var(--color-foreground)]"
                 >
-                  Log in
+                  Login
                 </button>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </nav>
+        </div>
+      </header>
 
-      <div className="h-16 md:h-14" />
+      {/* Spacer so content doesn't sit behind fixed navbar */}
+      <div className="h-14" />
     </>
   );
 }
