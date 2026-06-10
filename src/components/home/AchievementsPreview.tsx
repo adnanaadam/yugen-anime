@@ -180,7 +180,7 @@ export default function AchievementsPreview() {
           {previewBadges.map((badge, index) => (
             <div
               key={badge.name}
-              className="group relative"
+              className="group relative cursor-crosshair"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="relative transition-all duration-500 group-hover:-translate-y-3">
@@ -254,9 +254,9 @@ export default function AchievementsPreview() {
                     </div>
                   </div>
 
-                  <div className="p-5 md:p-6 text-center">
+                  <div className="p-2 md:p-3 text-center">
                     {/* Hexagonal icon container */}
-                    <div className="relative mx-auto mb-6 w-28 h-28">
+                    <div className="relative mx-auto mb-2 w-48 h-48">
                       <svg
                         viewBox="0 0 120 120"
                         className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -329,7 +329,7 @@ export default function AchievementsPreview() {
                       >
                         <text
                           x="60"
-                          y="18"
+                          y="8"
                           textAnchor="middle"
                           fontSize="7"
                           fill={badge.color}
@@ -340,16 +340,6 @@ export default function AchievementsPreview() {
                         <text
                           x="103"
                           y="36"
-                          textAnchor="middle"
-                          fontSize="7"
-                          fill={badge.color}
-                          className="opacity-0 group-hover:opacity-80 transition-opacity duration-300"
-                        >
-                          {badge.rune}
-                        </text>
-                        <text
-                          x="108"
-                          y="64"
                           textAnchor="middle"
                           fontSize="7"
                           fill={badge.color}
@@ -369,7 +359,7 @@ export default function AchievementsPreview() {
                         </text>
                         <text
                           x="60"
-                          y="108"
+                          y="118"
                           textAnchor="middle"
                           fontSize="7"
                           fill={badge.color}
@@ -380,16 +370,6 @@ export default function AchievementsPreview() {
                         <text
                           x="17"
                           y="90"
-                          textAnchor="middle"
-                          fontSize="7"
-                          fill={badge.color}
-                          className="opacity-0 group-hover:opacity-80 transition-opacity duration-300"
-                        >
-                          {badge.rune}
-                        </text>
-                        <text
-                          x="12"
-                          y="64"
                           textAnchor="middle"
                           fontSize="7"
                           fill={badge.color}
@@ -434,16 +414,16 @@ export default function AchievementsPreview() {
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div
-                          className="flex items-center justify-center transition-all duration-500 group-hover:scale-110"
+                          className="flex items-center justify-center z-10 transition-all duration-500 group-hover:scale-110"
                           style={{
-                            width: "64px",
-                            height: "64px",
+                            width: "204px",
+                            height: "204px",
                             backgroundColor: `${badge.color}10`,
                             clipPath: hexClipPathInner,
                           }}
                         >
                           <div
-                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                            className="absolute inset-0 opacity-0 z-10 group-hover:opacity-100 transition-opacity duration-500"
                             style={{
                               clipPath: hexClipPathInner,
                               boxShadow: `inset 0 0 35px ${badge.glow}`,
@@ -452,16 +432,16 @@ export default function AchievementsPreview() {
                           <Image
                             src={badge.icon}
                             alt={badge.name}
-                            width={36}
-                            height={36}
-                            className="relative z-10 object-contain transition-all duration-500 group-hover:scale-115 group-hover:brightness-110"
+                            width={66}
+                            height={66}
+                            className="relative z-40 object-contain transition-all duration-500 group-hover:scale-115 group-hover:brightness-110"
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Badge name */}
-                    <div className="flex items-center justify-center gap-2 mb-2">
+                    <div className="flex items-center justify-center gap-2 mb-1">
                       <div className="flex items-center gap-1">
                         <div
                           className="h-[1px] w-6 transition-all duration-500 group-hover:w-8"
@@ -474,7 +454,7 @@ export default function AchievementsPreview() {
                           {badge.rune}
                         </span>
                       </div>
-                      <h3 className="text-sm font-bold text-[#545863] group-hover:text-[#f96e46] transition-all duration-300 uppercase tracking-[0.15em]">
+                      <h3 className="text-xs font-bold text-[#545863] group-hover:text-[#f96e46] transition-all duration-300 uppercase tracking-[0.15em]">
                         {badge.name}
                       </h3>
                       <div className="flex items-center gap-1">
@@ -492,7 +472,7 @@ export default function AchievementsPreview() {
                     </div>
 
                     {/* Description */}
-                    <div className="relative mb-4">
+                    <div className="relative mb-2">
                       <div
                         className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         style={{ backgroundColor: `${badge.color}03` }}
@@ -516,10 +496,6 @@ export default function AchievementsPreview() {
                           style={{
                             background: `linear-gradient(90deg, transparent, ${badge.color}20, transparent)`,
                           }}
-                        />
-                        <span
-                          className="relative w-1.5 h-1.5 rounded-full"
-                          style={{ backgroundColor: badge.color }}
                         />
                         <span className="relative">{badge.rarityLabel}</span>
                       </span>

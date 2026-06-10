@@ -2,7 +2,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { getServerSession, authOptions } from "@/lib/auth";
 import { calculateLevel } from "@/lib/utils";
 import { AnimeStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -69,7 +69,7 @@ const BADGE_DEFINITIONS = {
 
 // Get current user from session
 async function getCurrentUser() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new Error("Not authenticated");
   return session.user.id;
 }

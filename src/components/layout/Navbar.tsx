@@ -8,7 +8,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { lordJuusai } from "@/fonts/fonts";
 import { ChevronDown, Menu, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-
+import { Navii } from '@usenavii/react';
 export default function Navbar() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -127,16 +127,17 @@ export default function Navbar() {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowUserMenu((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-white px-2 py-1.5 transition-colors hover:bg-[var(--color-surface-hover)]"
+                  className="flex items-center cursor-pointer gap-2 rounded-xl border border-[var(--color-border)] bg-white px-2 py-1.5 transition-colors hover:bg-[var(--color-surface-hover)]"
                 >
                   {session.user?.image ? (
-                    <Image
-                      src={session.user.image}
-                      alt="Avatar"
-                      width={32}
-                      height={32}
-                      className="rounded-lg object-cover"
-                    />
+                    // <Image
+                    //   src={session.user.image}
+                    //   alt="Avatar"
+                    //   width={32}
+                    //   height={32}
+                    //   className="rounded-lg object-cover"
+                    // />
+                    <Navii seed={session.user?.email ?? ""} size={24} title={session.user?.name ?? ""} animated />
                   ) : (
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-primary)] text-sm font-semibold">
                       {session.user?.name?.charAt(0)}
@@ -174,18 +175,11 @@ export default function Navbar() {
                     >
                       Profile
                     </Link>
-                    <Link
-                      href="/settings"
-                      className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Settings
-                    </Link>
                   </div>
 
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="w-full rounded-xl px-3 py-2 text-left text-sm text-[var(--color-secondary)] hover:bg-[var(--color-surface)]"
+                    className="w-full rounded-xl cursor-pointer px-3 py-2 text-left text-sm text-[var(--color-secondary)] hover:bg-[var(--color-surface)]"
                   >
                     Log Out
                   </button>
@@ -287,13 +281,6 @@ export default function Navbar() {
                   onClick={closeMobile}
                 >
                   Profile
-                </Link>
-                <Link
-                  href="/settings"
-                  className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
-                  onClick={closeMobile}
-                >
-                  Settings
                 </Link>
               </>
             )}

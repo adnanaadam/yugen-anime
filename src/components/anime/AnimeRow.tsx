@@ -4,7 +4,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
-import { ArrowRight, Star, Tv } from "lucide-react";
+import { ArrowRight, Star, Tv, Plus, Check, ChevronDown } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { addToAnimeList } from "@/features/tracking/api";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 interface AnimeRowProps {
@@ -74,13 +76,45 @@ function RowAnimeCard({
   index: number;
   totalCards: number;
 }) {
+  const { data: session } = useSession();
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [detailPosition, setDetailPosition] = useState<"right" | "left">("right");
+  const [showAddDropdown, setShowAddDropdown] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const title = anime.title.english || anime.title.romaji;
   const nativeTitle = anime.title.native;
+
+  const statusOptions = [
+    { label: "Watching", value: "WATCHING" as const, color: "#00e8fc" },
+    { label: "Completed", value: "COMPLETED" as const, color: "#97cc04" },
+    { label: "Plan to Watch", value: "PLAN_TO_WATCH" as const, color: "#f9c846" },
+    { label: "Paused", value: "PAUSED" as const, color: "#f96e46" },
+    { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
+    { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
+  ];
+
+  const activeStatus = statusOptions.find((s) => s.value === currentStatus);
+
+  const handleAddToList = async (e: React.MouseEvent, status: typeof statusOptions[number]["value"]) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!session || isUpdating) return;
+
+    setIsUpdating(true);
+    try {
+      await addToAnimeList(anime.id, status);
+      setCurrentStatus(status);
+      setShowAddDropdown(false);
+    } catch (error) {
+      console.error("Failed to add to list:", error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   // Determine if detail box should appear on left or right
   useEffect(() => {
@@ -89,7 +123,6 @@ function RowAnimeCard({
       const spaceOnRight = window.innerWidth - rect.right;
       const spaceOnLeft = rect.left;
 
-      // Need ~280px for detail box
       if (spaceOnRight < 300 && spaceOnLeft > spaceOnRight) {
         setDetailPosition("left");
       } else {
@@ -103,10 +136,13 @@ function RowAnimeCard({
       ref={cardRef}
       className="relative"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setShowAddDropdown(false);
+      }}
     >
       {/* Card */}
-      <Link href={`/anime/${anime.id}`} className="block">
+      <div className="block">
         <div
           className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
             isHovered
@@ -114,33 +150,118 @@ function RowAnimeCard({
               : "border-[#ececec] bg-white shadow-sm"
           }`}
         >
-          {/* Cover Image */}
-          <div className="relative aspect-[2/3] overflow-hidden">
-            {!imageLoaded && (
-              <div className="absolute inset-0 bg-[#545863]/15 animate-pulse" />
-            )}
-            <Image
-              src={anime.coverImage.large}
-              alt={title}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
-              className={`object-cover transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
-              onLoad={() => setImageLoaded(true)}
-            />
-          </div>
+          <Link href={`/anime/${anime.id}`}>
+            {/* Cover Image */}
+            <div className="relative aspect-[2/3] overflow-hidden">
+              {!imageLoaded && (
+                <div className="absolute inset-0 bg-[#545863]/15 animate-pulse" />
+              )}
+              <Image
+                src={anime.coverImage.large}
+                alt={title}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
+                className={`object-cover transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+                onLoad={() => setImageLoaded(true)}
+              />
+            </div>
+          </Link>
+
+          {/* Add to Library button */}
+          {session && (
+            <div className="absolute w-full px-3 bottom-2 left-1/2 -translate-x-1/2 z-20">
+              <div className="relative w-full">
+                {currentStatus ? (
+                  /* Status badge showing current status */
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowAddDropdown(!showAddDropdown);
+                    }}
+                    className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-[#ececec] px-3 shadow-sm hover:shadow-md transition-all"
+                    disabled={isUpdating}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: activeStatus?.color }}
+                      />
+                      <span
+                        className="text-xs font-medium"
+                        style={{ color: activeStatus?.color }}
+                      >
+                        {activeStatus?.label}
+                      </span>
+                    </div>
+                    <ChevronDown
+                      size={12}
+                      className={`text-[#7b7f89] transition-transform duration-200 ${
+                        showAddDropdown ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                ) : (
+                  /* Add to Library button */
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowAddDropdown(!showAddDropdown);
+                    }}
+                    className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
+                    disabled={isUpdating}
+                  >
+                    <Plus size={13} />
+                    <span className="text-xs font-medium">Add to Library</span>
+                  </button>
+                )}
+
+                {/* Status dropdown */}
+                {showAddDropdown && (
+                  <div className="absolute bottom-full left-0 right-0 mb-1.5 overflow-hidden rounded-xl border border-[#ececec] bg-white shadow-xl">
+                    {statusOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={(e) => handleAddToList(e, option.value)}
+                        className={`flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-xs transition-colors ${
+                          currentStatus === option.value
+                            ? "bg-[#f7f7f7] font-semibold text-[#545863]"
+                            : "text-[#545863] hover:bg-[#f7f7f7]"
+                        }`}
+                      >
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-offset-1"
+                          style={{
+                            backgroundColor: option.color,
+                          }}
+                        />
+                        <span>{option.label}</span>
+                        {currentStatus === option.value && (
+                          <Check size={12} className="ml-auto text-[#97cc04]" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Title below card */}
-        <div className="mt-2 px-0.5">
-          <h3
-            className={`text-[13px] font-semibold line-clamp-2 leading-tight transition-colors duration-200 ${
-              isHovered ? "text-[#f96e46]" : "text-[#545863]/70"
-            }`}
-          >
-            {title}
-          </h3>
-        </div>
-      </Link>
+        <Link href={`/anime/${anime.id}`}>
+          <div className="mt-2 px-0.5">
+            <h3
+              className={`text-[13px] font-semibold line-clamp-2 leading-tight transition-colors duration-200 ${
+                isHovered ? "text-[#f96e46]" : "text-[#545863]/70"
+              }`}
+            >
+              {title}
+            </h3>
+          </div>
+        </Link>
+      </div>
 
       {/* Hover Detail Box - slides out to the side */}
       <div
@@ -155,7 +276,6 @@ function RowAnimeCard({
         }`}
       >
         <div className="rounded-xl border border-[#ececec] bg-[#545863] shadow-xl p-5">
-          {/* Title */}
           <h4 className="text-sm font-bold text-white leading-tight">
             {title}
           </h4>
@@ -164,7 +284,6 @@ function RowAnimeCard({
             <p className="mt-0.5 text-[11px] text-white">{nativeTitle}</p>
           )}
 
-          {/* Meta info */}
           <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-[#7b7f89]">
             {anime.type && (
               <span className="flex items-center gap-1 rounded-md bg-[#f7f7f7] px-2 py-0.5">
@@ -184,7 +303,6 @@ function RowAnimeCard({
             )}
           </div>
 
-          {/* Score */}
           {anime.averageScore && (
             <div className="mt-3 flex items-center gap-2">
               <div className="flex items-center gap-1">
@@ -199,7 +317,6 @@ function RowAnimeCard({
             </div>
           )}
 
-          {/* Genres */}
           {anime.genres.length > 0 && (
             <div className="mt-3">
               <div className="flex flex-wrap gap-1.5">
@@ -215,7 +332,6 @@ function RowAnimeCard({
             </div>
           )}
 
-          {/* Studios */}
           {anime.studios.length > 0 && (
             <div className="mt-3 pt-3 border-t border-[#ececec]">
               <p className="text-[10px] text-white uppercase tracking-wider mb-1">
@@ -227,7 +343,6 @@ function RowAnimeCard({
             </div>
           )}
 
-          {/* Synopsis preview */}
           {anime.description && (
             <div className="mt-3 pt-3 border-t border-[#ececec]">
               <p className="text-[10px] text-white uppercase tracking-wider mb-1">
@@ -239,7 +354,6 @@ function RowAnimeCard({
             </div>
           )}
 
-          {/* Arrow indicator */}
           <div
             className={`absolute top-6 ${
               detailPosition === "right"

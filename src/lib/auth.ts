@@ -39,8 +39,14 @@ export const authOptions = {
   },
 };
 
-// Export the auth function for server-side usage
-export const { auth, handlers, signIn, signOut } = NextAuth(authOptions);
+// NextAuth v4: NextAuth() returns a single handler function
+const handler = NextAuth(authOptions);
 
-// Route handlers for the API route
-export const { GET, POST } = handlers;
+// Export for Next.js API route
+export { handler as GET, handler as POST };
+
+// Re-export signIn and signOut from next-auth for client-side usage
+export { signIn, signOut } from "next-auth/react";
+
+// Export getServerSession for server-side usage
+export { getServerSession } from "next-auth";
