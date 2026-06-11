@@ -9,6 +9,7 @@ import { lordJuusai } from "@/fonts/fonts";
 import { ChevronDown, Menu, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Navii } from '@usenavii/react';
+
 export default function Navbar() {
   const { data: session, status } = useSession();
   const router = useRouter();

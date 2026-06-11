@@ -1,110 +1,116 @@
 // src/app/(dashboard)/profile/page.tsx
-
 "use client";
 
 import { useSession } from "next-auth/react";
-import { motion } from "framer-motion";
+import { useUserStats } from "@/hooks/useUserData";
+import { xpToNextLevel } from "@/lib/utils";
 import Image from "next/image";
-
-// Import game-icons.net SVGs
-import SwordIcon from "@/assets/icons/sword.svg";
-import CrownIcon from "@/assets/icons/crown.svg";
-import ScrollIcon from "@/assets/icons/scroll.svg";
-import StarIcon from "@/assets/icons/star.svg";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
-  const cardColors = ["#d8d5cc", "#e5b23c", "#ff5b47"];
+  const { data: stats, loading } = useUserStats();
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-48 rounded-2xl bg-[#f7f7f7] animate-pulse" />
+        <div className="h-32 rounded-xl bg-[#f7f7f7] animate-pulse" />
+      </div>
+    );
+  }
+
+  const xpInfo = stats?.user ? xpToNextLevel(stats.user.xp) : null;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-white">Profile</h1>
-      <p className="mt-1 text-sm text-gray-400">
-        Your public profile and stats
-      </p>
-
-      {/* Profile Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mt-8 rounded-xl border border-gray-800 bg-[#0A0A0A] p-6"
-      >
-        <div className="flex items-center gap-6">
+    <div className="space-y-6">
+      {/* Profile card */}
+      <div className="rounded-2xl border border-[#ececec] bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-4">
           {session?.user?.image ? (
             <Image
               src={session.user.image}
               alt=""
-              className="h-20 w-20 rounded-full object-cover"
-              width={80}
-              height={80}
+              width={64}
+              height={64}
+              className="rounded-full"
             />
           ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#e5b23c] to-[#ff5b47] text-3xl font-bold text-black">
-              {session?.user?.name?.charAt(0) ?? "?"}
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#f9c846] text-[#545863] font-bold text-2xl">
+              {session?.user?.name?.charAt(0) || "?"}
             </div>
           )}
           <div>
-            <p className="text-xl font-semibold text-white">
-              {session?.user?.name ?? "User"}
+            <p className="text-lg font-bold text-[#545863]">
+              {session?.user?.name || "User"}
             </p>
-            <p className="text-sm text-gray-400">
-              {session?.user?.email ?? ""}
+            <p className="text-sm text-[#7b7f89]">
+              {session?.user?.email || ""}
             </p>
-            <div className="mt-2 flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <CrownIcon className="h-4 w-4" style={{ color: cardColors[1] }} />
-                <span className="text-sm text-white">Level 7 Otaku</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <ScrollIcon className="h-4 w-4" style={{ color: cardColors[0] }} />
-                <span className="text-sm text-gray-400">1,240 XP</span>
-              </div>
+            <div className="mt-1 flex items-center gap-3 text-sm">
+              <span className="text-[#f9c846] font-medium">
+                Level {stats?.user?.level || 1}
+              </span>
+              <span className="text-[#7b7f89]">·</span>
+              <span className="text-[#7b7f89]">{stats?.user?.xp || 0} XP</span>
             </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-800 pt-6">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-white">48</p>
-            <p className="text-xs text-gray-500">Anime Watched</p>
+        {/* XP Bar */}
+        <div className="mt-5">
+          <div className="flex justify-between text-xs mb-1.5">
+            <span className="text-[#7b7f89]">Level progress</span>
+            <span className="text-[#f96e46] font-medium">
+              {xpInfo?.progress.toFixed(0)}%
+            </span>
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-white">1,247</p>
-            <p className="text-xs text-gray-500">Episodes</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-white">6</p>
-            <p className="text-xs text-gray-500">Badges</p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Badges Section */}
-      <div className="mt-6 rounded-xl border border-gray-800 bg-[#0A0A0A] p-6">
-        <h3 className="mb-4 font-semibold text-white">Recent Badges</h3>
-        <div className="flex gap-4">
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e5b23c20]">
-              <ScrollIcon className="h-6 w-6" style={{ color: cardColors[1] }} />
-            </div>
-            <span className="text-xs text-gray-400">First Anime</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#6C5CE720]">
-              <SwordIcon className="h-6 w-6" style={{ color: "#6C5CE7" }} />
-            </div>
-            <span className="text-xs text-gray-400">Episode Master</span>
+          <div className="h-2 w-full rounded-full bg-[#f7f7f7] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#f9c846] to-[#f96e46]"
+              style={{ width: `${xpInfo?.progress || 0}%` }}
+            />
           </div>
         </div>
       </div>
 
-      {/* Coming Soon */}
-      <div className="mt-6 rounded-xl border border-gray-800 bg-[#0A0A0A] p-6 text-center">
-        <p className="text-sm text-gray-400">
-          Profile settings and activity feed coming soon.
-        </p>
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { label: "Total", value: stats?.stats.totalAnime || 0 },
+          { label: "Watching", value: stats?.stats.watching || 0 },
+          { label: "Completed", value: stats?.stats.completed || 0 },
+          { label: "Episodes", value: stats?.stats.totalEpisodes || 0 },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="rounded-xl border border-[#ececec] bg-white p-4 text-center shadow-sm"
+          >
+            <p className="text-xl font-bold text-[#545863]">{stat.value}</p>
+            <p className="text-[11px] text-[#7b7f89] mt-0.5">{stat.label}</p>
+          </div>
+        ))}
       </div>
+
+      {/* Badges */}
+      {stats?.badges && stats.badges.length > 0 && (
+        <div className="rounded-xl border border-[#ececec] bg-white p-5 shadow-sm">
+          <h3 className="text-sm font-semibold text-[#545863] mb-3">Badges</h3>
+          <div className="flex flex-wrap gap-2">
+            {stats.badges.map((ub: { id: string; badge: { name: string; description?: string } }) => (
+              <div
+                key={ub.id}
+                className="flex items-center gap-2 rounded-lg border border-[#ececec] px-3 py-2"
+              >
+                <span className="text-sm">🏆</span>
+                <div>
+                  <p className="text-xs font-medium text-[#545863]">{ub.badge.name}</p>
+                  <p className="text-[10px] text-[#7b7f89]">{ub.badge.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

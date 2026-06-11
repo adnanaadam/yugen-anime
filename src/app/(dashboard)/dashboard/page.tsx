@@ -1,28 +1,33 @@
 // src/app/(dashboard)/dashboard/page.tsx
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useUserStats } from "@/hooks/useUserData";
 import { useTrendingAnime } from "@/hooks/useAnimeData";
 import { xpToNextLevel } from "@/lib/utils";
-import { lordJuusai } from "@/fonts/fonts";
-import Image from "next/image";
 import Link from "next/link";
-import {
-  Eye,
-  CheckCircle,
-  BookMarked,
-  Pause,
-  XCircle,
-  RefreshCw,
-  Trophy,
-  ArrowRight,
-  Play,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import AnimeCard from "@/components/anime/AnimeCard";
+import { Navii } from '@usenavii/react';
+
+const statusColors: Record<string, string> = {
+  WATCHING: "#00e8fc",
+  COMPLETED: "#97cc04",
+  PLAN_TO_WATCH: "#f9c846",
+  PAUSED: "#f96e46",
+  DROPPED: "#ff4444",
+  REWATCHING: "#c084fc",
+};
+
+const statusLabels: Record<string, string> = {
+  WATCHING: "Watching",
+  COMPLETED: "Completed",
+  PLAN_TO_WATCH: "Plan to Watch",
+  PAUSED: "Paused",
+  DROPPED: "Dropped",
+  REWATCHING: "Rewatching",
+};
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
   const { data: stats, loading } = useUserStats();
   const { data: trending } = useTrendingAnime(6);
 
@@ -30,217 +35,169 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black p-8">
-        <div className="mx-auto max-w-6xl space-y-8">
-          <div className="h-48 rounded-2xl bg-white/[0.02] animate-pulse" />
-          <div className="grid grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-32 rounded-xl bg-white/[0.02] animate-pulse" />
-            ))}
-          </div>
+      <div className="space-y-8">
+        <div className="h-40 rounded-2xl bg-[#f7f7f7] animate-pulse" />
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-24 rounded-xl bg-[#f7f7f7] animate-pulse" />
+          ))}
         </div>
       </div>
     );
   }
 
-  const statusCards = [
-    {
-      label: "Watching",
-      count: stats?.stats.watching || 0,
-      icon: Play,
-      color: "#00e8fc",
-      href: "/library?status=WATCHING",
-    },
-    {
-      label: "Completed",
-      count: stats?.stats.completed || 0,
-      icon: CheckCircle,
-      color: "#97cc04",
-      href: "/library?status=COMPLETED",
-    },
-    {
-      label: "Plan to Watch",
-      count: stats?.stats.planToWatch || 0,
-      icon: BookMarked,
-      color: "#f9c846",
-      href: "/library?status=PLAN_TO_WATCH",
-    },
-    {
-      label: "Paused",
-      count: stats?.stats.paused || 0,
-      icon: Pause,
-      color: "#f96e46",
-      href: "/library?status=PAUSED",
-    },
-    {
-      label: "Dropped",
-      count: stats?.stats.dropped || 0,
-      icon: XCircle,
-      color: "#ff4444",
-      href: "/library?status=DROPPED",
-    },
-    {
-      label: "Rewatching",
-      count: stats?.stats.reWatching || 0,
-      icon: RefreshCw,
-      color: "#c084fc",
-      href: "/library?status=REWATCHING",
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-black">
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className={`text-3xl text-white ${lordJuusai.className}`}>
-            Welcome back{stats?.user?.name ? `, ${stats.user.name}` : ""}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Level {stats?.user?.level || 1} · {stats?.user?.xp || 0} XP
-          </p>
+    <div className="space-y-8">
+      {/* Profile header card */}
+      <div className="rounded-2xl border border-[#ececec] bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-4">
+          {/* {stats?.user?.image ? (
+            <Navii seed={stats.user?.email ?? ""} size={24} title={stats.user?.name ?? ""} animated />
+          ) : (
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f9c846] text-[#545863] font-bold text-xl">
+              {stats?.user?.name?.charAt(0) || "?"}
+            </div>
+          )} */}
+          <div>
+            <h1 className="text-xl font-bold text-[#545863]">
+              {stats?.user?.name || "User"}
+            </h1>
+            <p className="text-sm text-[#7b7f89]">
+              Level {stats?.user?.level || 1} · {stats?.user?.xp || 0} XP
+            </p>
+          </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* XP Card */}
-          <div className="lg:col-span-1 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
-            <div className="flex items-center gap-3 mb-5">
-              {stats?.user?.image ? (
-                <Image
-                  src={stats.user.image}
-                  alt=""
-                  width={48}
-                  height={48}
-                  className="rounded-full"
-                />
-              ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f9c846] text-black font-bold text-lg">
-                  {stats?.user?.name?.charAt(0) || "?"}
-                </div>
-              )}
-              <div>
-                <p className="text-lg font-semibold text-white">
-                  Level {stats?.user?.level || 1}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {stats?.user?.xp || 0} XP total
-                </p>
-              </div>
-            </div>
-
-            {/* XP Bar */}
-            <div className="mb-2">
-              <div className="flex justify-between text-xs mb-1.5">
-                <span className="text-gray-500">Progress to next level</span>
-                <span className="text-[#f9c846] font-medium">
-                  {xpInfo?.progress.toFixed(0)}%
-                </span>
-              </div>
-              <div className="h-2.5 w-full rounded-full bg-white/[0.06] overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#f9c846] to-[#f96e46] transition-all duration-700"
-                  style={{ width: `${xpInfo?.progress || 0}%` }}
-                />
-              </div>
-            </div>
-            <p className="text-[11px] text-gray-600 mb-6">
-              {xpInfo?.next ? `${xpInfo.next - (xpInfo.current || 0)} XP to Level ${(stats?.user?.level || 1) + 1}` : "Max level!"}
-            </p>
-
-            {/* Quick stats */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Episodes watched</span>
-                <span className="text-white font-medium">
-                  {stats?.stats.totalEpisodes || 0}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Anime rated</span>
-                <span className="text-white font-medium">
-                  {stats?.stats.ratedCount || 0}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Badges earned</span>
-                <span className="text-white font-medium">
-                  {stats?.badges?.length || 0}
-                </span>
-              </div>
-            </div>
-
-            {/* Badges */}
-            {stats?.badges && stats.badges.length > 0 && (
-              <div className="mt-5 pt-5 border-t border-white/[0.06]">
-                <div className="flex items-center gap-2 mb-3">
-                  <Trophy size={14} className="text-[#f9c846]" />
-                  <span className="text-xs text-gray-400">Recent Badges</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {stats.badges.slice(0, 4).map((ub) => (
-                    <div
-                      key={ub.id}
-                      className="flex items-center gap-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] px-2.5 py-1.5"
-                    >
-                      <Trophy size={12} className="text-[#f9c846]" />
-                      <span className="text-[11px] text-gray-300">
-                        {ub.badge.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+        {/* XP Bar */}
+        <div className="mt-4">
+          <div className="flex justify-between text-xs mb-1.5">
+            <span className="text-[#7b7f89]">Progress to Level {(stats?.user?.level || 1) + 1}</span>
+            <span className="text-[#f9c846] font-medium">
+              {xpInfo?.progress.toFixed(0)}%
+            </span>
           </div>
+          <div className="h-2 w-full rounded-full bg-[#f7f7f7] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#f9c846] to-[#f96e46] transition-all duration-700"
+              style={{ width: `${xpInfo?.progress || 0}%` }}
+            />
+          </div>
+          <p className="mt-1 text-[11px] text-[#7b7f89]">
+            {xpInfo?.next && xpInfo.current !== undefined
+              ? `${xpInfo.next - xpInfo.current} XP until next level`
+              : "Max level!"}
+          </p>
+        </div>
+      </div>
 
-          {/* Status cards grid */}
-          <div className="lg:col-span-2">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {statusCards.map((card) => (
-                <Link
-                  key={card.label}
-                  href={card.href}
-                  className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-white/[0.12] hover:bg-white/[0.03] transition-all duration-200 group"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div
-                      className="flex h-8 w-8 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: `${card.color}15` }}
-                    >
-                      <card.icon size={16} style={{ color: card.color }} />
-                    </div>
-                  </div>
-                  <p className="text-2xl font-bold text-white">{card.count}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{card.label}</p>
-                </Link>
-              ))}
-            </div>
-
-            {/* Trending preview */}
-            {trending && trending.length > 0 && (
-              <div className="mt-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-white">
-                    Trending Now
-                  </h3>
-                  <Link
-                    href="/explore"
-                    className="flex items-center gap-1 text-xs text-gray-500 hover:text-[#f9c846] transition-colors"
-                  >
-                    View all
-                    <ArrowRight size={12} />
-                  </Link>
-                </div>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-                  {trending.slice(0, 6).map((anime) => (
-                    <AnimeCard key={anime.id} anime={anime} size="sm" />
-                  ))}
-                </div>
-              </div>
-            )}
+      {/* Stats grid */}
+      <div>
+        <h2 className="text-sm font-semibold text-[#545863] mb-3 uppercase tracking-wider">
+          Your Stats
+        </h2>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-xl border border-[#ececec] bg-white p-4 text-center shadow-sm">
+            <p className="text-2xl font-bold text-[#545863]">
+              {stats?.stats.totalAnime || 0}
+            </p>
+            <p className="text-xs text-[#7b7f89] mt-0.5">Total Anime</p>
+          </div>
+          <div className="rounded-xl border border-[#ececec] bg-white p-4 text-center shadow-sm">
+            <p className="text-2xl font-bold text-[#545863]">
+              {stats?.stats.totalEpisodes || 0}
+            </p>
+            <p className="text-xs text-[#7b7f89] mt-0.5">Episodes</p>
+          </div>
+          <div className="rounded-xl border border-[#ececec] bg-white p-4 text-center shadow-sm">
+            <p className="text-2xl font-bold text-[#545863]">
+              {stats?.badges?.length || 0}
+            </p>
+            <p className="text-xs text-[#7b7f89] mt-0.5">Badges</p>
           </div>
         </div>
       </div>
+
+      {/* Status breakdown */}
+      <div>
+        <h2 className="text-sm font-semibold text-[#545863] mb-3 uppercase tracking-wider">
+          Status Breakdown
+        </h2>
+        <div className="grid grid-cols-3 gap-3">
+          {Object.entries(statusLabels).map(([key, label]) => {
+            const count = key === "WATCHING" ? stats?.stats.watching :
+              key === "COMPLETED" ? stats?.stats.completed :
+              key === "PLAN_TO_WATCH" ? stats?.stats.planToWatch :
+              key === "PAUSED" ? stats?.stats.paused :
+              key === "DROPPED" ? stats?.stats.dropped :
+              stats?.stats.reWatching;
+            const color = statusColors[key];
+
+            return (
+              <Link
+                key={key}
+                href={`/library?status=${key}`}
+                className="rounded-xl border border-[#ececec] bg-white p-4 shadow-sm hover:shadow-md transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="text-xs text-[#7b7f89] group-hover:text-[#545863] transition-colors">
+                    {label}
+                  </span>
+                </div>
+                <p className="text-xl font-bold text-[#545863]">{count || 0}</p>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Badges */}
+      {stats?.badges && stats.badges.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-[#545863] mb-3 uppercase tracking-wider">
+            Badges Earned
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {stats.badges.map((ub: { id: string; badge: { name: string } }) => (
+              <div
+                key={ub.id}
+                className="flex items-center gap-2 rounded-lg border border-[#ececec] bg-white px-3 py-2 shadow-sm"
+              >
+                <span className="text-sm">🏆</span>
+                <span className="text-xs font-medium text-[#545863]">
+                  {ub.badge.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Trending preview */}
+      {trending && trending.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-[#545863] uppercase tracking-wider">
+              Trending Now
+            </h2>
+            <Link
+              href="/explore"
+              className="flex items-center gap-1 text-xs text-[#f96e46] hover:text-[#e55d3a] transition-colors"
+            >
+              View all
+              <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+            {trending.slice(0, 6).map((anime) => (
+              <AnimeCard key={anime.id} anime={anime} size="sm" />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

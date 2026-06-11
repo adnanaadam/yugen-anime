@@ -1,45 +1,37 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { AnimeTrackingEntry, WatchStatus, TrackingStats } from "./types";
 import {
-  fetchUserTrackingList,
-  updateTrackingEntry,
-  addTrackingEntry,
-  removeTrackingEntry,
+  addToAnimeList,
+  updateProgress,
+  removeFromList,
+  getUserAnimeList,
 } from "./api";
 
 export function useTrackingList(userId: string) {
   const [entries, setEntries] = useState<AnimeTrackingEntry[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchUserTrackingList(userId)
-      .then((data) => {
-        if (!cancelled) {
-          setEntries(data);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
+  const cancelledRef = useRef(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const data = await fetchUserTrackingList(userId);
-    setEntries(data);
-    setLoading(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = await getUserAnimeList() as any[];
+    if (!userId || cancelledRef.current) return;
+    setEntries(data as AnimeTrackingEntry[]);
+    if (!cancelledRef.current) setLoading(false);
   }, [userId]);
+
+  useEffect(() => {
+    cancelledRef.current = false;
+    // setLoading(true) only fires after await, so it's not synchronous
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refresh().catch(() => {
+      if (!cancelledRef.current) setLoading(false);
+    });
+    return () => { cancelledRef.current = true; };
+  }, [refresh]);
 
   return { entries, loading, refresh };
 }
@@ -58,31 +50,31 @@ export function useTrackingStats(entries: AnimeTrackingEntry[]): TrackingStats {
 export function useTrackingActions(_userId: string) {
   const updateStatus = useCallback(
     async (animeId: number, status: WatchStatus) => {
-      await updateTrackingEntry(animeId, { status });
+      await addToAnimeList(animeId, status as import("@prisma/client").AnimeStatus);
     },
     []
   );
 
-  const updateProgress = useCallback(
+  const updateProgressAction = useCallback(
     async (animeId: number, progress: number) => {
-      await updateTrackingEntry(animeId, { progress });
+      await updateProgress(animeId, progress);
     },
     []
   );
 
   const addToTracking = useCallback(
     async (animeId: number, status: WatchStatus) => {
-      await addTrackingEntry(animeId, status);
+      await addToAnimeList(animeId, status as import("@prisma/client").AnimeStatus);
     },
     []
   );
 
   const removeFromTracking = useCallback(
     async (animeId: number) => {
-      await removeTrackingEntry(animeId);
+      await removeFromList(animeId);
     },
     []
   );
 
-  return { updateStatus, updateProgress, addToTracking, removeFromTracking };
+  return { updateStatus, updateProgress: updateProgressAction, addToTracking, removeFromTracking };
 }
