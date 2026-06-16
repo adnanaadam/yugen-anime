@@ -7,74 +7,176 @@ import { calculateLevel } from "@/lib/utils";
 import { AnimeStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-// Badge definitions
+// ============================================================
+// BADGE DEFINITIONS (8 badges for MVP)
+// ============================================================
+
 const BADGE_DEFINITIONS = {
   first_anime: {
     name: "First Anime",
     description: "Added your first anime to your list",
     icon: "scroll",
-    xpReward: 50,
+    xpReward: 100,
     category: "beginner",
   },
   episode_master: {
     name: "Episode Master",
     description: "Watched 100 episodes total",
     icon: "sword",
-    xpReward: 100,
+    xpReward: 300,
     category: "milestone",
   },
   anime_veteran: {
     name: "Anime Veteran",
     description: "Completed 50 anime",
     icon: "crown",
-    xpReward: 200,
+    xpReward: 500,
     category: "milestone",
   },
   completionist: {
     name: "Completionist",
     description: "Completed 10 anime",
     icon: "trophy",
-    xpReward: 150,
+    xpReward: 250,
     category: "achievement",
   },
   anime_lover: {
     name: "Anime Lover",
     description: "Watched 500 episodes",
     icon: "heart",
-    xpReward: 300,
+    xpReward: 750,
     category: "milestone",
   },
   binge_watcher: {
     name: "Binge Watcher",
-    description: "Watched 10 episodes in a single day",
+    description: "Watched 10+ episodes in one session",
     icon: "fire",
-    xpReward: 75,
+    xpReward: 150,
     category: "special",
   },
-  perfect_scorer: {
-    name: "Perfect Scorer",
-    description: "Rated 10 anime",
-    icon: "star",
+  collector: {
+    name: "Collector",
+    description: "Have 25 anime in your list",
+    icon: "inventory",
+    xpReward: 200,
+    category: "collection",
+  },
+  favorite_curator: {
+    name: "Favorite Curator",
+    description: "Added 5 anime to your favorites",
+    icon: "bookmark",
     xpReward: 100,
-    category: "engagement",
-  },
-  early_adopter: {
-    name: "Early Adopter",
-    description: "Joined Yugen in its early days",
-    icon: "sparkles",
-    xpReward: 25,
-    category: "special",
+    category: "collection",
   },
 };
 
-// Get current user from session
+const EARLY_ADOPTER_LIMIT = 1000;
+
+// ============================================================
+// XP REWARD CONFIG
+// ============================================================
+
+const XP_CONFIG = {
+  ADD_TO_LIST: 5,             // Adding a new anime to list
+  ADD_TO_FAVORITES: 10,       // Adding to favorites (one-time per anime)
+  EPISODE_WATCHED: 10,         // Per episode watched
+  COMPLETE_BASE: 20,          // Base XP for completing any anime
+  COMPLETE_PER_EPISODE: 1,    // Additional XP per episode in the anime
+  // Formula: COMPLETE_BASE + (episodes * COMPLETE_PER_EPISODE)
+  // 12-ep anime = 20 + (12 * 1) = 32 XP
+  // 24-ep anime = 20 + (24 * 1) = 44 XP
+};
+
+// ============================================================
+// AUTH HELPERS
+// ============================================================
+
 async function getCurrentUser() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new Error("Not authenticated");
   return session.user.id;
 }
 
-// Add or update anime in user's list
+// ============================================================
+// XP & LEVEL SYSTEM
+// ============================================================
+
+async function awardXP(userId: string, amount: number, reason: string) {
+  if (amount <= 0) return;
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { xp: { increment: amount } },
+  });
+
+  const newLevel = calculateLevel(user.xp);
+  if (newLevel !== user.level) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { level: newLevel },
+    });
+  }
+
+  console.log(`[XP] User ${userId}: +${amount} XP (${reason}) - Level ${newLevel}`);
+  return user;
+}
+
+// ============================================================
+// XP EXPLOIT PREVENTION
+// ============================================================
+
+// Track one-time XP awards per user per anime
+// These are actions that should only give XP once
+
+async function hasReceivedListAddXP(userId: string, animeId: number): Promise<boolean> {
+  // List add XP is awarded only when creating a NEW entry (not updating)
+  // This is handled in the addToAnimeList function by checking `existing`
+  // No additional tracking needed since we only award on creation
+  return false;
+}
+
+async function hasReceivedFavoriteXP(userId: string, animeId: number): Promise<boolean> {
+  // Check if this favorite already exists
+  const existing = await prisma.favorite.findUnique({
+    where: { userId_animeId: { userId, animeId } },
+  });
+  return !!existing;
+}
+
+// Episode progress validation
+function validateProgressUpdate(
+  currentProgress: number,
+  newProgress: number,
+  totalEpisodes: number | null
+): { valid: boolean; episodesWatched: number; reason?: string } {
+  // Can't decrease progress
+  if (newProgress < currentProgress) {
+    return { valid: false, episodesWatched: 0, reason: "Cannot decrease progress" };
+  }
+
+  // Can't exceed total episodes (if known)
+  if (totalEpisodes && newProgress > totalEpisodes) {
+    return { valid: false, episodesWatched: 0, reason: `Cannot exceed ${totalEpisodes} episodes` };
+  }
+
+  // Can't jump more than 50 episodes at once (prevents rapid farming)
+  const jump = newProgress - currentProgress;
+  if (jump > 50) {
+    return { valid: false, episodesWatched: 0, reason: "Cannot jump more than 50 episodes at once" };
+  }
+
+  // No change = no XP
+  if (jump === 0) {
+    return { valid: true, episodesWatched: 0 };
+  }
+
+  return { valid: true, episodesWatched: jump };
+}
+
+// ============================================================
+// ANIME LIST CRUD
+// ============================================================
+
 export async function addToAnimeList(
   animeId: number,
   status: AnimeStatus,
@@ -88,6 +190,8 @@ export async function addToAnimeList(
   });
 
   if (existing) {
+    const wasAlreadyCompleted = existing.status === "COMPLETED";
+
     const updated = await prisma.animeList.update({
       where: { id: existing.id },
       data: {
@@ -103,14 +207,10 @@ export async function addToAnimeList(
       },
     });
 
-    // Check for completionist badge
-    if (status === "COMPLETED") {
+    // Award XP for completing (only if newly completed)
+    if (status === "COMPLETED" && !wasAlreadyCompleted) {
+      await awardCompletionXP(userId, updated.progress);
       await checkCompletionBadges(userId);
-    }
-
-    // Award XP for completing
-    if (status === "COMPLETED" && existing.status !== "COMPLETED") {
-      await awardXP(userId, 50, "Completed anime");
     }
 
     revalidatePath("/library");
@@ -118,6 +218,7 @@ export async function addToAnimeList(
     return updated;
   }
 
+  // Create new entry — award list add XP (one-time)
   const created = await prisma.animeList.create({
     data: {
       userId,
@@ -130,12 +231,19 @@ export async function addToAnimeList(
     },
   });
 
-  // Check for first anime badge
-  await checkFirstAnimeBadge(userId);
+  // Award XP for adding to list (one-time, only on creation)
+  await awardXP(userId, XP_CONFIG.ADD_TO_LIST, "Added anime to list");
 
-  // Award XP for first anime
+  // Award XP if completed immediately
   if (status === "COMPLETED") {
-    await awardXP(userId, 50, "Completed first anime");
+    await awardCompletionXP(userId, created.progress);
+  }
+
+  // Check badges
+  await checkFirstAnimeBadge(userId);
+  await checkCollectorBadge(userId);
+  if (status === "COMPLETED") {
+    await checkCompletionBadges(userId);
   }
 
   revalidatePath("/library");
@@ -143,7 +251,6 @@ export async function addToAnimeList(
   return created;
 }
 
-// Update episode progress
 export async function updateProgress(animeId: number, progress: number) {
   const userId = await getCurrentUser();
 
@@ -156,25 +263,65 @@ export async function updateProgress(animeId: number, progress: number) {
     return addToAnimeList(animeId, "WATCHING", progress);
   }
 
-  const episodesWatched = progress - entry.progress;
+  // Fetch total episodes from Jikan for validation
+  let totalEpisodes: number | null = null;
+  try {
+    const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
+    const data = await res.json();
+    totalEpisodes = data.data?.episodes || null;
+  } catch {
+    // If Jikan fails, skip total episode validation
+    console.warn("Could not fetch episode count from Jikan");
+  }
+
+  // Validate progress update
+  const validation = validateProgressUpdate(entry.progress, progress, totalEpisodes);
+  if (!validation.valid) {
+    console.warn(`[XP BLOCKED] User ${userId}: ${validation.reason} for anime ${animeId}`);
+    return entry;
+  }
+
+  const { episodesWatched } = validation;
+
+  // Only update if there's actual change
+  if (episodesWatched === 0 && progress === entry.progress) {
+    return entry;
+  }
 
   const updated = await prisma.animeList.update({
     where: { id: entry.id },
     data: {
       progress,
       status: entry.status === "PLAN_TO_WATCH" ? "WATCHING" : entry.status,
-      ...(entry.status !== "WATCHING" ? { startedAt: new Date() } : {}),
+      ...(entry.status !== "WATCHING" && entry.status !== "REWATCHING"
+        ? { startedAt: new Date() }
+        : {}),
     },
   });
 
   // Award XP for episodes watched
   if (episodesWatched > 0) {
-    await awardXP(userId, episodesWatched * 10, `Watched ${episodesWatched} episodes`);
+    await awardXP(
+      userId,
+      episodesWatched * XP_CONFIG.EPISODE_WATCHED,
+      `Watched ${episodesWatched} episode${episodesWatched > 1 ? "s" : ""}`
+    );
 
-    // Check binge watcher (10+ episodes in a day)
+    // Binge watcher check
     if (episodesWatched >= 10) {
       await checkAndAwardBadge(userId, "binge_watcher");
     }
+  }
+
+  // Auto-complete when all episodes watched
+  if (totalEpisodes && progress >= totalEpisodes && entry.status !== "COMPLETED") {
+    const wasAlreadyCompleted = false;
+    await prisma.animeList.update({
+      where: { id: entry.id },
+      data: { status: "COMPLETED", completedAt: new Date() },
+    });
+    await awardCompletionXP(userId, progress);
+    await checkCompletionBadges(userId);
   }
 
   // Check episode milestone badges
@@ -184,43 +331,6 @@ export async function updateProgress(animeId: number, progress: number) {
   return updated;
 }
 
-// Rate an anime
-export async function rateAnime(animeId: number, score: number) {
-  const userId = await getCurrentUser();
-
-  const entry = await prisma.animeList.findUnique({
-    where: { userId_animeId: { userId, animeId } },
-  });
-
-  if (!entry) {
-    // Create entry with score
-    return addToAnimeList(animeId, "COMPLETED", undefined, score);
-  }
-
-  const wasRated = entry.score !== null;
-
-  const updated = await prisma.animeList.update({
-    where: { id: entry.id },
-    data: { score },
-  });
-
-  if (!wasRated) {
-    await awardXP(userId, 5, "Rated an anime");
-
-    // Check perfect scorer badge
-    const ratedCount = await prisma.animeList.count({
-      where: { userId, score: { not: null } },
-    });
-    if (ratedCount >= 10) {
-      await checkAndAwardBadge(userId, "perfect_scorer");
-    }
-  }
-
-  revalidatePath("/library");
-  return updated;
-}
-
-// Remove from list
 export async function removeFromList(animeId: number) {
   const userId = await getCurrentUser();
   await prisma.animeList.deleteMany({
@@ -229,7 +339,6 @@ export async function removeFromList(animeId: number) {
   revalidatePath("/library");
 }
 
-// Get user's anime list
 export async function getUserAnimeList(
   status?: AnimeStatus,
   sortBy: "updatedAt" | "score" | "progress" = "updatedAt"
@@ -244,48 +353,81 @@ export async function getUserAnimeList(
   });
 }
 
-// Award XP to user
-async function awardXP(userId: string, amount: number, reason: string) {
-  const user = await prisma.user.update({
-    where: { id: userId },
-    data: { xp: { increment: amount } },
-  });
+// ============================================================
+// COMPLETION XP (based on episode count)
+// ============================================================
 
-  // Update level
-  const newLevel = calculateLevel(user.xp);
-  if (newLevel !== user.level) {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { level: newLevel },
-    });
-  }
-
-  return user;
+async function awardCompletionXP(userId: string, episodesWatched: number) {
+  const xpAmount = XP_CONFIG.COMPLETE_BASE + (episodesWatched * XP_CONFIG.COMPLETE_PER_EPISODE);
+  await awardXP(userId, xpAmount, `Completed anime (${episodesWatched} episodes)`);
 }
 
-// Check and award first anime badge
+// ============================================================
+// FAVORITES
+// ============================================================
+
+export async function addToFavorites(animeId: number) {
+  const userId = await getCurrentUser();
+
+  // Check if already favorited (prevents duplicate XP)
+  const existing = await prisma.favorite.findUnique({
+    where: { userId_animeId: { userId, animeId } },
+  });
+
+  if (existing) {
+    return existing; // Already favorited, no XP
+  }
+
+  const created = await prisma.favorite.create({
+    data: { userId, animeId },
+  });
+
+  // Award XP for favoriting (one-time per anime)
+  await awardXP(userId, XP_CONFIG.ADD_TO_FAVORITES, "Added anime to favorites");
+
+  // Check favorite curator badge
+  await checkFavoriteCuratorBadge(userId);
+
+  revalidatePath("/dashboard");
+  return created;
+}
+
+export async function removeFromFavorites(animeId: number) {
+  const userId = await getCurrentUser();
+  await prisma.favorite.deleteMany({
+    where: { userId, animeId },
+  });
+  revalidatePath("/dashboard");
+}
+
+export async function getUserFavorites(userId?: string) {
+  const id = userId || (await getCurrentUser());
+  return prisma.favorite.findMany({
+    where: { userId: id },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+// ============================================================
+// BADGE CHECK FUNCTIONS
+// ============================================================
+
 async function checkFirstAnimeBadge(userId: string) {
   const count = await prisma.animeList.count({ where: { userId } });
-  if (count === 1) {
+  if (count >= 1) {
     await checkAndAwardBadge(userId, "first_anime");
   }
 }
 
-// Check completion badges
 async function checkCompletionBadges(userId: string) {
   const completedCount = await prisma.animeList.count({
     where: { userId, status: "COMPLETED" },
   });
 
-  if (completedCount >= 50) {
-    await checkAndAwardBadge(userId, "anime_veteran");
-  }
-  if (completedCount >= 10) {
-    await checkAndAwardBadge(userId, "completionist");
-  }
+  if (completedCount >= 50) await checkAndAwardBadge(userId, "anime_veteran");
+  if (completedCount >= 10) await checkAndAwardBadge(userId, "completionist");
 }
 
-// Check episode milestones
 async function checkEpisodeMilestones(userId: string) {
   const totalProgress = await prisma.animeList.aggregate({
     where: { userId },
@@ -294,23 +436,44 @@ async function checkEpisodeMilestones(userId: string) {
 
   const totalEpisodes = totalProgress._sum.progress || 0;
 
-  if (totalEpisodes >= 500) {
-    await checkAndAwardBadge(userId, "anime_lover");
-  }
-  if (totalEpisodes >= 100) {
-    await checkAndAwardBadge(userId, "episode_master");
+  if (totalEpisodes >= 500) await checkAndAwardBadge(userId, "anime_lover");
+  if (totalEpisodes >= 100) await checkAndAwardBadge(userId, "episode_master");
+}
+
+async function checkCollectorBadge(userId: string) {
+  const count = await prisma.animeList.count({ where: { userId } });
+  if (count >= 25) await checkAndAwardBadge(userId, "collector");
+}
+
+async function checkFavoriteCuratorBadge(userId: string) {
+  const count = await prisma.favorite.count({ where: { userId } });
+  if (count >= 5) await checkAndAwardBadge(userId, "favorite_curator");
+}
+
+export async function checkEarlyAdopterBadge(userId: string) {
+  const userCount = await prisma.user.count();
+  if (userCount <= EARLY_ADOPTER_LIMIT) {
+    await checkAndAwardBadge(userId, "early_adopter");
   }
 }
 
-// Check and award a badge
+// ============================================================
+// BADGE AWARDING
+// ============================================================
+
 async function checkAndAwardBadge(userId: string, badgeKey: string) {
   const definition = BADGE_DEFINITIONS[badgeKey as keyof typeof BADGE_DEFINITIONS];
   if (!definition) return;
 
-  // Find or create badge in database
   const badge = await prisma.badge.upsert({
-    where: { id: badgeKey }, // Using badge key as ID
-    update: {},
+    where: { id: badgeKey },
+    update: {
+      name: definition.name,
+      description: definition.description,
+      icon: definition.icon,
+      xpReward: definition.xpReward,
+      category: definition.category,
+    },
     create: {
       id: badgeKey,
       name: definition.name,
@@ -321,7 +484,6 @@ async function checkAndAwardBadge(userId: string, badgeKey: string) {
     },
   });
 
-  // Check if user already has this badge
   const existing = await prisma.userBadge.findUnique({
     where: { userId_badgeId: { userId, badgeId: badge.id } },
   });
@@ -331,16 +493,19 @@ async function checkAndAwardBadge(userId: string, badgeKey: string) {
       data: { userId, badgeId: badge.id },
     });
 
-    // Award bonus XP
     await awardXP(userId, definition.xpReward, `Earned badge: ${definition.name}`);
+    console.log(`[BADGE] User ${userId} earned: ${definition.name} (${definition.category})`);
   }
 }
 
-// Get user stats
+// ============================================================
+// USER STATS & BADGES
+// ============================================================
+
 export async function getUserStats(userId?: string) {
   const id = userId || (await getCurrentUser());
 
-  const [listCounts, totalEpisodes, ratedCount, user] = await Promise.all([
+  const [listCounts, totalEpisodes, ratedCount, user, favoritesCount] = await Promise.all([
     prisma.animeList.groupBy({
       by: ["status"],
       where: { userId: id },
@@ -355,7 +520,18 @@ export async function getUserStats(userId?: string) {
     }),
     prisma.user.findUnique({
       where: { id },
-      select: { xp: true, level: true, username: true, name: true, image: true, createdAt: true },
+      select: {
+        id: true,
+        xp: true,
+        level: true,
+        username: true,
+        name: true,
+        image: true,
+        createdAt: true,
+      },
+    }),
+    prisma.favorite.count({
+      where: { userId: id },
     }),
   ]);
 
@@ -376,41 +552,16 @@ export async function getUserStats(userId?: string) {
       reWatching: statusCounts["REWATCHING"] || 0,
       totalEpisodes: totalEpisodes._sum.progress || 0,
       ratedCount,
+      favoritesCount,
     },
   };
 }
 
-// Get user badges
 export async function getUserBadges(userId?: string) {
   const id = userId || (await getCurrentUser());
   return prisma.userBadge.findMany({
     where: { userId: id },
     include: { badge: true },
     orderBy: { earnedAt: "desc" },
-  });
-}
-
-// Add to favorites
-export async function addToFavorites(animeId: number) {
-  const userId = await getCurrentUser();
-  return prisma.favorite.create({
-    data: { userId, animeId },
-  });
-}
-
-// Remove from favorites
-export async function removeFromFavorites(animeId: number) {
-  const userId = await getCurrentUser();
-  await prisma.favorite.deleteMany({
-    where: { userId, animeId },
-  });
-}
-
-// Get user favorites
-export async function getUserFavorites(userId?: string) {
-  const id = userId || (await getCurrentUser());
-  return prisma.favorite.findMany({
-    where: { userId: id },
-    orderBy: { createdAt: "desc" },
   });
 }

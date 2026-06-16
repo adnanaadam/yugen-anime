@@ -51,13 +51,6 @@ export default function DashboardLayout({
             {/* User pill */}
             <div className="flex items-center gap-2">
               {session.user?.image ? (
-                // <Image
-                //   src={session.user.image}
-                //   alt=""
-                //   width={24}
-                //   height={24}
-                //   className="rounded-full"
-                // />
                       <Navii seed={session.user?.email ?? ""} size={24} title={session.user?.name ?? ""} animated />
               ) : (
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#f9c846] text-[10px] font-bold text-[#545863]">
@@ -92,7 +85,7 @@ export default function DashboardLayout({
 
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[#7b7f89] hover:text-[#f96e46] hover:bg-[#fef2f2] transition-colors ml-2"
+                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[#7b7f89] hover:text-[#f96e46] hover:bg-[#fef2f2] transition-colors ml-2"
               >
                 <LogOut size={15} />
                 <span className="hidden sm:inline">Logout</span>

@@ -2,13 +2,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { lordJuusai } from "@/fonts/fonts";
 import { ChevronDown, Menu, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Navii } from '@usenavii/react';
+import { Navii } from "@usenavii/react";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -81,7 +80,10 @@ export default function Navbar() {
 
           {/* Center: Nav - always centered in its column */}
           <nav className="flex items-center justify-center gap-8 text-[var(--color-surface)]">
-            <Link href="/explore" className="hover:underline underline-offset-4">
+            <Link
+              href="/explore"
+              className="hover:underline underline-offset-4"
+            >
               Explore
             </Link>
           </nav>
@@ -116,7 +118,10 @@ export default function Navbar() {
                   onClick={() => setSearchOpen(true)}
                   className="flex size-9 items-center justify-center cursor-pointer rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface-hover)]"
                 >
-                  <Search className="text-[var(--color-foreground)]" size={18} />
+                  <Search
+                    className="text-[var(--color-foreground)]"
+                    size={18}
+                  />
                 </button>
               )}
             </div>
@@ -131,14 +136,12 @@ export default function Navbar() {
                   className="flex items-center cursor-pointer gap-2 rounded-xl border border-[var(--color-border)] bg-white px-2 py-1.5 transition-colors hover:bg-[var(--color-surface-hover)]"
                 >
                   {session.user?.image ? (
-                    // <Image
-                    //   src={session.user.image}
-                    //   alt="Avatar"
-                    //   width={32}
-                    //   height={32}
-                    //   className="rounded-lg object-cover"
-                    // />
-                    <Navii seed={session.user?.email ?? ""} size={24} title={session.user?.name ?? ""} animated />
+                    <Navii
+                      seed={session.user?.email ?? ""}
+                      size={24}
+                      title={session.user?.name ?? ""}
+                      animated
+                    />
                   ) : (
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-primary)] text-sm font-semibold">
                       {session.user?.name?.charAt(0)}
@@ -169,6 +172,13 @@ export default function Navbar() {
                   </div>
 
                   <div className="py-2">
+                    <Link
+                      href="/dashboard"
+                      className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Dashboard
+                    </Link>
                     <Link
                       href="/profile"
                       className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
@@ -203,7 +213,9 @@ export default function Navbar() {
         <div className="flex h-14 items-center justify-between px-4">
           {/* Logo */}
           <Link href="/" onClick={closeMobile}>
-            <h1 className={`text-xl text-[var(--color-surface)] ${lordJuusai.className}`}>
+            <h1
+              className={`text-xl text-[var(--color-surface)] ${lordJuusai.className}`}
+            >
               Yugen
             </h1>
           </Link>

@@ -17,6 +17,15 @@ const categories = [
   { id: "seasonal", label: "Seasonal" },
 ];
 
+const statusOptions = [
+  { label: "Watching", value: "WATCHING" as const, color: "#00e8fc" },
+  { label: "Completed", value: "COMPLETED" as const, color: "#97cc04" },
+  { label: "Plan to Watch", value: "PLAN_TO_WATCH" as const, color: "#f9c846" },
+  { label: "Paused", value: "PAUSED" as const, color: "#f96e46" },
+  { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
+  { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
+];
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformJikanToAnime(jikanAnime: any): TransformedAnime {
   return {
@@ -123,32 +132,67 @@ async function fetchAnimeData({
   }
 }
 
+// Track user's anime statuses globally so we don't fetch per-card
+function useUserAnimeStatuses(session: ReturnType<typeof useSession>["data"]) {
+  const [statusMap, setStatusMap] = useState<Record<number, { status: string; progress: number }>>({});
+  const [loaded, setLoaded] = useState(!session);
+
+  useEffect(() => {
+    if (!session) return;
+
+    const fetchStatuses = async () => {
+      try {
+        const response = await fetch("/api/tracking/list");
+        if (!response.ok) return;
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          const map: Record<number, { status: string; progress: number }> = {};
+          data.forEach((item: { animeId: number; status: string; progress: number }) => {
+            map[item.animeId] = { status: item.status, progress: item.progress || 0 };
+          });
+          setStatusMap(map);
+        }
+      } catch (error) {
+        console.error("Error fetching anime statuses:", error);
+      } finally {
+        setLoaded(true);
+      }
+    };
+
+    fetchStatuses();
+  }, [session]);
+
+  // Function to update a single status locally
+  const updateStatus = (animeId: number, status: string) => {
+    setStatusMap((prev) => ({
+      ...prev,
+      [animeId]: { status, progress: prev[animeId]?.progress || 0 },
+    }));
+  };
+
+  return { statusMap, loaded, updateStatus };
+}
+
 interface ExploreAnimeCardProps {
   anime: TransformedAnime;
   session: ReturnType<typeof useSession>["data"];
+  initialStatus: string | null;
+  initialProgress: number;
+  onStatusChange: (animeId: number, status: string) => void;
 }
 
-function ExploreAnimeCard({ anime, session }: ExploreAnimeCardProps) {
+function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onStatusChange }: ExploreAnimeCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [detailPosition, setDetailPosition] = useState<"right" | "left">("right");
   const [showAddDropdown, setShowAddDropdown] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  const [currentStatus, setCurrentStatus] = useState<string | null>(initialStatus);
+  const [userProgress, setUserProgress] = useState(initialProgress);
   const [isUpdating, setIsUpdating] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const title = anime.title.english || anime.title.romaji;
   const nativeTitle = anime.title.native;
-
-  const statusOptions = [
-    { label: "Watching", value: "WATCHING" as const, color: "#00e8fc" },
-    { label: "Completed", value: "COMPLETED" as const, color: "#97cc04" },
-    { label: "Plan to Watch", value: "PLAN_TO_WATCH" as const, color: "#f9c846" },
-    { label: "Paused", value: "PAUSED" as const, color: "#f96e46" },
-    { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
-    { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
-  ];
-
   const activeStatus = statusOptions.find((s) => s.value === currentStatus);
 
   const handleAddToList = async (e: React.MouseEvent, status: typeof statusOptions[number]["value"]) => {
@@ -160,6 +204,7 @@ function ExploreAnimeCard({ anime, session }: ExploreAnimeCardProps) {
     try {
       await addToAnimeList(anime.id, status);
       setCurrentStatus(status);
+      onStatusChange(anime.id, status);
       setShowAddDropdown(false);
     } catch (error) {
       console.error("Failed to add to list:", error);
@@ -176,6 +221,15 @@ function ExploreAnimeCard({ anime, session }: ExploreAnimeCardProps) {
       setDetailPosition(spaceOnRight < 300 && spaceOnLeft > spaceOnRight ? "left" : "right");
     }
   }, [isHovered]);
+
+  // Sync local state with parent statusMap (only on initial mount via key)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentStatus(initialStatus);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUserProgress(initialProgress);
+  }, [initialStatus, initialProgress]);
+
 
   return (
     <div
@@ -370,7 +424,9 @@ function ExploreContent() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
 
-  // Debounce search — also reset to page 1 when query changes
+  // Global user statuses (fetched once, not per-card)
+  const { statusMap, loaded: statusesLoaded, updateStatus } = useUserAnimeStatuses(session);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
@@ -379,7 +435,6 @@ function ExploreContent() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch data — resets list when query/category changes (page=1), appends when loading more
   useEffect(() => {
     let cancelled = false;
 
@@ -420,7 +475,6 @@ function ExploreContent() {
     return () => { cancelled = true; };
   }, [debouncedQuery, activeCategory, page]);
 
-  // Scroll listener
   useEffect(() => {
     const handleScroll = () => setShowBackToTop(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -529,7 +583,14 @@ function ExploreContent() {
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
               {animeList.map((anime, index) => (
-                <ExploreAnimeCard key={`${anime.id}-${index}`} anime={anime} session={session} />
+                <ExploreAnimeCard
+                  key={`${anime.id}-${index}`}
+                  anime={anime}
+                  session={session}
+                  initialStatus={statusesLoaded ? statusMap[anime.id]?.status || null : null}
+                  initialProgress={statusesLoaded ? statusMap[anime.id]?.progress || 0 : 0}
+                  onStatusChange={updateStatus}
+                />
               ))}
               {loadingMore &&
                 Array.from({ length: 5 }).map((_, i) => (

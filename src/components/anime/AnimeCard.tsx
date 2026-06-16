@@ -139,7 +139,7 @@ export default function AnimeCard({ anime, size = "md" }: AnimeCardProps) {
 
           {/* Title below */}
           <div className="p-2">
-            <h3 className="text-[13px] font-medium text-gray-200 line-clamp-2 leading-tight group-hover:text-white transition-colors">
+            <h3 className="text-[13px] font-medium text-gray-500 line-clamp-2 leading-tight group-hover:text-white transition-colors">
               {title}
             </h3>
             <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-500">

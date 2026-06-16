@@ -34,7 +34,7 @@ model User {
   sessions      Session[]
   animeList     AnimeList[]
   badges        UserBadge[]
-  favorites     Favorite[]  // Add this line
+  favorites     Favorite[]
 }
 
 model AnimeList {

@@ -16,6 +16,15 @@ interface AnimeRowProps {
   viewMoreHref?: string;
 }
 
+const statusOptions = [
+  { label: "Watching", value: "WATCHING" as const, color: "#00e8fc" },
+  { label: "Completed", value: "COMPLETED" as const, color: "#97cc04" },
+  { label: "Plan to Watch", value: "PLAN_TO_WATCH" as const, color: "#f9c846" },
+  { label: "Paused", value: "PAUSED" as const, color: "#f96e46" },
+  { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
+  { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
+];
+
 export default function AnimeRow({
   title,
   animeList,
@@ -79,27 +88,50 @@ function RowAnimeCard({
   const { data: session } = useSession();
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [detailPosition, setDetailPosition] = useState<"right" | "left">("right");
+  const [detailPosition, setDetailPosition] = useState<"right" | "left">(
+    "right",
+  );
   const [showAddDropdown, setShowAddDropdown] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  const [userProgress, setUserProgress] = useState(0);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(true);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const title = anime.title.english || anime.title.romaji;
   const nativeTitle = anime.title.native;
-
-  const statusOptions = [
-    { label: "Watching", value: "WATCHING" as const, color: "#00e8fc" },
-    { label: "Completed", value: "COMPLETED" as const, color: "#97cc04" },
-    { label: "Plan to Watch", value: "PLAN_TO_WATCH" as const, color: "#f9c846" },
-    { label: "Paused", value: "PAUSED" as const, color: "#f96e46" },
-    { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
-    { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
-  ];
-
   const activeStatus = statusOptions.find((s) => s.value === currentStatus);
 
-  const handleAddToList = async (e: React.MouseEvent, status: typeof statusOptions[number]["value"]) => {
+  // Fetch user's tracking status for this anime
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const response = await fetch("/api/tracking/list");
+        if (!response.ok) return;
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          const entry = data.find(
+            (item: { animeId: number }) => item.animeId === anime.id,
+          );
+          if (entry) {
+            setCurrentStatus(entry.status);
+            setUserProgress(entry.progress || 0);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching anime status:", error);
+      } finally {
+        setStatusLoading(false);
+      }
+    };
+
+    fetchStatus();
+  }, [session, anime.id]);
+
+  const handleAddToList = async (
+    e: React.MouseEvent,
+    status: (typeof statusOptions)[number]["value"],
+  ) => {
     e.preventDefault();
     e.stopPropagation();
     if (!session || isUpdating) return;
@@ -130,6 +162,11 @@ function RowAnimeCard({
       }
     }
   }, [isHovered]);
+
+  if (!session) {
+    setStatusLoading(false);
+    return;
+  }
 
   return (
     <div
@@ -168,7 +205,7 @@ function RowAnimeCard({
           </Link>
 
           {/* Add to Library button */}
-          {session && (
+          {session && !statusLoading && (
             <div className="absolute w-full px-3 bottom-2 left-1/2 -translate-x-1/2 z-20">
               <div className="relative w-full">
                 {currentStatus ? (
@@ -232,9 +269,7 @@ function RowAnimeCard({
                       >
                         <span
                           className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-offset-1"
-                          style={{
-                            backgroundColor: option.color,
-                          }}
+                          style={{ backgroundColor: option.color }}
                         />
                         <span>{option.label}</span>
                         {currentStatus === option.value && (
@@ -266,9 +301,7 @@ function RowAnimeCard({
       {/* Hover Detail Box - slides out to the side */}
       <div
         className={`absolute top-0 z-50 w-84 transition-all duration-300 pointer-events-none ${
-          isHovered
-            ? "opacity-100 translate-x-0"
-            : "opacity-0 translate-x-2"
+          isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
         } ${
           detailPosition === "right"
             ? "left-[calc(100%+12px)]"
@@ -311,9 +344,7 @@ function RowAnimeCard({
                   {(anime.averageScore / 10).toFixed(1)}
                 </span>
               </div>
-              <span className="text-[11px] text-white">
-                / 10
-              </span>
+              <span className="text-[11px] text-white">/ 10</span>
             </div>
           )}
 
@@ -356,16 +387,16 @@ function RowAnimeCard({
 
           <div
             className={`absolute top-6 ${
-              detailPosition === "right"
-                ? "-left-1.5"
-                : "-right-1.5"
+              detailPosition === "right" ? "-left-1.5" : "-right-1.5"
             }`}
           >
-            <div className={`w-3 h-3 bg-[#545863] border border-[#ececec] rotate-45 ${
-              detailPosition === "right"
-                ? "border-r-0 border-t-0"
-                : "border-l-0 border-b-0"
-            }`} />
+            <div
+              className={`w-3 h-3 bg-[#545863] border border-[#ececec] rotate-45 ${
+                detailPosition === "right"
+                  ? "border-r-0 border-t-0"
+                  : "border-l-0 border-b-0"
+              }`}
+            />
           </div>
         </div>
       </div>
