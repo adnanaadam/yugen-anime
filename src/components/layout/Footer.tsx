@@ -10,9 +10,8 @@ const footerLinks = {
     { label: "Search", href: "/explore" },
   ],
   platform: [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "Library", href: "/library" },
     { label: "Profile", href: "/profile" },
+    { label: "Library", href: "/library" },
     { label: "Settings", href: "/settings" },
   ],
   info: [
@@ -30,9 +29,7 @@ export default function Footer() {
         <div className="grid gap-10 md:grid-cols-4">
           {/* Brand */}
           <div>
-            <h3
-              className={`text-2xl text-white ${lordJuusai.className}`}
-            >
+            <h3 className={`text-2xl text-white ${lordJuusai.className}`}>
               Yugen
             </h3>
             <p className="mt-2 text-xs text-gray-500 leading-relaxed max-w-xs">
@@ -100,7 +97,8 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-white/[0.04] flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-600">
-            &copy; {new Date().getFullYear()} Yugen. Not affiliated with AniList or MyAnimeList.
+            &copy; {new Date().getFullYear()} Yugen. Not affiliated with AniList
+            or MyAnimeList.
           </p>
           <p className="text-xs text-gray-600">
             Powered by{" "}

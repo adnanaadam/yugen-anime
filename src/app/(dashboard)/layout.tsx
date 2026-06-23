@@ -5,15 +5,14 @@ import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { LayoutDashboard, Library, User, Settings, LogOut } from "lucide-react";
+import { Library, User, Settings, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { Navii } from '@usenavii/react';
+import { Navii } from "@usenavii/react";
+import { CldImage } from "next-cloudinary";
 
 const navTabs = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Library", href: "/library", icon: Library },
   { label: "Profile", href: "/profile", icon: User },
+  { label: "Library", href: "/library", icon: Library },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -51,22 +50,35 @@ export default function DashboardLayout({
             {/* User pill */}
             <div className="flex items-center gap-2">
               {session.user?.image ? (
-                      <Navii seed={session.user?.email ?? ""} size={24} title={session.user?.name ?? ""} animated />
-              ) : (
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#f9c846] text-[10px] font-bold text-[#545863]">
-                  {session.user?.name?.charAt(0) || "?"}
+                <div className="relative size-7 rounded-full overflow-hidden">
+                  <CldImage
+                    src={session.user.image}
+                    alt={session.user?.name || "Avatar"}
+                    fill
+                    className="object-cover"
+                    crop="fill"
+                    gravity="face"
+                  />
                 </div>
+              ) : (
+                <Navii
+                  seed={session.user?.email ?? ""}
+                  size={24}
+                  title={session.user?.name ?? ""}
+                  animated
+                />
               )}
               <span className="text-sm font-medium text-[#545863]">
-                {session.user?.name || "User"}
+                {session.user?.username || session.user?.name || "User"}
               </span>
             </div>
 
             {/* Nav tabs */}
             <nav className="flex items-center gap-1">
               {navTabs.map((tab) => {
-                const isActive = pathname === tab.href || 
-                  (tab.href === "/dashboard" && pathname.startsWith("/dashboard"));
+                const isActive =
+                  pathname === tab.href ||
+                  (tab.href === "/profile" && pathname.startsWith("/profile"));
                 return (
                   <Link
                     key={tab.href}
@@ -96,9 +108,7 @@ export default function DashboardLayout({
       </header>
 
       {/* Content */}
-      <main className="mx-auto max-w-5xl px-4 py-6">
-        {children}
-      </main>
+      <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
     </div>
   );
 }

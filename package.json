@@ -14,13 +14,16 @@
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@usenavii/react": "^0.8.1",
+    "cloudinary": "^2.10.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.14.0",
     "next": "16.2.6",
     "next-auth": "^4.24.14",
+    "next-cloudinary": "^6.17.5",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
     "swr": "^2.4.1"
   },
   "devDependencies": {

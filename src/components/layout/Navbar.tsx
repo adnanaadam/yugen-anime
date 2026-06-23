@@ -8,6 +8,9 @@ import { lordJuusai } from "@/fonts/fonts";
 import { ChevronDown, Menu, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Navii } from "@usenavii/react";
+import Image from "next/image";
+import { CldImage } from "next-cloudinary";
+import { div } from "framer-motion/client";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -128,24 +131,31 @@ export default function Navbar() {
 
             {/* User */}
             {status === "loading" ? (
-              <div className="h-10 w-10 animate-pulse rounded-full bg-gray-200" />
+              <div className="h-10 w-10 animate-pulse rounded-md bg-gray-200" />
             ) : session ? (
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowUserMenu((prev) => !prev)}
-                  className="flex items-center cursor-pointer gap-2 rounded-xl border border-[var(--color-border)] bg-white px-2 py-1.5 transition-colors hover:bg-[var(--color-surface-hover)]"
+                  className="flex items-center cursor-pointer gap-2 rounded-md border border-[var(--color-border)] bg-white px-1 py-1 transition-colors hover:bg-[var(--color-surface-hover)]"
                 >
                   {session.user?.image ? (
+                    <div className="relative size-7 rounded-full overflow-hidden">
+                      <CldImage
+                        src={session.user.image}
+                        alt={session.user?.name || "Avatar"}
+                        fill
+                        className="object-cover"
+                        crop="fill"
+                        gravity="face"
+                      />
+                    </div>
+                  ) : (
                     <Navii
                       seed={session.user?.email ?? ""}
                       size={24}
                       title={session.user?.name ?? ""}
                       animated
                     />
-                  ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-primary)] text-sm font-semibold">
-                      {session.user?.name?.charAt(0)}
-                    </div>
                   )}
                   <ChevronDown
                     size={14}
@@ -164,7 +174,7 @@ export default function Navbar() {
                 >
                   <div className="border-b border-[var(--color-border)] p-3">
                     <p className="font-medium text-[var(--color-foreground)]">
-                      {session.user?.name}
+                      {session.user?.username || session.user?.name}
                     </p>
                     <p className="truncate text-xs text-[var(--color-text-secondary)]">
                       {session.user?.email}
@@ -173,18 +183,18 @@ export default function Navbar() {
 
                   <div className="py-2">
                     <Link
-                      href="/dashboard"
-                      className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
                       href="/profile"
                       className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
                       onClick={() => setShowUserMenu(false)}
                     >
                       Profile
+                    </Link>
+                    <Link
+                      href="/library"
+                      className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Library
                     </Link>
                   </div>
 
@@ -282,18 +292,19 @@ export default function Navbar() {
             {session && (
               <>
                 <Link
-                  href="/dashboard"
-                  className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
-                  onClick={closeMobile}
-                >
-                  Dashboard
-                </Link>
-                <Link
                   href="/profile"
                   className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
                   onClick={closeMobile}
                 >
                   Profile
+                </Link>
+
+                <Link
+                  href="/library"
+                  className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+                  onClick={closeMobile}
+                >
+                  Library
                 </Link>
               </>
             )}

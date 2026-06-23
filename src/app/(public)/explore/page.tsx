@@ -5,7 +5,16 @@ import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Search, Plus, ArrowUp, Loader2, Star, Tv, Check, ChevronDown } from "lucide-react";
+import {
+  Search,
+  Plus,
+  ArrowUp,
+  Loader2,
+  Star,
+  Tv,
+  Check,
+  ChevronDown,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { addToAnimeList } from "@/features/tracking/api";
 import { lordJuusai } from "@/fonts/fonts";
@@ -25,6 +34,9 @@ const statusOptions = [
   { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
   { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
 ];
+
+// 18+ genre identifiers to filter client-side
+const adultGenres = ["Hentai", "Erotica"];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformJikanToAnime(jikanAnime: any): TransformedAnime {
@@ -66,20 +78,30 @@ async function fetchAnimeData({
   activeCategory,
   page = 1,
   perPage = 25,
+  sfw = true,
 }: {
   searchQuery: string;
   activeCategory: string;
   page?: number;
   perPage?: number;
+  sfw?: boolean;
 }) {
   try {
     if (searchQuery.trim()) {
       const response = await fetch(
-        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchQuery)}&page=${page}&limit=${perPage}&order_by=popularity&sort=desc`
+        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchQuery)}&page=${page}&limit=${perPage}&order_by=popularity&sort=desc&sfw=${sfw}`,
       );
       const data = await response.json();
+      let media = data.data?.map(transformJikanToAnime) || [];
+      // Client-side filter for 18+ genres
+      if (sfw) {
+        media = media.filter(
+          (anime: TransformedAnime) =>
+            !anime.genres?.some((g) => adultGenres.includes(g)),
+        );
+      }
       return {
-        media: data.data?.map(transformJikanToAnime) || [],
+        media: media,
         pageInfo: {
           hasNextPage: !!data.pagination?.has_next_page,
           total: data.pagination?.items?.total || 0,
@@ -92,10 +114,10 @@ async function fetchAnimeData({
     let url = "";
     switch (activeCategory) {
       case "trending":
-        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=airing`;
+        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=airing&sfw=${sfw}`;
         break;
       case "popular":
-        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=bypopularity`;
+        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=bypopularity&sfw=${sfw}`;
         break;
       case "seasonal": {
         const now = new Date();
@@ -105,17 +127,25 @@ async function fetchAnimeData({
         if (month >= 3 && month <= 5) season = "spring";
         else if (month >= 6 && month <= 8) season = "summer";
         else if (month >= 9 && month <= 11) season = "fall";
-        url = `https://api.jikan.moe/v4/seasons/${year}/${season}?page=${page}&limit=${perPage}`;
+        url = `https://api.jikan.moe/v4/seasons/${year}/${season}?page=${page}&limit=${perPage}&sfw=${sfw}`;
         break;
       }
       default:
-        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}`;
+        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&sfw=${sfw}`;
     }
 
     const response = await fetch(url);
     const data = await response.json();
+    let media = data.data?.map(transformJikanToAnime) || [];
+    // Client-side filter for 18+ genres
+    if (sfw) {
+      media = media.filter(
+        (anime: TransformedAnime) =>
+          !anime.genres?.some((g) => adultGenres.includes(g)),
+      );
+    }
     return {
-      media: data.data?.map(transformJikanToAnime) || [],
+      media: media,
       pageInfo: {
         hasNextPage: !!data.pagination?.has_next_page,
         total: data.pagination?.items?.total || 0,
@@ -134,7 +164,9 @@ async function fetchAnimeData({
 
 // Track user's anime statuses globally so we don't fetch per-card
 function useUserAnimeStatuses(session: ReturnType<typeof useSession>["data"]) {
-  const [statusMap, setStatusMap] = useState<Record<number, { status: string; progress: number }>>({});
+  const [statusMap, setStatusMap] = useState<
+    Record<number, { status: string; progress: number }>
+  >({});
   const [loaded, setLoaded] = useState(!session);
 
   useEffect(() => {
@@ -147,9 +179,14 @@ function useUserAnimeStatuses(session: ReturnType<typeof useSession>["data"]) {
         const data = await response.json();
         if (Array.isArray(data)) {
           const map: Record<number, { status: string; progress: number }> = {};
-          data.forEach((item: { animeId: number; status: string; progress: number }) => {
-            map[item.animeId] = { status: item.status, progress: item.progress || 0 };
-          });
+          data.forEach(
+            (item: { animeId: number; status: string; progress: number }) => {
+              map[item.animeId] = {
+                status: item.status,
+                progress: item.progress || 0,
+              };
+            },
+          );
           setStatusMap(map);
         }
       } catch (error) {
@@ -181,13 +218,22 @@ interface ExploreAnimeCardProps {
   onStatusChange: (animeId: number, status: string) => void;
 }
 
-function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onStatusChange }: ExploreAnimeCardProps) {
+function ExploreAnimeCard({
+  anime,
+  session,
+  initialStatus,
+  initialProgress,
+  onStatusChange,
+}: ExploreAnimeCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [detailPosition, setDetailPosition] = useState<"right" | "left">("right");
+  const [detailPosition, setDetailPosition] = useState<"right" | "left">(
+    "right",
+  );
   const [showAddDropdown, setShowAddDropdown] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState<string | null>(initialStatus);
-  const [userProgress, setUserProgress] = useState(initialProgress);
+  const [currentStatus, setCurrentStatus] = useState<string | null>(
+    initialStatus,
+  );
   const [isUpdating, setIsUpdating] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -195,7 +241,10 @@ function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onSt
   const nativeTitle = anime.title.native;
   const activeStatus = statusOptions.find((s) => s.value === currentStatus);
 
-  const handleAddToList = async (e: React.MouseEvent, status: typeof statusOptions[number]["value"]) => {
+  const handleAddToList = async (
+    e: React.MouseEvent,
+    status: (typeof statusOptions)[number]["value"],
+  ) => {
     e.preventDefault();
     e.stopPropagation();
     if (!session || isUpdating) return;
@@ -218,7 +267,9 @@ function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onSt
       const rect = cardRef.current.getBoundingClientRect();
       const spaceOnRight = window.innerWidth - rect.right;
       const spaceOnLeft = rect.left;
-      setDetailPosition(spaceOnRight < 300 && spaceOnLeft > spaceOnRight ? "left" : "right");
+      setDetailPosition(
+        spaceOnRight < 300 && spaceOnLeft > spaceOnRight ? "left" : "right",
+      );
     }
   }, [isHovered]);
 
@@ -226,10 +277,7 @@ function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onSt
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentStatus(initialStatus);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUserProgress(initialProgress);
   }, [initialStatus, initialProgress]);
-
 
   return (
     <div
@@ -279,10 +327,21 @@ function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onSt
                     disabled={isUpdating}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: activeStatus?.color }} />
-                      <span className="text-xs font-medium" style={{ color: activeStatus?.color }}>{activeStatus?.label}</span>
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: activeStatus?.color }}
+                      />
+                      <span
+                        className="text-xs font-medium"
+                        style={{ color: activeStatus?.color }}
+                      >
+                        {activeStatus?.label}
+                      </span>
                     </div>
-                    <ChevronDown size={12} className={`text-[#7b7f89] transition-transform duration-200 ${showAddDropdown ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      size={12}
+                      className={`text-[#7b7f89] transition-transform duration-200 ${showAddDropdown ? "rotate-180" : ""}`}
+                    />
                   </button>
                 ) : (
                   <button
@@ -311,9 +370,14 @@ function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onSt
                             : "text-[#545863] hover:bg-[#f7f7f7]"
                         }`}
                       >
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-offset-1" style={{ backgroundColor: option.color }} />
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-offset-1"
+                          style={{ backgroundColor: option.color }}
+                        />
                         <span>{option.label}</span>
-                        {currentStatus === option.value && <Check size={12} className="ml-auto text-[#97cc04]" />}
+                        {currentStatus === option.value && (
+                          <Check size={12} className="ml-auto text-[#97cc04]" />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -325,7 +389,9 @@ function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onSt
 
         <Link href={`/anime/${anime.id}`}>
           <div className="mt-2 px-0.5">
-            <h3 className={`text-[13px] font-semibold line-clamp-2 leading-tight transition-colors duration-200 ${isHovered ? "text-[#f96e46]" : "text-[#545863]/70"}`}>
+            <h3
+              className={`text-[13px] font-semibold line-clamp-2 leading-tight transition-colors duration-200 ${isHovered ? "text-[#f96e46]" : "text-[#545863]/70"}`}
+            >
               {title}
             </h3>
           </div>
@@ -339,19 +405,38 @@ function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onSt
         } ${detailPosition === "right" ? "left-[calc(100%+12px)]" : "right-[calc(100%+12px)]"}`}
       >
         <div className="rounded-xl border border-[#ececec] bg-[#545863] shadow-xl p-5">
-          <h4 className="text-sm font-bold text-white leading-tight">{title}</h4>
-          {nativeTitle && nativeTitle !== title && <p className="mt-0.5 text-[11px] text-white">{nativeTitle}</p>}
+          <h4 className="text-sm font-bold text-white leading-tight">
+            {title}
+          </h4>
+          {nativeTitle && nativeTitle !== title && (
+            <p className="mt-0.5 text-[11px] text-white">{nativeTitle}</p>
+          )}
 
           <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
-            {anime.type && <span className="flex items-center gap-1 rounded-md bg-white/10 px-2 py-0.5 text-white/80"><Tv size={11} />{anime.type}</span>}
-            {anime.status && <span className="rounded-md bg-[#f9c846]/20 text-[#f9c846] px-2 py-0.5 font-medium">{anime.status}</span>}
-            {anime.episodes && <span className="rounded-md bg-white/10 px-2 py-0.5 text-white/80">{anime.episodes} episodes</span>}
+            {anime.type && (
+              <span className="flex items-center gap-1 rounded-md bg-white/10 px-2 py-0.5 text-white/80">
+                <Tv size={11} />
+                {anime.type}
+              </span>
+            )}
+            {anime.status && (
+              <span className="rounded-md bg-[#f9c846]/20 text-[#f9c846] px-2 py-0.5 font-medium">
+                {anime.status}
+              </span>
+            )}
+            {anime.episodes && (
+              <span className="rounded-md bg-white/10 px-2 py-0.5 text-white/80">
+                {anime.episodes} episodes
+              </span>
+            )}
           </div>
 
           {anime.averageScore && (
             <div className="mt-3 flex items-center gap-2">
               <Star size={14} className="text-[#f9c846]" fill="#f9c846" />
-              <span className="text-sm font-bold text-white">{(anime.averageScore / 10).toFixed(1)}</span>
+              <span className="text-sm font-bold text-white">
+                {(anime.averageScore / 10).toFixed(1)}
+              </span>
               <span className="text-[11px] text-white/60">/ 10</span>
             </div>
           )}
@@ -360,7 +445,12 @@ function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onSt
             <div className="mt-3">
               <div className="flex flex-wrap gap-1.5">
                 {anime.genres.map((genre) => (
-                  <span key={genre} className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[10px] text-white font-medium">{genre}</span>
+                  <span
+                    key={genre}
+                    className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[10px] text-white font-medium"
+                  >
+                    {genre}
+                  </span>
                 ))}
               </div>
             </div>
@@ -368,22 +458,32 @@ function ExploreAnimeCard({ anime, session, initialStatus, initialProgress, onSt
 
           {anime.studios.length > 0 && (
             <div className="mt-3 pt-3 border-t border-white/10">
-              <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">Studio</p>
-              <p className="text-xs text-white/80 font-medium">{anime.studios.slice(0, 2).join(", ")}</p>
+              <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">
+                Studio
+              </p>
+              <p className="text-xs text-white/80 font-medium">
+                {anime.studios.slice(0, 2).join(", ")}
+              </p>
             </div>
           )}
 
           {anime.description && (
             <div className="mt-3 pt-3 border-t border-white/10">
-              <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">Synopsis</p>
+              <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">
+                Synopsis
+              </p>
               <p className="text-[11px] text-white/70 leading-relaxed line-clamp-4">
                 {anime.description.replace(/<[^>]*>/g, "").replace(/\\n/g, " ")}
               </p>
             </div>
           )}
 
-          <div className={`absolute top-6 ${detailPosition === "right" ? "-left-1.5" : "-right-1.5"}`}>
-            <div className={`w-3 h-3 bg-[#545863] border border-[#ececec] rotate-45 ${detailPosition === "right" ? "border-r-0 border-t-0" : "border-l-0 border-b-0"}`} />
+          <div
+            className={`absolute top-6 ${detailPosition === "right" ? "-left-1.5" : "-right-1.5"}`}
+          >
+            <div
+              className={`w-3 h-3 bg-[#545863] border border-[#ececec] rotate-45 ${detailPosition === "right" ? "border-r-0 border-t-0" : "border-l-0 border-b-0"}`}
+            />
           </div>
         </div>
       </div>
@@ -423,9 +523,14 @@ function ExploreContent() {
   });
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
+  const [sfwOnly, setSfwOnly] = useState(true);
 
   // Global user statuses (fetched once, not per-card)
-  const { statusMap, loaded: statusesLoaded, updateStatus } = useUserAnimeStatuses(session);
+  const {
+    statusMap,
+    loaded: statusesLoaded,
+    updateStatus,
+  } = useUserAnimeStatuses(session);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -451,6 +556,7 @@ function ExploreContent() {
           searchQuery: debouncedQuery,
           activeCategory,
           page,
+          sfw: sfwOnly,
         });
 
         if (cancelled) return;
@@ -472,8 +578,10 @@ function ExploreContent() {
     };
 
     fetchData();
-    return () => { cancelled = true; };
-  }, [debouncedQuery, activeCategory, page]);
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQuery, activeCategory, page, sfwOnly]);
 
   useEffect(() => {
     const handleScroll = () => setShowBackToTop(window.scrollY > 600);
@@ -515,11 +623,13 @@ function ExploreContent() {
   };
 
   return (
-    <div className="min-h-screen mx-auto max-w-5xl overflow-hidden bg-[#fffdf8]">
+    <div className="min-h-screen mx-auto max-w-5xl w-5xl overflow-hidden bg-[#fffdf8]">
       {/* Header */}
       <div className="bg-white border-b border-[#ececec]">
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-14">
-          <h1 className={`text-3xl md:text-4xl text-[#545863] ${lordJuusai.className}`}>
+          <h1
+            className={`text-3xl md:text-4xl text-[#545863] ${lordJuusai.className}`}
+          >
             Explore Anime
           </h1>
           <p className="mt-2 text-sm text-[#7b7f89] max-w-lg">
@@ -539,20 +649,42 @@ function ExploreContent() {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleCategoryChange(category.id)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                  activeCategory === category.id
-                    ? "bg-[#f9c846] text-[#545863]"
-                    : "bg-white border border-[#ececec] text-[#7b7f89] hover:bg-[#f7f7f7]"
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
+          <div className="mt-5 flex flex-wrap gap-3 items-center">
+            {/* Category tabs */}
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategoryChange(category.id)}
+                  className={`rounded-lg px-4 py-2 cursor-pointer text-sm font-medium transition-colors ${
+                    activeCategory === category.id
+                      ? "bg-[#f9c846] text-[#545863]"
+                      : "bg-white border border-[#ececec] text-[#7b7f89] hover:bg-[#f7f7f7]"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+
+            {/* 18+ Toggle */}
+            <button
+              onClick={() => {
+                setSfwOnly(!sfwOnly);
+                setPage(1);
+                setAnimeList([]);
+              }}
+              className={`flex items-center gap-1.5 cursor-pointer rounded-lg px-3 py-2 text-xs font-medium border transition-colors ${
+                sfwOnly
+                  ? "bg-white border-[#ececec] text-[#7b7f89] hover:bg-[#f7f7f7]"
+                  : "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/20"
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${sfwOnly ? "bg-[#97cc04]" : "bg-[#f96e46]"}`}
+              />
+              {sfwOnly ? "SFW" : "18+"}
+            </button>
           </div>
         </div>
       </div>
@@ -561,10 +693,14 @@ function ExploreContent() {
       <div className="mx-auto max-w-5xl relative px-4 py-8">
         <div className="mb-6 flex items-center relative justify-between">
           <p className="text-sm text-[#7b7f89]">
-            {loading ? "Loading..." : `${pageInfo.total || animeList.length} anime found`}
+            {loading
+              ? "Loading..."
+              : `${pageInfo.total || animeList.length} anime found`}
           </p>
           {!loading && totalPages > 1 && (
-            <p className="text-xs text-[#7b7f89]">Page {currentPage} of {totalPages}</p>
+            <p className="text-xs text-[#7b7f89]">
+              Page {currentPage} of {totalPages}
+            </p>
           )}
         </div>
 
@@ -576,8 +712,12 @@ function ExploreContent() {
           </div>
         ) : animeList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <p className="text-lg font-semibold text-[#545863]">No anime found</p>
-            <p className="mt-1 text-sm text-[#7b7f89]">Try another title or category.</p>
+            <p className="text-lg font-semibold text-[#545863]">
+              No anime found
+            </p>
+            <p className="mt-1 text-sm text-[#7b7f89]">
+              Try another title or category.
+            </p>
           </div>
         ) : (
           <>
@@ -587,8 +727,12 @@ function ExploreContent() {
                   key={`${anime.id}-${index}`}
                   anime={anime}
                   session={session}
-                  initialStatus={statusesLoaded ? statusMap[anime.id]?.status || null : null}
-                  initialProgress={statusesLoaded ? statusMap[anime.id]?.progress || 0 : 0}
+                  initialStatus={
+                    statusesLoaded ? statusMap[anime.id]?.status || null : null
+                  }
+                  initialProgress={
+                    statusesLoaded ? statusMap[anime.id]?.progress || 0 : 0
+                  }
                   onStatusChange={updateStatus}
                 />
               ))}
@@ -623,7 +767,12 @@ function ExploreContent() {
                 <div className="hidden md:flex items-center gap-1 ml-4">
                   {getPageNumbers().map((pageNum, i) =>
                     pageNum === "..." ? (
-                      <span key={`dots-${i}`} className="px-2 py-1 text-xs text-[#7b7f89]">...</span>
+                      <span
+                        key={`dots-${i}`}
+                        className="px-2 py-1 text-xs text-[#7b7f89]"
+                      >
+                        ...
+                      </span>
                     ) : (
                       <button
                         key={pageNum}
@@ -641,7 +790,7 @@ function ExploreContent() {
                       >
                         {pageNum}
                       </button>
-                    )
+                    ),
                   )}
                 </div>
               </div>
@@ -664,11 +813,13 @@ function ExploreContent() {
 
 export default function ExplorePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#fffdf8] flex items-center justify-center">
-        <div className="text-[#7b7f89] text-sm">Loading...</div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#fffdf8] flex items-center justify-center">
+          <div className="text-[#7b7f89] text-sm">Loading...</div>
+        </div>
+      }
+    >
       <ExploreContent />
     </Suspense>
   );
