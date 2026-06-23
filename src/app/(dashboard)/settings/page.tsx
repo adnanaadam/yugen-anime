@@ -18,12 +18,6 @@ export default function SettingsPage() {
   const [usernameError, setUsernameError] = useState("");
   const [savingUsername, setSavingUsername] = useState(false);
 
-  useEffect(() => {
-    if (session?.user?.username) {
-      setUsername((prevUsername) => session.user.username || prevUsername);
-    }
-  }, [session?.user?.username]);
-
   // Avatar upload
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

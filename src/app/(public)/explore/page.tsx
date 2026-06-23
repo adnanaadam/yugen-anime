@@ -15,7 +15,7 @@ import {
   Check,
   ChevronDown,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList } from "@/features/tracking/api";
 import { lordJuusai } from "@/fonts/fonts";
 import type { TransformedAnime } from "@/services/jikan.service";
@@ -247,7 +247,12 @@ function ExploreAnimeCard({
   ) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!session || isUpdating) return;
+    if (isUpdating) return;
+
+    if (!session) {
+      signIn();
+      return;
+    }
 
     setIsUpdating(true);
     try {
@@ -313,8 +318,7 @@ function ExploreAnimeCard({
             </div>
           </Link>
 
-          {session && (
-            <div className="absolute w-full px-3 bottom-2 left-1/2 -translate-x-1/2 z-20">
+          <div className="absolute w-full px-3 bottom-2 left-1/2 -translate-x-1/2 z-20">
               <div className="relative w-full">
                 {currentStatus ? (
                   <button
@@ -348,6 +352,10 @@ function ExploreAnimeCard({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      if (!session) {
+                        signIn();
+                        return;
+                      }
                       setShowAddDropdown(!showAddDropdown);
                     }}
                     className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
@@ -384,7 +392,6 @@ function ExploreAnimeCard({
                 )}
               </div>
             </div>
-          )}
         </div>
 
         <Link href={`/anime/${anime.id}`}>

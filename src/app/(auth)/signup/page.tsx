@@ -14,7 +14,7 @@ export default function SignUpPage() {
 
   useEffect(() => {
     if (session) {
-      router.push("/dashboard");
+      router.push("/profile");
     }
   }, [session, router]);
 

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useCallback } from "react";
 import { Plus, Play, BookMarked, Check } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList } from "@/features/tracking/api";
 import type { TransformedAnime } from "@/services/jikan.service";
 
@@ -30,7 +30,10 @@ export default function AnimeCard({ anime, size = "md" }: AnimeCardProps) {
     async (e: React.MouseEvent, status: "PLAN_TO_WATCH" | "WATCHING") => {
       e.preventDefault();
       e.stopPropagation();
-      if (!session) return;
+      if (!session) {
+        signIn();
+        return;
+      }
 
       try {
         await addToAnimeList(anime.id, status);
@@ -94,47 +97,49 @@ export default function AnimeCard({ anime, size = "md" }: AnimeCardProps) {
             </div>
 
             {/* Add to list button */}
-            {session && (
-              <div className="absolute bottom-2 right-2 z-20">
-                {added ? (
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#97cc04] text-black shadow-lg">
-                    <Check size={14} />
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setShowDropdown(!showDropdown);
-                      }}
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm border border-white/10 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#f9c846] hover:text-black hover:border-transparent"
-                    >
-                      <Plus size={14} />
-                    </button>
+            <div className="absolute bottom-2 right-2 z-20">
+              {added ? (
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#97cc04] text-black shadow-lg">
+                  <Check size={14} />
+                </div>
+              ) : (
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!session) {
+                        signIn();
+                        return;
+                      }
+                      setShowDropdown(!showDropdown);
+                    }}
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm border border-white/10 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#f9c846] hover:text-black hover:border-transparent"
+                  >
+                    <Plus size={14} />
+                  </button>
 
-                    {showDropdown && (
-                      <div className="absolute bottom-full right-0 mb-1.5 overflow-hidden rounded-lg border border-white/10 bg-black/95 backdrop-blur-md shadow-xl text-nowrap">
-                        <button
-                          onClick={(e) => handleAddToList(e, "WATCHING")}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-[11px] text-white hover:bg-white/10 transition-colors"
-                        >
-                          <Play size={12} className="text-[#f9c846]" />
-                          Watching
-                        </button>
-                        <button
-                          onClick={(e) => handleAddToList(e, "PLAN_TO_WATCH")}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-[11px] text-white hover:bg-white/10 transition-colors"
-                        >
-                          <BookMarked size={12} className="text-[#00e8fc]" />
-                          Plan to Watch
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+                  {showDropdown && session && (
+                    <div className="absolute bottom-full right-0 mb-1.5 overflow-hidden rounded-lg border border-white/10 bg-black/95 backdrop-blur-md shadow-xl text-nowrap">
+                      <button
+                        onClick={(e) => handleAddToList(e, "WATCHING")}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-[11px] text-white hover:bg-white/10 transition-colors"
+                      >
+                        <Play size={12} className="text-[#f9c846]" />
+                        Watching
+                      </button>
+                      <button
+                        onClick={(e) => handleAddToList(e, "PLAN_TO_WATCH")}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-[11px] text-white hover:bg-white/10 transition-colors"
+                      >
+                        <BookMarked size={12} className="text-[#00e8fc]" />
+                        Plan to Watch
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Title below */}

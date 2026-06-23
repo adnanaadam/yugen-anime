@@ -8,9 +8,7 @@ import { lordJuusai } from "@/fonts/fonts";
 import { ChevronDown, Menu, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Navii } from "@usenavii/react";
-import Image from "next/image";
 import { CldImage } from "next-cloudinary";
-import { div } from "framer-motion/client";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
