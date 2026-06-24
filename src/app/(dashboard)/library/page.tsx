@@ -278,8 +278,8 @@ function LibraryAnimeCard({
               </div>
             )}
 
-            {/* Update button */}
-            <div className="absolute bottom-1 right-1 z-20">
+            {/* Update button - center bottom position */}
+            <div className="absolute w-full px-2 bottom-1 left-1/2 -translate-x-1/2 z-20">
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -290,9 +290,9 @@ function LibraryAnimeCard({
                   }
                   setShowModal(true);
                 }}
-                className="flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm border border-white/10 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#f9c846] hover:text-black hover:border-transparent"
+                className="flex w-full cursor-pointer text-xs px-2 py-1 items-center justify-center rounded-sm bg-black/60 text-white backdrop-blur-sm border border-white/10 transition-all hover:bg-[#f9c846] hover:text-black hover:border-transparent"
               >
-                <ChevronDown size={10} />
+               <p>Update progress</p>
               </button>
             </div>
           </div>
@@ -301,7 +301,7 @@ function LibraryAnimeCard({
         {/* Title below */}
         <div className="p-1.5">
           <Link href={`/anime/${entry.animeId}`}>
-            <h3 className="text-[11px] font-medium text-gray-500 line-clamp-2 leading-tight group-hover:text-white transition-colors">
+            <h3 className="text-[11px] font-medium text-gray-500 line-clamp-2 leading-tight group-hover:text-[#f96e46] transition-colors">
               {title}
             </h3>
           </Link>
