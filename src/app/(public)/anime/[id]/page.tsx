@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { ArrowLeft, Star, Tv, Clock, Users, Calendar, Check, ChevronDown, BookOpen } from "lucide-react";
 import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { lordJuusai } from "@/fonts/fonts";
@@ -192,7 +192,11 @@ export default function AnimeDetailPage() {
   }, [session, anime]);
 
   const handleStatusChange = async (status: AnimeStatus) => {
-    if (!session || !anime || updating) return;
+    if (!session) {
+      signIn();
+      return;
+    }
+    if (!anime || updating) return;
     setUpdating(true);
     try {
       await addToAnimeList(anime.id, status, userProgress, userScore || undefined);
@@ -206,7 +210,11 @@ export default function AnimeDetailPage() {
   };
 
   const handleProgressUpdate = async (increment: number) => {
-    if (!session || !anime || updating) return;
+    if (!session) {
+      signIn();
+      return;
+    }
+    if (!anime || updating) return;
     const newProgress = Math.min(userProgress + increment, anime.episodes || 0);
     setUpdating(true);
     try {
@@ -258,17 +266,18 @@ export default function AnimeDetailPage() {
   }
 
   const title = anime.title.english || anime.title.romaji;
+  const imageSrc = "/images/anime-bg4.jpg";
 
   return (
     <div className="min-h-screen bg-[#fffdf8]">
       {/* Banner */}
-      <div className="relative h-[200px] md:h-[300px] bg-[#f7f7f7]">
+      <div className="relative h-[200px] md:h-[300px] bg-black">
         {anime.bannerImage && (
           <Image
-            src={anime.bannerImage}
+            src={imageSrc}
             alt={title}
             fill
-            className="object-cover"
+            className="object-cover opacity-30"
             priority
           />
         )}
@@ -333,8 +342,8 @@ export default function AnimeDetailPage() {
                 )}
 
                 {/* Library link */}
-                {session && (
-                  <div className="pt-2 mt-2 border-t border-[#ececec]">
+                <div className="pt-2 mt-2 border-t border-[#ececec]">
+                  {session ? (
                     <Link
                       href="/library"
                       className="inline-flex items-center gap-2 text-sm text-[#f96e46] hover:text-[#e55d3a] transition-colors"
@@ -342,8 +351,16 @@ export default function AnimeDetailPage() {
                       <BookOpen size={14} />
                       View in Library
                     </Link>
-                  </div>
-                )}
+                  ) : (
+                    <button
+                      onClick={() => signIn()}
+                      className="inline-flex items-center gap-2 text-sm text-[#f96e46] hover:text-[#e55d3a] transition-colors"
+                    >
+                      <BookOpen size={14} />
+                      Sign in to track
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -414,14 +431,19 @@ export default function AnimeDetailPage() {
             </div>
 
             {/* Tracking Section */}
-            {session && (
-              <div className="mt-6">
-                <h3 className="text-sm font-semibold text-[#545863] mb-4">Your Progress</h3>
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold text-[#545863] mb-4">Your Progress</h3>
 
                 {/* Status selector */}
                 <div className="relative">
                   <button
-                    onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                    onClick={() => {
+                      if (!session) {
+                        signIn();
+                        return;
+                      }
+                      setShowStatusDropdown(!showStatusDropdown);
+                    }}
                     className="flex items-center cursor-pointer justify-between w-full rounded-lg border border-[#ececec] bg-[#fffdf8] px-4 py-2.5 text-sm transition-colors hover:border-[#f9c846]/30"
                   >
                     <div className="flex items-center gap-2">
@@ -493,7 +515,6 @@ export default function AnimeDetailPage() {
                   </div>
                 )}
               </div>
-            )}
 
             {/* Description */}
             <div className="mt-8">
