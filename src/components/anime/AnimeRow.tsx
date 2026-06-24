@@ -4,9 +4,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
-import { ArrowRight, Star, Tv, Plus, Check, ChevronDown } from "lucide-react";
+import { ArrowRight, Star, Tv, ChevronDown } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList } from "@/features/tracking/api";
+import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 interface AnimeRowProps {
@@ -16,14 +17,14 @@ interface AnimeRowProps {
   viewMoreHref?: string;
 }
 
-const statusOptions = [
-  { label: "Watching", value: "WATCHING" as const, color: "#00e8fc" },
-  { label: "Completed", value: "COMPLETED" as const, color: "#97cc04" },
-  { label: "Plan to Watch", value: "PLAN_TO_WATCH" as const, color: "#f9c846" },
-  { label: "Paused", value: "PAUSED" as const, color: "#f96e46" },
-  { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
-  { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
-];
+const statusColors: Record<string, string> = {
+  WATCHING: "#00e8fc",
+  COMPLETED: "#97cc04",
+  PLAN_TO_WATCH: "#f9c846",
+  PAUSED: "#f96e46",
+  DROPPED: "#ff4444",
+  REWATCHING: "#c084fc",
+};
 
 export default function AnimeRow({
   title,
@@ -91,7 +92,7 @@ function RowAnimeCard({
   const [detailPosition, setDetailPosition] = useState<"right" | "left">(
     "right",
   );
-  const [showAddDropdown, setShowAddDropdown] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
   const [userProgress, setUserProgress] = useState(0);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -100,7 +101,6 @@ function RowAnimeCard({
 
   const title = anime.title.english || anime.title.romaji;
   const nativeTitle = anime.title.native;
-  const activeStatus = statusOptions.find((s) => s.value === currentStatus);
 
   // Fetch user's tracking status for this anime
   useEffect(() => {
@@ -128,14 +128,7 @@ function RowAnimeCard({
     fetchStatus();
   }, [session, anime.id]);
 
-  const handleAddToList = async (
-    e: React.MouseEvent,
-    status: (typeof statusOptions)[number]["value"],
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isUpdating) return;
-
+  const handleSave = async (status: string, progress: number) => {
     if (!session) {
       signIn();
       return;
@@ -143,11 +136,16 @@ function RowAnimeCard({
 
     setIsUpdating(true);
     try {
-      await addToAnimeList(anime.id, status);
+      await addToAnimeList(
+        anime.id,
+        status as "WATCHING" | "COMPLETED" | "PLAN_TO_WATCH" | "PAUSED" | "DROPPED" | "REWATCHING",
+        progress,
+      );
       setCurrentStatus(status);
-      setShowAddDropdown(false);
+      setUserProgress(progress);
+      setShowModal(false);
     } catch (error) {
-      console.error("Failed to add to list:", error);
+      console.error("Failed to update:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -168,6 +166,9 @@ function RowAnimeCard({
     }
   }, [isHovered]);
 
+  const activeStatusColor = currentStatus ? statusColors[currentStatus] : null;
+  const isAiring = anime.status?.toLowerCase().includes("airing") || anime.status?.toLowerCase().includes("currently");
+
   return (
     <div
       ref={cardRef}
@@ -175,7 +176,7 @@ function RowAnimeCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
-        setShowAddDropdown(false);
+        setShowModal(false);
       }}
     >
       {/* Card */}
@@ -209,12 +210,12 @@ function RowAnimeCard({
             <div className="absolute w-full px-3 bottom-2 left-1/2 -translate-x-1/2 z-20">
               <div className="relative w-full">
                 {currentStatus ? (
-                  /* Status badge showing current status */
+                  /* Status badge showing current status - click to open modal */
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setShowAddDropdown(!showAddDropdown);
+                      setShowModal(true);
                     }}
                     className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-[#ececec] px-3 shadow-sm hover:shadow-md transition-all"
                     disabled={isUpdating}
@@ -222,20 +223,18 @@ function RowAnimeCard({
                     <div className="flex items-center gap-2">
                       <span
                         className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: activeStatus?.color }}
+                        style={{ backgroundColor: activeStatusColor || "#545863" }}
                       />
                       <span
                         className="text-xs font-medium"
-                        style={{ color: activeStatus?.color }}
+                        style={{ color: activeStatusColor || "#545863" }}
                       >
-                        {activeStatus?.label}
+                        {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1).toLowerCase()}
                       </span>
                     </div>
                     <ChevronDown
                       size={12}
-                      className={`text-[#7b7f89] transition-transform duration-200 ${
-                        showAddDropdown ? "rotate-180" : ""
-                      }`}
+                      className={`text-[#7b7f89] transition-transform duration-200`}
                     />
                   </button>
                 ) : (
@@ -248,40 +247,13 @@ function RowAnimeCard({
                         signIn();
                         return;
                       }
-                      setShowAddDropdown(!showAddDropdown);
+                      setShowModal(true);
                     }}
                     className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
                     disabled={isUpdating}
                   >
-                    <Plus size={13} />
                     <span className="text-xs font-medium">Add to Library</span>
                   </button>
-                )}
-
-                {/* Status dropdown */}
-                {showAddDropdown && (
-                  <div className="absolute bottom-full left-0 right-0 mb-1.5 overflow-hidden rounded-xl border border-[#ececec] bg-white shadow-xl">
-                    {statusOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={(e) => handleAddToList(e, option.value)}
-                        className={`flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-xs transition-colors ${
-                          currentStatus === option.value
-                            ? "bg-[#f7f7f7] font-semibold text-[#545863]"
-                            : "text-[#545863] hover:bg-[#f7f7f7]"
-                        }`}
-                      >
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-offset-1"
-                          style={{ backgroundColor: option.color }}
-                        />
-                        <span>{option.label}</span>
-                        {currentStatus === option.value && (
-                          <Check size={12} className="ml-auto text-[#97cc04]" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
                 )}
               </div>
             </div>
@@ -404,6 +376,20 @@ function RowAnimeCard({
           </div>
         </div>
       </div>
+
+      {/* Update Progress Modal */}
+      <UpdateProgressModal
+        key={`modal-${anime.id}`}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSave={handleSave}
+        currentStatus={currentStatus || "PLAN_TO_WATCH"}
+        currentProgress={userProgress}
+        totalEpisodes={anime.episodes || undefined}
+        animeTitle={title}
+        isAiring={isAiring}
+        isUpdating={isUpdating}
+      />
     </div>
   );
 }

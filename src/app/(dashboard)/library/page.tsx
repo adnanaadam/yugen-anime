@@ -272,11 +272,9 @@ function LibraryAnimeCard({
             )}
 
             {/* Episode count */}
-            {entry.anime?.episodes && (
               <div className="absolute top-1 right-1 z-10 rounded bg-black/70 px-1 py-0.5 text-[9px] text-gray-300 backdrop-blur-sm">
-                {entry.progress}/{entry.anime.episodes}
+                {entry.progress > 0 && `${entry.progress} eps · `}
               </div>
-            )}
 
             {/* Update button - center bottom position */}
             <div className="absolute w-full px-2 bottom-1 left-1/2 -translate-x-1/2 z-20">

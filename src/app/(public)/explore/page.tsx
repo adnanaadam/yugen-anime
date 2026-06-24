@@ -12,12 +12,12 @@ import {
   Loader2,
   Star,
   Tv,
-  Check,
   ChevronDown,
 } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList } from "@/features/tracking/api";
 import { lordJuusai } from "@/fonts/fonts";
+import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 const categories = [
@@ -26,14 +26,14 @@ const categories = [
   { id: "seasonal", label: "Seasonal" },
 ];
 
-const statusOptions = [
-  { label: "Watching", value: "WATCHING" as const, color: "#00e8fc" },
-  { label: "Completed", value: "COMPLETED" as const, color: "#97cc04" },
-  { label: "Plan to Watch", value: "PLAN_TO_WATCH" as const, color: "#f9c846" },
-  { label: "Paused", value: "PAUSED" as const, color: "#f96e46" },
-  { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
-  { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
-];
+const statusColors: Record<string, string> = {
+  WATCHING: "#00e8fc",
+  COMPLETED: "#97cc04",
+  PLAN_TO_WATCH: "#f9c846",
+  PAUSED: "#f96e46",
+  DROPPED: "#ff4444",
+  REWATCHING: "#c084fc",
+};
 
 // 18+ genre identifiers to filter client-side
 const adultGenres = ["Hentai", "Erotica"];
@@ -200,10 +200,10 @@ function useUserAnimeStatuses(session: ReturnType<typeof useSession>["data"]) {
   }, [session]);
 
   // Function to update a single status locally
-  const updateStatus = (animeId: number, status: string) => {
+  const updateStatus = (animeId: number, status: string, progress: number) => {
     setStatusMap((prev) => ({
       ...prev,
-      [animeId]: { status, progress: prev[animeId]?.progress || 0 },
+      [animeId]: { status, progress },
     }));
   };
 
@@ -215,7 +215,7 @@ interface ExploreAnimeCardProps {
   session: ReturnType<typeof useSession>["data"];
   initialStatus: string | null;
   initialProgress: number;
-  onStatusChange: (animeId: number, status: string) => void;
+  onStatusChange: (animeId: number, status: string, progress: number) => void;
 }
 
 function ExploreAnimeCard({
@@ -230,7 +230,7 @@ function ExploreAnimeCard({
   const [detailPosition, setDetailPosition] = useState<"right" | "left">(
     "right",
   );
-  const [showAddDropdown, setShowAddDropdown] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<string | null>(
     initialStatus,
   );
@@ -239,16 +239,9 @@ function ExploreAnimeCard({
 
   const title = anime.title.english || anime.title.romaji;
   const nativeTitle = anime.title.native;
-  const activeStatus = statusOptions.find((s) => s.value === currentStatus);
+  const activeStatus = statusColors[currentStatus || ""];
 
-  const handleAddToList = async (
-    e: React.MouseEvent,
-    status: (typeof statusOptions)[number]["value"],
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isUpdating) return;
-
+  const handleSave = async (status: string, progress: number) => {
     if (!session) {
       signIn();
       return;
@@ -256,12 +249,13 @@ function ExploreAnimeCard({
 
     setIsUpdating(true);
     try {
-      await addToAnimeList(anime.id, status);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await addToAnimeList(anime.id, status as any, progress);
       setCurrentStatus(status);
-      onStatusChange(anime.id, status);
-      setShowAddDropdown(false);
+      onStatusChange(anime.id, status, progress);
+      setShowModal(false);
     } catch (error) {
-      console.error("Failed to add to list:", error);
+      console.error("Failed to update:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -284,6 +278,8 @@ function ExploreAnimeCard({
     setCurrentStatus(initialStatus);
   }, [initialStatus, initialProgress]);
 
+  const isAiring = anime.status?.toLowerCase().includes("airing") || anime.status?.toLowerCase().includes("currently");
+
   return (
     <div
       ref={cardRef}
@@ -291,7 +287,7 @@ function ExploreAnimeCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
-        setShowAddDropdown(false);
+        setShowModal(false);
       }}
     >
       <div className="block">
@@ -325,7 +321,7 @@ function ExploreAnimeCard({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setShowAddDropdown(!showAddDropdown);
+                      setShowModal(true);
                     }}
                     className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-[#ececec] px-3 shadow-sm hover:shadow-md transition-all"
                     disabled={isUpdating}
@@ -333,18 +329,18 @@ function ExploreAnimeCard({
                     <div className="flex items-center gap-2">
                       <span
                         className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: activeStatus?.color }}
+                        style={{ backgroundColor: activeStatus }}
                       />
                       <span
                         className="text-xs font-medium"
-                        style={{ color: activeStatus?.color }}
+                        style={{ color: activeStatus }}
                       >
-                        {activeStatus?.label}
+                        {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1).toLowerCase()}
                       </span>
                     </div>
                     <ChevronDown
                       size={12}
-                      className={`text-[#7b7f89] transition-transform duration-200 ${showAddDropdown ? "rotate-180" : ""}`}
+                      className={`text-[#7b7f89] transition-transform duration-200`}
                     />
                   </button>
                 ) : (
@@ -356,7 +352,7 @@ function ExploreAnimeCard({
                         signIn();
                         return;
                       }
-                      setShowAddDropdown(!showAddDropdown);
+                      setShowModal(true);
                     }}
                     className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
                     disabled={isUpdating}
@@ -364,31 +360,6 @@ function ExploreAnimeCard({
                     <Plus size={13} />
                     <span className="text-xs font-medium">Add to Library</span>
                   </button>
-                )}
-
-                {showAddDropdown && (
-                  <div className="absolute bottom-full left-0 right-0 mb-1.5 overflow-hidden rounded-xl border border-[#ececec] bg-white shadow-xl">
-                    {statusOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={(e) => handleAddToList(e, option.value)}
-                        className={`flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-xs transition-colors ${
-                          currentStatus === option.value
-                            ? "bg-[#f7f7f7] font-semibold text-[#545863]"
-                            : "text-[#545863] hover:bg-[#f7f7f7]"
-                        }`}
-                      >
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-offset-1"
-                          style={{ backgroundColor: option.color }}
-                        />
-                        <span>{option.label}</span>
-                        {currentStatus === option.value && (
-                          <Check size={12} className="ml-auto text-[#97cc04]" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
                 )}
               </div>
             </div>
@@ -494,6 +465,20 @@ function ExploreAnimeCard({
           </div>
         </div>
       </div>
+
+      {/* Update Progress Modal */}
+      <UpdateProgressModal
+        key={`modal-${anime.id}`}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSave={handleSave}
+        currentStatus={currentStatus || "PLAN_TO_WATCH"}
+        currentProgress={initialProgress}
+        totalEpisodes={anime.episodes || undefined}
+        animeTitle={title}
+        isAiring={isAiring}
+        isUpdating={isUpdating}
+      />
     </div>
   );
 }
