@@ -1,13 +1,17 @@
 // src/app/(dashboard)/dashboard/page.tsx
 "use client";
 
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useUserStats } from "@/hooks/useUserData";
 import { useTrendingAnime } from "@/hooks/useAnimeData";
 import { xpToNextLevel } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowRight, Play, CheckCircle, Bookmark, PauseCircle, XCircle, Repeat } from "lucide-react";
+import { ArrowRight, Plus, Check } from "lucide-react";
+import { useSession, signIn } from "next-auth/react";
+import { addToAnimeList } from "@/features/tracking/api";
 import AnimeCard from "@/components/anime/AnimeCard";
 import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
+import Image from "next/image";
 
 const COLORS = ["#00e8fc", "#97cc04", "#f9c846", "#f96e46", "#ff4444", "#c084fc"];
 
@@ -20,14 +24,76 @@ const statusLabels: Record<string, string> = {
   REWATCHING: "Rewatching",
 };
 
+const statusOptions = [
+  { label: "Watching", value: "WATCHING" as const, color: "#00e8fc" },
+  { label: "Completed", value: "COMPLETED" as const, color: "#97cc04" },
+  { label: "Plan to Watch", value: "PLAN_TO_WATCH" as const, color: "#f9c846" },
+  { label: "Paused", value: "PAUSED" as const, color: "#f96e46" },
+  { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
+  { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
+];
+
+const hexClipPath =
+  "polygon(50% 3%, 93% 28%, 93% 72%, 50% 97%, 7% 72%, 7% 28%)";
+const hexClipPathInner =
+  "polygon(50% 8%, 88% 30%, 88% 70%, 50% 92%, 12% 70%, 12% 30%)";
+
 export default function DashboardPage() {
   const { data: stats, loading } = useUserStats();
   const { data: trending } = useTrendingAnime(6);
+  const { data: session } = useSession();
+
+  const [statusMap, setStatusMap] = useState<Record<number, { status: string; progress: number }>>({});
+  const [statusesLoaded, setStatusesLoaded] = useState(() => !session);
 
   const xpInfo = stats?.user ? xpToNextLevel(stats.user.xp) : null;
   const totalAnime = stats?.stats.totalAnime || 0;
   const totalEpisodes = stats?.stats.totalEpisodes || 0;
   const badgeCount = stats?.badges?.length || 0;
+
+  // Fetch user's anime statuses
+  useEffect(() => {
+    if (!session) return;
+
+    let cancelled = false;
+    const fetchStatuses = async () => {
+      try {
+        const response = await fetch("/api/tracking/list");
+        if (!response.ok) return;
+        const data = await response.json();
+        if (Array.isArray(data) && !cancelled) {
+          const map: Record<number, { status: string; progress: number }> = {};
+          data.forEach(
+            (item: { animeId: number; status: string; progress: number }) => {
+              map[item.animeId] = {
+                status: item.status,
+                progress: item.progress || 0,
+              };
+            },
+          );
+          setStatusMap(map);
+        }
+      } catch (error) {
+        console.error("Error fetching anime statuses:", error);
+      } finally {
+        if (!cancelled) {
+          setStatusesLoaded(true);
+        }
+      }
+    };
+
+    fetchStatuses();
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
+
+  const updateStatus = (animeId: number, status: string) => {
+    setStatusMap((prev) => ({
+      ...prev,
+      [animeId]: { status, progress: prev[animeId]?.progress || 0 },
+    }));
+  };
 
   const pieData = [
     { name: "Watching", value: stats?.stats.watching || 0 },
@@ -164,22 +230,133 @@ export default function DashboardPage() {
 
       {/* Badges */}
       <div className="rounded-2xl border border-[#ececec] bg-white overflow-hidden p-5">
-        <h3 className="text-xs font-semibold text-[#545863] mb-3 uppercase tracking-[0.15em]">
+        <h3 className="text-xs font-semibold text-[#545863] mb-4 uppercase tracking-[0.15em]">
           Badges · {badgeCount}/8
         </h3>
         {stats?.badges && stats.badges.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {stats.badges.map((ub: { id: string; badge: { name: string; icon: string | null; category: string | null } }) => (
-              <div
-                key={ub.id}
-                className="flex items-center gap-2 rounded-lg border border-[#ececec] bg-[#fffdf8] px-3 py-1.5"
-              >
-                <span className="text-sm">🏆</span>
-                <span className="text-[11px] font-medium text-[#545863]">
-                  {ub.badge.name}
-                </span>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {stats.badges.map((ub: { id: string; badge: { name: string; icon: string | null; category: string | null } }, index: number) => {
+              const badgeColors: Record<string, { color: string; rarityColor: string; glow: string }> = {
+                first_anime: { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
+                episode_master: { color: "#97cc04", rarityColor: "bg-[#97cc04]/10 text-[#97cc04] border-[#97cc04]/20", glow: "rgba(151,204,4,0.2)" },
+                anime_veteran: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.25)" },
+                completionist: { color: "#f96e46", rarityColor: "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/20", glow: "rgba(249,110,70,0.15)" },
+                anime_lover: { color: "#f96e46", rarityColor: "bg-gradient-to-r from-[#f9c846]/20 via-[#f96e46]/20 to-[#c084fc]/20 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
+                binge_watcher: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
+                collector: { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
+                favorite_curator: { color: "#c084fc", rarityColor: "bg-[#c084fc]/10 text-[#c084fc] border-[#c084fc]/20", glow: "rgba(192,132,252,0.2)" },
+              };
+
+              const badgeData = badgeColors[ub.id] || badgeColors.first_anime;
+              const rarityLabel = ub.badge.category
+                ? ub.badge.category.charAt(0).toUpperCase() + ub.badge.category.slice(1)
+                : "Common";
+
+              return (
+                <div
+                  key={ub.id}
+                  className="group relative cursor-pointer"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="relative transition-all duration-500 group-hover:-translate-y-1">
+                    {/* Outer glow */}
+                    <div
+                      className="absolute -inset-[2px] opacity-0 group-hover:opacity-100 transition-all duration-700 blur-md"
+                      style={{
+                        background: `linear-gradient(135deg, ${badgeData.color}60, ${badgeData.color}10, ${badgeData.color}60, ${badgeData.color}10)`,
+                        backgroundSize: "400% 400%",
+                        animation: "borderGlow 2s ease-in-out infinite",
+                        clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px)",
+                      }}
+                    />
+
+                    {/* Card body */}
+                    <div
+                      className="relative bg-white overflow-hidden shadow-sm transition-shadow duration-300 group-hover:shadow-2xl"
+                      style={{
+                        clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px)",
+                      }}
+                    >
+                      {/* Top ornament bar */}
+                      <div className="relative h-1.5 overflow-hidden">
+                        <div
+                          className="absolute inset-0 opacity-40"
+                          style={{
+                            background: `linear-gradient(90deg, transparent, ${badgeData.color}, ${badgeData.color}, transparent)`,
+                          }}
+                        />
+                        <div
+                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                          style={{
+                            background: `linear-gradient(90deg, transparent, ${badgeData.color}, ${badgeData.color}, ${badgeData.color}, transparent)`,
+                          }}
+                        />
+                      </div>
+
+                      <div className="p-3 text-center">
+                        {/* Icon */}
+                        <div className="relative mx-auto mb-2 w-12 h-12 flex items-center justify-center">
+                          <div
+                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500"
+                            style={{
+                              background: `radial-gradient(ellipse at center, ${badgeData.glow} 0%, transparent 65%)`,
+                              clipPath: hexClipPath,
+                            }}
+                          />
+                          <div
+                            className="relative flex items-center justify-center z-10 transition-all duration-500 group-hover:scale-110"
+                            style={{
+                              width: "48px",
+                              height: "48px",
+                              backgroundColor: `${badgeData.color}10`,
+                              clipPath: hexClipPathInner,
+                            }}
+                          >
+                            <span className="text-2xl relative z-40">🏆</span>
+                          </div>
+                        </div>
+
+                        {/* Badge name */}
+                        <h3 className="text-[11px] font-bold text-[#545863] group-hover:text-[#f96e46] transition-all duration-300 uppercase tracking-[0.1em] leading-tight">
+                          {ub.badge.name}
+                        </h3>
+
+                        {/* Rarity gem */}
+                        <div className="relative inline-block mt-2">
+                          <span
+                            className={`relative inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] ${badgeData.rarityColor} overflow-hidden`}
+                          >
+                            <div
+                              className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
+                              style={{
+                                background: `linear-gradient(90deg, transparent, ${badgeData.color}20, transparent)`,
+                              }}
+                            />
+                            <span className="relative">{rarityLabel}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bottom ornament bar */}
+                      <div className="relative h-1.5 overflow-hidden">
+                        <div
+                          className="absolute inset-0 opacity-40"
+                          style={{
+                            background: `linear-gradient(90deg, transparent, ${badgeData.color}, ${badgeData.color}, transparent)`,
+                          }}
+                        />
+                        <div
+                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                          style={{
+                            background: `linear-gradient(90deg, transparent, ${badgeData.color}, ${badgeData.color}, ${badgeData.color}, transparent)`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className="text-xs text-[#7b7f89]">
@@ -205,11 +382,184 @@ export default function DashboardPage() {
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
             {trending.slice(0, 6).map((anime) => (
-              <AnimeCard key={anime.id} anime={anime} size="sm" />
+              <TrendingAnimeCard
+                key={anime.id}
+                anime={anime}
+                session={session}
+                initialStatus={statusesLoaded ? statusMap[anime.id]?.status || null : null}
+                initialProgress={statusesLoaded ? statusMap[anime.id]?.progress || 0 : 0}
+                onStatusChange={updateStatus}
+              />
             ))}
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+<style jsx>{`
+  @keyframes borderGlow {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+`}</style>
+
+function TrendingAnimeCard({
+  anime,
+  session,
+  initialStatus,
+  initialProgress,
+  onStatusChange,
+}: {
+  anime: { id: number; title: { english: string | null; romaji: string }; coverImage: { large: string }; averageScore: number | null; episodes: number | null; seasonYear: number | null; type: string | null };
+  session: ReturnType<typeof useSession>["data"];
+  initialStatus: string | null;
+  initialProgress: number;
+  onStatusChange: (animeId: number, status: string) => void;
+}) {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const title = anime.title.english || anime.title.romaji;
+  const activeStatus = statusOptions.find((s) => s.value === initialStatus);
+
+  const handleAddToList = async (
+    e: React.MouseEvent,
+    status: (typeof statusOptions)[number]["value"],
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isUpdating) return;
+
+    if (!session) {
+      signIn();
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await addToAnimeList(anime.id, status);
+      onStatusChange(anime.id, status);
+      setShowDropdown(false);
+    } catch (error) {
+      console.error("Failed to add to list:", error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return (
+    <div className="relative group">
+      <div className="block">
+        <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] transition-colors duration-200 group-hover:border-white/[0.15]">
+          {/* Cover Image */}
+          <Link href={`/anime/${anime.id}`} className="block">
+            <div className="relative aspect-[2/3] overflow-hidden">
+              <Image
+                src={anime.coverImage.large}
+                alt={title}
+                fill
+                sizes="(max-width: 768px) 140px, 200px"
+                className="object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-75"
+              />
+
+              {/* Score badge */}
+              {anime.averageScore && (
+                <div className="absolute top-2 left-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-medium text-[#f9c846] backdrop-blur-sm">
+                  ★ {(anime.averageScore / 10).toFixed(1)}
+                </div>
+              )}
+
+              {/* Episode count */}
+              {anime.episodes && (
+                <div className="absolute top-2 right-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-gray-300 backdrop-blur-sm">
+                  {anime.episodes} eps
+                </div>
+              )}
+
+              {/* Add to list button */}
+              <div className="absolute bottom-2 right-2 z-20">
+                {initialStatus ? (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowDropdown(!showDropdown);
+                    }}
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm border border-white/10 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#f9c846] hover:text-black hover:border-transparent"
+                    disabled={isUpdating}
+                  >
+                    <Check size={14} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!session) {
+                        signIn();
+                        return;
+                      }
+                      setShowDropdown(!showDropdown);
+                    }}
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm border border-white/10 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#f9c846] hover:text-black hover:border-transparent"
+                    disabled={isUpdating}
+                  >
+                    <Plus size={14} />
+                  </button>
+                )}
+
+                {showDropdown && session && (
+                  <div className="absolute bottom-full right-0 mb-1.5 overflow-hidden rounded-lg border border-white/10 bg-black/95 backdrop-blur-md shadow-xl text-nowrap">
+                    {statusOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={(e) => handleAddToList(e, option.value)}
+                        className={`flex w-full items-center gap-2 px-3 py-2 text-[11px] transition-colors ${
+                          initialStatus === option.value
+                            ? "bg-white/10 font-semibold text-white"
+                            : "text-white hover:bg-white/10"
+                        }`}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: option.color }}
+                        />
+                        <span>{option.label}</span>
+                        {initialStatus === option.value && (
+                          <Check size={12} className="ml-auto text-[#97cc04]" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Title below */}
+        <div className="p-2">
+          <h3 className="text-[13px] font-medium text-gray-500 line-clamp-2 leading-tight group-hover:text-white transition-colors">
+            {title}
+          </h3>
+          <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-500">
+            {anime.seasonYear && <span>{anime.seasonYear}</span>}
+            {anime.type && (
+              <>
+                <span className="text-gray-600">·</span>
+                <span>{anime.type === "TV" ? "TV" : anime.type}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

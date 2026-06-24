@@ -21,7 +21,7 @@ const BADGE_DEFINITIONS = {
   },
   episode_master: {
     name: "Episode Master",
-    description: "Watched 100 episodes total",
+    description: "Watched 500 episodes total",
     icon: "sword",
     xpReward: 300,
     category: "milestone",
@@ -35,14 +35,14 @@ const BADGE_DEFINITIONS = {
   },
   completionist: {
     name: "Completionist",
-    description: "Completed 10 anime",
+    description: "Completed 20 anime",
     icon: "trophy",
     xpReward: 250,
     category: "achievement",
   },
   anime_lover: {
     name: "Anime Lover",
-    description: "Watched 500 episodes",
+    description: "Watched 1000 episodes",
     icon: "heart",
     xpReward: 750,
     category: "milestone",
@@ -191,12 +191,28 @@ export async function addToAnimeList(
 
   if (existing) {
     const wasAlreadyCompleted = existing.status === "COMPLETED";
+    
+    // If updating to COMPLETED without progress, fetch total episodes
+    let updatedProgress = progress ?? existing.progress;
+    if (status === "COMPLETED" && !progress && existing.progress === 0) {
+      try {
+        const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
+        const data = await res.json();
+        const totalEpisodes = data.data?.episodes;
+        if (totalEpisodes) {
+          updatedProgress = totalEpisodes;
+        }
+      } catch {
+        // If Jikan fails, keep existing progress
+        console.warn("Could not fetch episode count from Jikan when updating to completed");
+      }
+    }
 
     const updated = await prisma.animeList.update({
       where: { id: existing.id },
       data: {
         status,
-        progress: progress ?? existing.progress,
+        progress: updatedProgress,
         score: score ?? existing.score,
         ...(status === "COMPLETED" && !existing.completedAt
           ? { completedAt: new Date() }
@@ -214,17 +230,34 @@ export async function addToAnimeList(
     }
 
     revalidatePath("/library");
-    revalidatePath("/dashboard");
+    revalidatePath("/profile");
     return updated;
   }
 
   // Create new entry — award list add XP (one-time)
+  let finalProgress = progress || 0;
+  
+  // If completing anime without progress, fetch total episodes
+  if (status === "COMPLETED" && !progress) {
+    try {
+      const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
+      const data = await res.json();
+      const totalEpisodes = data.data?.episodes;
+      if (totalEpisodes) {
+        finalProgress = totalEpisodes;
+      }
+    } catch {
+      // If Jikan fails, keep progress at 0
+      console.warn("Could not fetch episode count from Jikan for completed anime");
+    }
+  }
+  
   const created = await prisma.animeList.create({
     data: {
       userId,
       animeId,
       status,
-      progress: progress || 0,
+      progress: finalProgress,
       score: score || null,
       startedAt: status === "WATCHING" ? new Date() : null,
       completedAt: status === "COMPLETED" ? new Date() : null,
@@ -247,7 +280,7 @@ export async function addToAnimeList(
   }
 
   revalidatePath("/library");
-  revalidatePath("/dashboard");
+  revalidatePath("/profile");
   return created;
 }
 
@@ -327,7 +360,7 @@ export async function updateProgress(animeId: number, progress: number) {
   // Check episode milestone badges
   await checkEpisodeMilestones(userId);
 
-  revalidatePath("/dashboard");
+  revalidatePath("/profile");
   return updated;
 }
 
@@ -388,7 +421,7 @@ export async function addToFavorites(animeId: number) {
   // Check favorite curator badge
   await checkFavoriteCuratorBadge(userId);
 
-  revalidatePath("/dashboard");
+  revalidatePath("/profile");
   return created;
 }
 
@@ -397,7 +430,7 @@ export async function removeFromFavorites(animeId: number) {
   await prisma.favorite.deleteMany({
     where: { userId, animeId },
   });
-  revalidatePath("/dashboard");
+  revalidatePath("/profile");
 }
 
 export async function getUserFavorites(userId?: string) {
@@ -425,19 +458,22 @@ async function checkCompletionBadges(userId: string) {
   });
 
   if (completedCount >= 50) await checkAndAwardBadge(userId, "anime_veteran");
-  if (completedCount >= 10) await checkAndAwardBadge(userId, "completionist");
+  if (completedCount >= 20) await checkAndAwardBadge(userId, "completionist");
 }
 
 async function checkEpisodeMilestones(userId: string) {
   const totalProgress = await prisma.animeList.aggregate({
-    where: { userId },
+    where: { 
+      userId,
+      status: { not: "REWATCHING" }
+    },
     _sum: { progress: true },
   });
 
   const totalEpisodes = totalProgress._sum.progress || 0;
 
   if (totalEpisodes >= 500) await checkAndAwardBadge(userId, "anime_lover");
-  if (totalEpisodes >= 100) await checkAndAwardBadge(userId, "episode_master");
+  if (totalEpisodes >= 1000) await checkAndAwardBadge(userId, "episode_master");
 }
 
 async function checkCollectorBadge(userId: string) {
@@ -512,7 +548,10 @@ export async function getUserStats(userId?: string) {
       _count: true,
     }),
     prisma.animeList.aggregate({
-      where: { userId: id },
+      where: { 
+        userId: id,
+        status: { not: "REWATCHING" }
+      },
       _sum: { progress: true },
     }),
     prisma.animeList.count({
