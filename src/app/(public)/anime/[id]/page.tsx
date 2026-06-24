@@ -6,9 +6,10 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
-import { ArrowLeft, Star, Tv, Clock, Users, Calendar, Check, ChevronDown, BookOpen, Plus, Minus } from "lucide-react";
+import { ArrowLeft, Star, Tv, Clock, Users, Calendar, BookOpen } from "lucide-react";
 import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { lordJuusai } from "@/fonts/fonts";
+import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 
 // Types
 interface Anime {
@@ -50,15 +51,6 @@ interface Anime {
 }
 
 type AnimeStatus = "WATCHING" | "COMPLETED" | "PLAN_TO_WATCH" | "PAUSED" | "DROPPED" | "REWATCHING";
-
-const statusOptions = [
-  { label: "Watching", value: "WATCHING" as const, color: "#00e8fc" },
-  { label: "Completed", value: "COMPLETED" as const, color: "#97cc04" },
-  { label: "Plan to Watch", value: "PLAN_TO_WATCH" as const, color: "#f9c846" },
-  { label: "Paused", value: "PAUSED" as const, color: "#f96e46" },
-  { label: "Dropped", value: "DROPPED" as const, color: "#ff4444" },
-  { label: "Rewatching", value: "REWATCHING" as const, color: "#c084fc" },
-];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformJikanToAnime(jikanAnime: any): Anime {
@@ -123,9 +115,7 @@ export default function AnimeDetailPage() {
   const [userStatus, setUserStatus] = useState<AnimeStatus | null>(null);
   const [userScore, setUserScore] = useState<number | null>(null);
   const [updating, setUpdating] = useState(false);
-  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
-
-  const activeStatus = statusOptions.find((s) => s.value === userStatus);
+  const [showModal, setShowModal] = useState(false);
 
   // Fetch anime details
   useEffect(() => {
@@ -191,40 +181,21 @@ export default function AnimeDetailPage() {
     fetchUserStatus();
   }, [session, anime]);
 
-  const handleStatusChange = async (status: AnimeStatus) => {
+  const handleSave = async (status: string, progress: number) => {
     if (!session) {
       signIn();
       return;
     }
     if (!anime || updating) return;
-    setUpdating(true);
-    try {
-      await addToAnimeList(anime.id, status, userProgress, userScore || undefined);
-      setUserStatus(status);
-      setShowStatusDropdown(false);
-    } catch (error) {
-      console.error("Error updating status:", error);
-    } finally {
-      setUpdating(false);
-    }
-  };
 
-  const handleProgressUpdate = async (delta: number) => {
-    if (!session) {
-      signIn();
-      return;
-    }
-    if (!anime || updating) return;
-    const newProgress = Math.max(0, Math.min(userProgress + delta, anime.episodes || 0));
     setUpdating(true);
     try {
-      await updateProgress(anime.id, newProgress);
-      setUserProgress(newProgress);
-      if (newProgress === anime.episodes && anime.episodes > 0) {
-        setUserStatus("COMPLETED");
-      }
+      await addToAnimeList(anime.id, status as AnimeStatus, progress, userScore || undefined);
+      setUserStatus(status as AnimeStatus);
+      setUserProgress(progress);
+      setShowModal(false);
     } catch (error) {
-      console.error("Error updating progress:", error);
+      console.error("Error updating:", error);
     } finally {
       setUpdating(false);
     }
@@ -436,93 +407,44 @@ export default function AnimeDetailPage() {
             <div className="mt-6">
               <h3 className="text-sm font-semibold text-[#545863] mb-4">Your Progress</h3>
 
-                {/* Status selector */}
-                <div className="relative">
-                  <button
-                    onClick={() => {
-                      if (!session) {
-                        signIn();
-                        return;
-                      }
-                      setShowStatusDropdown(!showStatusDropdown);
-                    }}
-                    className="flex items-center cursor-pointer justify-between w-full rounded-lg border border-[#ececec] bg-[#fffdf8] px-4 py-2.5 text-sm transition-colors hover:border-[#f9c846]/30"
-                  >
+              {/* Update Button */}
+              {session ? (
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="w-full rounded-lg border border-[#ececec] bg-[#fffdf8] px-4 py-2.5 text-sm font-medium text-[#545863] hover:border-[#f9c846]/30 transition-colors"
+                >
+                  {userStatus ? "Update Progress" : "Add to Library"}
+                </button>
+              ) : (
+                <button
+                  onClick={() => signIn()}
+                  className="w-full rounded-lg border border-[#ececec] bg-[#fffdf8] px-4 py-2.5 text-sm font-medium text-[#545863] hover:border-[#f9c846]/30 transition-colors"
+                >
+                  Sign in to track
+                </button>
+              )}
+
+              {/* Current Status Display */}
+              {userStatus && (
+                <div className="mt-4 p-4 rounded-lg border border-[#ececec] bg-white">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      {activeStatus ? (
-                        <>
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: activeStatus.color }} />
-                          <span className="text-[#545863] font-medium">{activeStatus.label}</span>
-                        </>
-                      ) : (
-                        <span className="text-[#7b7f89]">Add to Library</span>
-                      )}
+                      <span className="w-3 h-3 rounded-full" style={{ 
+                        backgroundColor: userStatus === "WATCHING" ? "#00e8fc" :
+                                       userStatus === "COMPLETED" ? "#97cc04" :
+                                       userStatus === "PLAN_TO_WATCH" ? "#f9c846" :
+                                       userStatus === "PAUSED" ? "#f96e46" :
+                                       userStatus === "DROPPED" ? "#ff4444" : "#c084fc"
+                      }} />
+                      <span className="text-sm font-medium text-[#545863]">{userStatus}</span>
                     </div>
-                    <ChevronDown size={14} className={`text-[#7b7f89] transition-transform ${showStatusDropdown ? "rotate-180" : ""}`} />
-                  </button>
-
-                  {showStatusDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-1 overflow-hidden rounded-xl border border-[#ececec] bg-white shadow-xl z-30">
-                      {statusOptions.map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => handleStatusChange(option.value)}
-                          disabled={updating || (option.value === "COMPLETED" && isAiring)}
-                          className={`flex w-full items-center cursor-pointer gap-3 px-4 py-2.5 text-sm transition-colors ${
-                            userStatus === option.value
-                              ? "bg-[#f7f7f7] font-semibold text-[#545863]"
-                              : "text-[#545863] hover:bg-[#f7f7f7]"
-                          } ${option.value === "COMPLETED" && isAiring ? "opacity-50 cursor-not-allowed" : ""}`}
-                        >
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: option.color }} />
-                          <span>{option.label}</span>
-                          {option.value === "COMPLETED" && isAiring && (
-                            <span className="ml-auto text-[10px] text-[#7b7f89]">(Airing)</span>
-                          )}
-                          {userStatus === option.value && !(option.value === "COMPLETED" && isAiring) && (
-                            <Check size={14} className="ml-auto text-[#97cc04]" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Progress bar */}
-                {(userStatus === "WATCHING" || userStatus === "REWATCHING") && anime.episodes > 0 && (
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between text-xs text-[#7b7f89] mb-1.5">
-                      <span>Episode Progress</span>
-                      <span className="font-medium text-[#545863]">{userProgress} / {anime.episodes}</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-[#f7f7f7] overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#f9c846] to-[#f96e46] transition-all duration-300"
-                        style={{ width: `${(userProgress / anime.episodes) * 100}%` }}
-                      />
-                    </div>
-                    <div className="mt-3 flex items-center gap-2">
-                      <button
-                        onClick={() => handleProgressUpdate(-1)}
-                        disabled={updating || userProgress === 0}
-                        className="p-2 rounded-lg border border-[#ececec] bg-white hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <span className="text-sm font-medium text-[#545863] w-16 text-center">
-                        {userProgress}
-                      </span>
-                      <button
-                        onClick={() => handleProgressUpdate(1)}
-                        disabled={updating || userProgress >= anime.episodes}
-                        className="p-2 rounded-lg bg-[#f9c846] hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
-                      >
-                        <Plus size={14} />
-                      </button>
-                    </div>
+                    <span className="text-sm text-[#7b7f89]">
+                      {userProgress} / {anime.episodes || "?"} eps
+                    </span>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+            </div>
 
             {/* Description */}
             <div className="mt-8">
@@ -601,6 +523,20 @@ export default function AnimeDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Update Progress Modal */}
+      <UpdateProgressModal
+        key={`modal-${anime.id}`}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSave={handleSave}
+        currentStatus={userStatus || "PLAN_TO_WATCH"}
+        currentProgress={userProgress}
+        totalEpisodes={anime.episodes || undefined}
+        animeTitle={title}
+        isAiring={isAiring}
+        isUpdating={updating}
+      />
     </div>
   );
 }
