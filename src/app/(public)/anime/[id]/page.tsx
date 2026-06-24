@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
-import { ArrowLeft, Star, Tv, Clock, Users, Calendar, Check, ChevronDown, BookOpen } from "lucide-react";
+import { ArrowLeft, Star, Tv, Clock, Users, Calendar, Check, ChevronDown, BookOpen, Plus, Minus } from "lucide-react";
 import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { lordJuusai } from "@/fonts/fonts";
 
@@ -209,13 +209,13 @@ export default function AnimeDetailPage() {
     }
   };
 
-  const handleProgressUpdate = async (increment: number) => {
+  const handleProgressUpdate = async (delta: number) => {
     if (!session) {
       signIn();
       return;
     }
     if (!anime || updating) return;
-    const newProgress = Math.min(userProgress + increment, anime.episodes || 0);
+    const newProgress = Math.max(0, Math.min(userProgress + delta, anime.episodes || 0));
     setUpdating(true);
     try {
       await updateProgress(anime.id, newProgress);
@@ -229,6 +229,8 @@ export default function AnimeDetailPage() {
       setUpdating(false);
     }
   };
+
+  const isAiring = anime?.status?.toLowerCase().includes("airing") || anime?.status?.toLowerCase().includes("currently");
 
   if (loading) {
     return (
@@ -465,16 +467,19 @@ export default function AnimeDetailPage() {
                         <button
                           key={option.value}
                           onClick={() => handleStatusChange(option.value)}
-                          disabled={updating}
+                          disabled={updating || (option.value === "COMPLETED" && isAiring)}
                           className={`flex w-full items-center cursor-pointer gap-3 px-4 py-2.5 text-sm transition-colors ${
                             userStatus === option.value
                               ? "bg-[#f7f7f7] font-semibold text-[#545863]"
                               : "text-[#545863] hover:bg-[#f7f7f7]"
-                          }`}
+                          } ${option.value === "COMPLETED" && isAiring ? "opacity-50 cursor-not-allowed" : ""}`}
                         >
                           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: option.color }} />
                           <span>{option.label}</span>
-                          {userStatus === option.value && (
+                          {option.value === "COMPLETED" && isAiring && (
+                            <span className="ml-auto text-[10px] text-[#7b7f89]">(Airing)</span>
+                          )}
+                          {userStatus === option.value && !(option.value === "COMPLETED" && isAiring) && (
                             <Check size={14} className="ml-auto text-[#97cc04]" />
                           )}
                         </button>
@@ -484,7 +489,7 @@ export default function AnimeDetailPage() {
                 </div>
 
                 {/* Progress bar */}
-                {userStatus === "WATCHING" && anime.episodes > 0 && (
+                {(userStatus === "WATCHING" || userStatus === "REWATCHING") && anime.episodes > 0 && (
                   <div className="mt-4">
                     <div className="flex items-center justify-between text-xs text-[#7b7f89] mb-1.5">
                       <span>Episode Progress</span>
@@ -496,20 +501,23 @@ export default function AnimeDetailPage() {
                         style={{ width: `${(userProgress / anime.episodes) * 100}%` }}
                       />
                     </div>
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-3 flex items-center gap-2">
+                      <button
+                        onClick={() => handleProgressUpdate(-1)}
+                        disabled={updating || userProgress === 0}
+                        className="p-2 rounded-lg border border-[#ececec] bg-white hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="text-sm font-medium text-[#545863] w-16 text-center">
+                        {userProgress}
+                      </span>
                       <button
                         onClick={() => handleProgressUpdate(1)}
-                        disabled={updating || userProgress === anime.episodes}
-                        className="rounded-lg bg-[#f9c846] px-4 py-2 text-xs font-medium text-[#545863] hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
+                        disabled={updating || userProgress >= anime.episodes}
+                        className="p-2 rounded-lg bg-[#f9c846] hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
                       >
-                        +1 Episode
-                      </button>
-                      <button
-                        onClick={() => handleProgressUpdate(5)}
-                        disabled={updating || userProgress + 5 > anime.episodes}
-                        className="rounded-lg border border-[#ececec] bg-white px-4 py-2 text-xs text-[#545863] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
-                      >
-                        +5 Episodes
+                        <Plus size={14} />
                       </button>
                     </div>
                   </div>

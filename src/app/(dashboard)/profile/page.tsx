@@ -12,6 +12,7 @@ import { addToAnimeList } from "@/features/tracking/api";
 import AnimeCard from "@/components/anime/AnimeCard";
 import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
 import Image from "next/image";
+import BadgeCard from "@/components/badges/BadgeCard";
 
 const COLORS = ["#00e8fc", "#97cc04", "#f9c846", "#f96e46", "#ff4444", "#c084fc"];
 
@@ -248,113 +249,23 @@ export default function DashboardPage() {
               };
 
               const badgeData = badgeColors[ub.id] || badgeColors.first_anime;
-              const rarityLabel = ub.badge.category
-                ? ub.badge.category.charAt(0).toUpperCase() + ub.badge.category.slice(1)
-                : "Common";
+              const rarityLabel = ub.badge.category ? ub.badge.category.charAt(0).toUpperCase() + ub.badge.category.slice(1) : "Common";
 
               return (
-                <div
+                <BadgeCard
                   key={ub.id}
-                  className="group relative cursor-pointer"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="relative transition-all duration-500 group-hover:-translate-y-1">
-                    {/* Outer glow */}
-                    <div
-                      className="absolute -inset-[2px] opacity-0 group-hover:opacity-100 transition-all duration-700 blur-md"
-                      style={{
-                        background: `linear-gradient(135deg, ${badgeData.color}60, ${badgeData.color}10, ${badgeData.color}60, ${badgeData.color}10)`,
-                        backgroundSize: "400% 400%",
-                        animation: "borderGlow 2s ease-in-out infinite",
-                        clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px)",
-                      }}
-                    />
-
-                    {/* Card body */}
-                    <div
-                      className="relative bg-white overflow-hidden shadow-sm transition-shadow duration-300 group-hover:shadow-2xl"
-                      style={{
-                        clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px)",
-                      }}
-                    >
-                      {/* Top ornament bar */}
-                      <div className="relative h-1.5 overflow-hidden">
-                        <div
-                          className="absolute inset-0 opacity-40"
-                          style={{
-                            background: `linear-gradient(90deg, transparent, ${badgeData.color}, ${badgeData.color}, transparent)`,
-                          }}
-                        />
-                        <div
-                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                          style={{
-                            background: `linear-gradient(90deg, transparent, ${badgeData.color}, ${badgeData.color}, ${badgeData.color}, transparent)`,
-                          }}
-                        />
-                      </div>
-
-                      <div className="p-3 text-center">
-                        {/* Icon */}
-                        <div className="relative mx-auto mb-2 w-12 h-12 flex items-center justify-center">
-                          <div
-                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500"
-                            style={{
-                              background: `radial-gradient(ellipse at center, ${badgeData.glow} 0%, transparent 65%)`,
-                              clipPath: hexClipPath,
-                            }}
-                          />
-                          <div
-                            className="relative flex items-center justify-center z-10 transition-all duration-500 group-hover:scale-110"
-                            style={{
-                              width: "48px",
-                              height: "48px",
-                              backgroundColor: `${badgeData.color}10`,
-                              clipPath: hexClipPathInner,
-                            }}
-                          >
-                            <span className="text-2xl relative z-40">🏆</span>
-                          </div>
-                        </div>
-
-                        {/* Badge name */}
-                        <h3 className="text-[11px] font-bold text-[#545863] group-hover:text-[#f96e46] transition-all duration-300 uppercase tracking-[0.1em] leading-tight">
-                          {ub.badge.name}
-                        </h3>
-
-                        {/* Rarity gem */}
-                        <div className="relative inline-block mt-2">
-                          <span
-                            className={`relative inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] ${badgeData.rarityColor} overflow-hidden`}
-                          >
-                            <div
-                              className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
-                              style={{
-                                background: `linear-gradient(90deg, transparent, ${badgeData.color}20, transparent)`,
-                              }}
-                            />
-                            <span className="relative">{rarityLabel}</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Bottom ornament bar */}
-                      <div className="relative h-1.5 overflow-hidden">
-                        <div
-                          className="absolute inset-0 opacity-40"
-                          style={{
-                            background: `linear-gradient(90deg, transparent, ${badgeData.color}, ${badgeData.color}, transparent)`,
-                          }}
-                        />
-                        <div
-                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                          style={{
-                            background: `linear-gradient(90deg, transparent, ${badgeData.color}, ${badgeData.color}, ${badgeData.color}, transparent)`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  badge={{
+                    id: ub.id,
+                    name: ub.badge.name,
+                    description: ub.badge.name,
+                    icon: "/icons/trophy.png",
+                    category: ub.badge.category || "Common",
+                  }}
+                  color={badgeData.color}
+                  rarityColor={badgeData.rarityColor}
+                  glow={badgeData.glow}
+                  index={index}
+                />
               );
             })}
           </div>
@@ -397,18 +308,6 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-<style jsx>{`
-  @keyframes borderGlow {
-    0%,
-    100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-  }
-`}</style>
 
 function TrendingAnimeCard({
   anime,

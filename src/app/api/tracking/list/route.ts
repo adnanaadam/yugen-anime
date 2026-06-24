@@ -21,7 +21,36 @@ export async function GET(request: NextRequest) {
     orderBy: { updatedAt: "desc" },
   });
 
-  return NextResponse.json(list);
+  // Fetch anime details from Jikan for each entry
+  const enrichedList = await Promise.all(
+    list.map(async (entry) => {
+      try {
+        const res = await fetch(`https://api.jikan.moe/v4/anime/${entry.animeId}`);
+        if (!res.ok) return { ...entry, anime: null };
+        const data = await res.json();
+        const anime = data.data;
+        
+        return {
+          ...entry,
+          anime: {
+            title: {
+              english: anime.title_english,
+              romaji: anime.title,
+            },
+            coverImage: {
+              large: anime.images.jpg.large_image_url,
+            },
+            averageScore: anime.score ? anime.score * 10 : null,
+            episodes: anime.episodes,
+          },
+        };
+      } catch {
+        return { ...entry, anime: null };
+      }
+    })
+  );
+
+  return NextResponse.json(enrichedList);
 }
 
 export async function POST(request: NextRequest) {

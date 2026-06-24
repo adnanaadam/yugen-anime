@@ -71,7 +71,7 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop */}
-      <header className="fixed top-0 left-0 right-0 z-50 hidden md:flex items-center justify-center h-14 bg-[#545863]">
+      <header className="fixed top-0 left-0 right-0 z-50 hidden md:flex items-center justify-center h-14 bg-[var(--color-secondary)]">
         {/* Grid layout: 3 equal columns so center stays centered */}
         <div className="grid grid-cols-3 items-center w-full text-[var(--color-surface)] px-8 lg:px-16">
           {/* Left: Logo */}
