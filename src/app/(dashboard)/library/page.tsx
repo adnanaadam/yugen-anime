@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import React from "react";
 import { useAnimeList } from "@/hooks/useUserData";
 import { useSession, signIn } from "next-auth/react";
@@ -52,7 +53,8 @@ interface LibraryEntry {
 }
 
 export default function LibraryPage() {
-  const [activeStatus, setActiveStatus] = useState("");
+  const searchParams = useSearchParams();
+  const [activeStatus, setActiveStatus] = useState(searchParams.get("status") || "");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { data: animeList, loading, mutate } = useAnimeList(activeStatus || undefined);
   const { data: session } = useSession();
