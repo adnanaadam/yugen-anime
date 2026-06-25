@@ -190,7 +190,13 @@ export default function AnimeDetailPage() {
 
     setUpdating(true);
     try {
-      await addToAnimeList(anime.id, status as AnimeStatus, progress, userScore || undefined);
+      // If status changed, use addToAnimeList (handles status + progress)
+      // If only progress changed, use updateProgress (awards XP)
+      if (status !== userStatus) {
+        await addToAnimeList(anime.id, status as AnimeStatus, progress, userScore || undefined);
+      } else {
+        await updateProgress(anime.id, progress);
+      }
       setUserStatus(status as AnimeStatus);
       setUserProgress(progress);
       setShowModal(false);

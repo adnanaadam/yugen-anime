@@ -15,7 +15,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
-import { addToAnimeList } from "@/features/tracking/api";
+import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { lordJuusai } from "@/fonts/fonts";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 import type { TransformedAnime } from "@/services/jikan.service";
@@ -249,8 +249,14 @@ function ExploreAnimeCard({
 
     setIsUpdating(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await addToAnimeList(anime.id, status as any, progress);
+      // If status changed, use addToAnimeList (handles status + progress)
+      // If only progress changed, use updateProgress (awards XP)
+      if (status !== currentStatus) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await addToAnimeList(anime.id, status as any, progress);
+      } else {
+        await updateProgress(anime.id, progress);
+      }
       setCurrentStatus(status);
       onStatusChange(anime.id, status, progress);
       setShowModal(false);
@@ -472,7 +478,7 @@ function ExploreAnimeCard({
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSave={handleSave}
-        currentStatus={currentStatus || "PLAN_TO_WATCH"}
+        currentStatus={currentStatus || ""}
         currentProgress={initialProgress}
         totalEpisodes={anime.episodes || undefined}
         animeTitle={title}

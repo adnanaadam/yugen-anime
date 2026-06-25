@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, Plus, Minus } from "lucide-react";
 
 const statusOptions = [
@@ -39,6 +39,24 @@ export default function UpdateProgressModal({
   // to ensure state resets for different anime (e.g., key={`modal-${animeId}-${Date.now()}`})
   const [status, setStatus] = useState(currentStatus);
   const [progress, setProgress] = useState(currentProgress);
+  const prevStatusRef = useRef(currentStatus);
+  const prevProgressRef = useRef(currentProgress);
+
+  // Sync status with prop changes (only when changed)
+  useEffect(() => {
+    if (currentStatus !== prevStatusRef.current) {
+      prevStatusRef.current = currentStatus;
+      setStatus(currentStatus);
+    }
+  }, [currentStatus]);
+
+  // Sync progress with prop changes (only when changed)
+  useEffect(() => {
+    if (currentProgress !== prevProgressRef.current) {
+      prevProgressRef.current = currentProgress;
+      setProgress(currentProgress);
+    }
+  }, [currentProgress]);
 
   if (!isOpen) return null;
 

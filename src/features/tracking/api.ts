@@ -149,11 +149,6 @@ function validateProgressUpdate(
   newProgress: number,
   totalEpisodes: number | null
 ): { valid: boolean; episodesWatched: number; reason?: string } {
-  // Can't decrease progress
-  if (newProgress < currentProgress) {
-    return { valid: false, episodesWatched: 0, reason: "Cannot decrease progress" };
-  }
-
   // Can't exceed total episodes (if known)
   if (totalEpisodes && newProgress > totalEpisodes) {
     return { valid: false, episodesWatched: 0, reason: `Cannot exceed ${totalEpisodes} episodes` };
@@ -161,17 +156,15 @@ function validateProgressUpdate(
 
   const jump = newProgress - currentProgress;
   
-  // Farming protection: limit episodes per update (max 100)
-  if (jump > 100) {
-    return { valid: false, episodesWatched: 0, reason: "Cannot update more than 100 episodes at once" };
-  }
-  
   // No change = no XP
   if (jump === 0) {
     return { valid: true, episodesWatched: 0 };
   }
 
-  return { valid: true, episodesWatched: jump };
+  // Only award XP for increases (negative jump = decrease = 0 XP)
+  const episodesWatched = jump > 0 ? jump : 0;
+  
+  return { valid: true, episodesWatched };
 }
 
 // ============================================================

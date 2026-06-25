@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { ArrowRight, Star, Tv, ChevronDown } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
-import { addToAnimeList } from "@/features/tracking/api";
+import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 import type { TransformedAnime } from "@/services/jikan.service";
 
@@ -136,11 +136,17 @@ function RowAnimeCard({
 
     setIsUpdating(true);
     try {
-      await addToAnimeList(
-        anime.id,
-        status as "WATCHING" | "COMPLETED" | "PLAN_TO_WATCH" | "PAUSED" | "DROPPED" | "REWATCHING",
-        progress,
-      );
+      // If status changed, use addToAnimeList (handles status + progress)
+      // If only progress changed, use updateProgress (awards XP)
+      if (status !== currentStatus) {
+        await addToAnimeList(
+          anime.id,
+          status as "WATCHING" | "COMPLETED" | "PLAN_TO_WATCH" | "PAUSED" | "DROPPED" | "REWATCHING",
+          progress,
+        );
+      } else {
+        await updateProgress(anime.id, progress);
+      }
       setCurrentStatus(status);
       setUserProgress(progress);
       setShowModal(false);
@@ -383,7 +389,7 @@ function RowAnimeCard({
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSave={handleSave}
-        currentStatus={currentStatus || "PLAN_TO_WATCH"}
+        currentStatus={currentStatus || ""}
         currentProgress={userProgress}
         totalEpisodes={anime.episodes || undefined}
         animeTitle={title}
