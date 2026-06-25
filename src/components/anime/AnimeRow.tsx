@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { ArrowRight, Star, Tv, ChevronDown } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList, updateProgress } from "@/features/tracking/api";
+import { handleFeedback, extractFeedback } from "@/lib/feedback-helper";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 import type { TransformedAnime } from "@/services/jikan.service";
 
@@ -135,26 +136,32 @@ function RowAnimeCard({
     }
 
     setIsUpdating(true);
-    try {
-      // If status changed, use addToAnimeList (handles status + progress)
-      // If only progress changed, use updateProgress (awards XP)
-      if (status !== currentStatus) {
-        await addToAnimeList(
-          anime.id,
-          status as "WATCHING" | "COMPLETED" | "PLAN_TO_WATCH" | "PAUSED" | "DROPPED" | "REWATCHING",
-          progress,
-        );
-      } else {
-        await updateProgress(anime.id, progress);
+      try {
+        let feedback;
+        if (status !== currentStatus) {
+          const result = await addToAnimeList(
+            anime.id,
+            status as "WATCHING" | "COMPLETED" | "PLAN_TO_WATCH" | "PAUSED" | "DROPPED" | "REWATCHING",
+            progress,
+          );
+          feedback = extractFeedback(result);
+        } else {
+          const result = await updateProgress(anime.id, progress);
+          feedback = extractFeedback(result);
+        }
+        
+        if (feedback) {
+          handleFeedback(feedback);
+        }
+        
+        setCurrentStatus(status);
+        setUserProgress(progress);
+        setShowModal(false);
+      } catch (error) {
+        console.error("Failed to update:", error);
+      } finally {
+        setIsUpdating(false);
       }
-      setCurrentStatus(status);
-      setUserProgress(progress);
-      setShowModal(false);
-    } catch (error) {
-      console.error("Failed to update:", error);
-    } finally {
-      setIsUpdating(false);
-    }
   };
 
   // Determine if detail box should appear on left or right

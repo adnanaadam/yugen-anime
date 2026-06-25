@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList, updateProgress } from "@/features/tracking/api";
+import { handleFeedback, extractFeedback } from "@/lib/feedback-helper";
 import { lordJuusai } from "@/fonts/fonts";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 import type { TransformedAnime } from "@/services/jikan.service";
@@ -249,14 +250,20 @@ function ExploreAnimeCard({
 
     setIsUpdating(true);
     try {
-      // If status changed, use addToAnimeList (handles status + progress)
-      // If only progress changed, use updateProgress (awards XP)
+      let feedback;
       if (status !== currentStatus) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await addToAnimeList(anime.id, status as any, progress);
+        const result = await addToAnimeList(anime.id, status as any, progress);
+        feedback = extractFeedback(result);
       } else {
-        await updateProgress(anime.id, progress);
+        const result = await updateProgress(anime.id, progress);
+        feedback = extractFeedback(result);
       }
+      
+      if (feedback) {
+        handleFeedback(feedback);
+      }
+      
       setCurrentStatus(status);
       onStatusChange(anime.id, status, progress);
       setShowModal(false);

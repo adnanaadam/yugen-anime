@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
 import { ArrowLeft, Star, Tv, Clock, Users, Calendar, BookOpen } from "lucide-react";
 import { addToAnimeList, updateProgress } from "@/features/tracking/api";
+import { handleFeedback, extractFeedback } from "@/lib/feedback-helper";
 import { lordJuusai } from "@/fonts/fonts";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 
@@ -190,13 +191,19 @@ export default function AnimeDetailPage() {
 
     setUpdating(true);
     try {
-      // If status changed, use addToAnimeList (handles status + progress)
-      // If only progress changed, use updateProgress (awards XP)
+      let feedback;
       if (status !== userStatus) {
-        await addToAnimeList(anime.id, status as AnimeStatus, progress, userScore || undefined);
+        const result = await addToAnimeList(anime.id, status as AnimeStatus, progress, userScore || undefined);
+        feedback = extractFeedback(result);
       } else {
-        await updateProgress(anime.id, progress);
+        const result = await updateProgress(anime.id, progress);
+        feedback = extractFeedback(result);
       }
+      
+      if (feedback) {
+        handleFeedback(feedback);
+      }
+      
       setUserStatus(status as AnimeStatus);
       setUserProgress(progress);
       setShowModal(false);
