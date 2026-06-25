@@ -159,12 +159,8 @@ function validateProgressUpdate(
     return { valid: false, episodesWatched: 0, reason: `Cannot exceed ${totalEpisodes} episodes` };
   }
 
-  // Can't jump more than 50 episodes at once (prevents rapid farming)
   const jump = newProgress - currentProgress;
-  if (jump > 50) {
-    return { valid: false, episodesWatched: 0, reason: "Cannot jump more than 50 episodes at once" };
-  }
-
+  
   // No change = no XP
   if (jump === 0) {
     return { valid: true, episodesWatched: 0 };

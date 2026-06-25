@@ -49,7 +49,7 @@ export default function DashboardLayout({
           <div className="flex items-center justify-between h-12">
             {/* User pill */}
             <div className="flex items-center gap-2">
-              {session.user?.image ? (
+              {session.user?.image && session.user.image.includes("cloudinary") ? (
                 <div className="relative size-7 rounded-full overflow-hidden">
                   <CldImage
                     src={session.user.image}

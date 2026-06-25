@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
             },
             averageScore: anime.score ? anime.score * 10 : null,
             episodes: anime.episodes,
+            status: anime.status,
           },
         };
       } catch {

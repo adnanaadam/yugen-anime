@@ -136,7 +136,7 @@ export default function Navbar() {
                   onClick={() => setShowUserMenu((prev) => !prev)}
                   className="flex items-center cursor-pointer gap-2 rounded-md border border-[var(--color-border)] bg-white px-1 py-1 transition-colors hover:bg-[var(--color-surface-hover)]"
                 >
-                  {session.user?.image ? (
+                  {session.user?.image && session.user.image.includes("cloudinary") ? (
                     <div className="relative size-7 rounded-full overflow-hidden">
                       <CldImage
                         src={session.user.image}

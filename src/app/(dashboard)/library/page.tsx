@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import React from "react";
 import { useAnimeList } from "@/hooks/useUserData";
 import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList } from "@/features/tracking/api";
@@ -46,6 +47,7 @@ interface LibraryEntry {
     };
     averageScore: number | null;
     episodes: number | null;
+    status: string | null;
   };
 }
 
@@ -167,17 +169,20 @@ function LibraryAnimeCard({
 }) {
   const [showModal, setShowModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [enrichedAnime, setEnrichedAnime] = useState(entry.anime);
+  const [fetchedAnime, setFetchedAnime] = useState<LibraryEntry["anime"] | null>(null);
 
-  // Fallback: fetch anime details if missing from API
+  // Use entry.anime if available, otherwise use fetched data
+  const enrichedAnime = entry.anime || fetchedAnime;
+
+  // Fetch from Jikan if entry.anime is missing
   useEffect(() => {
-    if (!entry.anime) {
+    if (!entry.anime && !fetchedAnime) {
       let cancelled = false;
       fetch(`https://api.jikan.moe/v4/anime/${entry.animeId}`)
         .then((res) => res.json())
         .then((data) => {
           if (!cancelled && data.data) {
-            setEnrichedAnime({
+            setFetchedAnime({
               title: {
                 english: data.data.title_english,
                 romaji: data.data.title,
@@ -187,13 +192,14 @@ function LibraryAnimeCard({
               },
               averageScore: data.data.score ? data.data.score * 10 : null,
               episodes: data.data.episodes,
+              status: data.data.status,
             });
           }
         })
         .catch((err) => console.error("Failed to fetch anime details:", err));
       return () => { cancelled = true; };
     }
-  }, [entry.anime, entry.animeId]);
+  }, [entry.anime, entry.animeId, fetchedAnime]);
 
   const handleSave = async (status: string, progress: number) => {
     if (!session) {
@@ -220,6 +226,7 @@ function LibraryAnimeCard({
   const currentStatusColor = statusColors[entry.status] || "#545863";
   const currentStatusLabel = entry.status.charAt(0).toUpperCase() + entry.status.slice(1).toLowerCase();
   const title = enrichedAnime?.title?.english || enrichedAnime?.title?.romaji || `Anime #${entry.animeId}`;
+  const isAiring = enrichedAnime?.status?.toLowerCase().includes("currently airing");
 
   if (viewMode === "list") {
     return (
@@ -356,7 +363,7 @@ function LibraryAnimeCard({
         currentProgress={entry.progress}
         totalEpisodes={enrichedAnime?.episodes || undefined}
         animeTitle={title}
-        isAiring={false}
+        isAiring={isAiring}
         isUpdating={isUpdating}
       />
     </div>
