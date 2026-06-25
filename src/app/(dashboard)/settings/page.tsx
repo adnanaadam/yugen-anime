@@ -45,7 +45,7 @@ export default function SettingsPage() {
       }
 
       const data = await response.json();
-      await update({ ...session, user: { ...session?.user, image: data.url } });
+      await update({ user: { ...session?.user, image: data.url } });
       setPreview(null);
     } catch (error) {
       console.error("Upload error:", error);
@@ -68,7 +68,7 @@ export default function SettingsPage() {
         throw new Error(errData.error || "Delete failed");
       }
 
-      await update({ ...session, user: { ...session?.user, image: null } });
+      await update({ user: { ...session?.user, image: null } });
       setPreview(null);
     } catch (error) {
       console.error("Delete error:", error);
@@ -119,10 +119,7 @@ export default function SettingsPage() {
         return;
       }
 
-      await update({
-        ...session,
-        user: { ...session?.user, username: data.username },
-      });
+      await update({ user: { ...session?.user, username: data.username } });
       setUsername(data.username);
       setIsEditingUsername(false);
     } catch (error) {

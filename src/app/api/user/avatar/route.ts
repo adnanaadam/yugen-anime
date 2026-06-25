@@ -49,7 +49,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Upload error:", error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Upload failed";
+    return NextResponse.json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === "development" ? String(error) : undefined
+    }, { status: 500 });
   }
 }
 
@@ -78,6 +82,10 @@ export async function DELETE() {
     return NextResponse.json({ message: "Avatar removed" });
   } catch (error) {
     console.error("Delete error:", error);
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Delete failed";
+    return NextResponse.json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === "development" ? String(error) : undefined
+    }, { status: 500 });
   }
 }
