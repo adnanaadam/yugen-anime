@@ -278,7 +278,7 @@ function ExploreAnimeCard({
     setCurrentStatus(initialStatus);
   }, [initialStatus, initialProgress]);
 
-  const isAiring = anime.status?.toLowerCase().includes("airing") || anime.status?.toLowerCase().includes("currently");
+  const isAiring = anime.status?.toLowerCase().includes("currently airing");
 
   return (
     <div

@@ -108,7 +108,7 @@ export default function UpdateProgressModal({
                   />
                   <span className="text-xs font-medium text-[#545863]">{option.label}</span>
                   {option.value === "COMPLETED" && isAiring && (
-                    <span className="text-[10px] text-[#7b7f89]">(Airing)</span>
+                    <span className="text-[10px] text-[#7b7f89]">(Currently Airing)</span>
                   )}
                 </button>
               ))}

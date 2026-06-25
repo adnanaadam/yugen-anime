@@ -1,7 +1,7 @@
 // src/app/(dashboard)/library/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAnimeList } from "@/hooks/useUserData";
 import { useSession, signIn } from "next-auth/react";
@@ -167,6 +167,33 @@ function LibraryAnimeCard({
 }) {
   const [showModal, setShowModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [enrichedAnime, setEnrichedAnime] = useState(entry.anime);
+
+  // Fallback: fetch anime details if missing from API
+  useEffect(() => {
+    if (!entry.anime) {
+      let cancelled = false;
+      fetch(`https://api.jikan.moe/v4/anime/${entry.animeId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!cancelled && data.data) {
+            setEnrichedAnime({
+              title: {
+                english: data.data.title_english,
+                romaji: data.data.title,
+              },
+              coverImage: {
+                large: data.data.images.jpg.large_image_url,
+              },
+              averageScore: data.data.score ? data.data.score * 10 : null,
+              episodes: data.data.episodes,
+            });
+          }
+        })
+        .catch((err) => console.error("Failed to fetch anime details:", err));
+      return () => { cancelled = true; };
+    }
+  }, [entry.anime, entry.animeId]);
 
   const handleSave = async (status: string, progress: number) => {
     if (!session) {
@@ -192,16 +219,18 @@ function LibraryAnimeCard({
 
   const currentStatusColor = statusColors[entry.status] || "#545863";
   const currentStatusLabel = entry.status.charAt(0).toUpperCase() + entry.status.slice(1).toLowerCase();
-  const title = entry.anime?.title?.english || entry.anime?.title?.romaji || `Anime #${entry.animeId}`;
+  const title = enrichedAnime?.title?.english || enrichedAnime?.title?.romaji || `Anime #${entry.animeId}`;
 
   if (viewMode === "list") {
     return (
       <div className="flex items-center gap-3 rounded-xl border border-[#ececec] bg-white p-3 shadow-sm hover:shadow-md hover:border-[#f9c846]/30 transition-all">
         {/* Cover Image */}
         <Link href={`/anime/${entry.animeId}`} className="relative w-12 h-16 flex-shrink-0">
-          {entry.anime?.coverImage?.large ? (
+          {!entry.anime && !enrichedAnime ? (
+            <div className="w-full h-full bg-[#f7f7f7] rounded animate-pulse" />
+          ) : enrichedAnime?.coverImage?.large ? (
             <Image
-              src={entry.anime.coverImage.large}
+              src={enrichedAnime.coverImage.large}
               alt={title}
               fill
               className="object-cover rounded"
@@ -251,9 +280,11 @@ function LibraryAnimeCard({
         {/* Cover Image */}
         <Link href={`/anime/${entry.animeId}`} className="block">
           <div className="relative aspect-[2/3] overflow-hidden">
-            {entry.anime?.coverImage?.large ? (
+            {!entry.anime && !enrichedAnime ? (
+              <div className="w-full h-full bg-[#f7f7f7] animate-pulse" />
+            ) : enrichedAnime?.coverImage?.large ? (
               <Image
-                src={entry.anime.coverImage.large}
+                src={enrichedAnime.coverImage.large}
                 alt={title}
                 fill
                 className="object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-75"
@@ -265,9 +296,9 @@ function LibraryAnimeCard({
             )}
 
             {/* Score badge */}
-            {entry.anime?.averageScore && (
+            {enrichedAnime?.averageScore && (
               <div className="absolute top-1 left-1 z-10 rounded bg-black/70 px-1 py-0.5 text-[10px] font-medium text-[#f9c846] backdrop-blur-sm">
-                ★ {(entry.anime.averageScore / 10).toFixed(1)}
+                ★ {(enrichedAnime.averageScore / 10).toFixed(1)}
               </div>
             )}
 
@@ -323,7 +354,7 @@ function LibraryAnimeCard({
         onSave={handleSave}
         currentStatus={entry.status}
         currentProgress={entry.progress}
-        totalEpisodes={entry.anime?.episodes || undefined}
+        totalEpisodes={enrichedAnime?.episodes || undefined}
         animeTitle={title}
         isAiring={false}
         isUpdating={isUpdating}

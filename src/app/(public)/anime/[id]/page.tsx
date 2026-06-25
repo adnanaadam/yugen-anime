@@ -201,7 +201,7 @@ export default function AnimeDetailPage() {
     }
   };
 
-  const isAiring = anime?.status?.toLowerCase().includes("airing") || anime?.status?.toLowerCase().includes("currently");
+  const isAiring = anime?.status?.toLowerCase().includes("currently airing");
 
   if (loading) {
     return (

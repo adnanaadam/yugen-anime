@@ -167,7 +167,7 @@ function RowAnimeCard({
   }, [isHovered]);
 
   const activeStatusColor = currentStatus ? statusColors[currentStatus] : null;
-  const isAiring = anime.status?.toLowerCase().includes("airing") || anime.status?.toLowerCase().includes("currently");
+  const isAiring = anime.status?.toLowerCase().includes("currently airing");
 
   return (
     <div
