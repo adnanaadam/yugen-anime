@@ -161,6 +161,11 @@ function validateProgressUpdate(
 
   const jump = newProgress - currentProgress;
   
+  // Farming protection: limit episodes per update (max 100)
+  if (jump > 100) {
+    return { valid: false, episodesWatched: 0, reason: "Cannot update more than 100 episodes at once" };
+  }
+  
   // No change = no XP
   if (jump === 0) {
     return { valid: true, episodesWatched: 0 };

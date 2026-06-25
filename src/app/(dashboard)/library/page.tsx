@@ -6,7 +6,7 @@ import Link from "next/link";
 import React from "react";
 import { useAnimeList } from "@/hooks/useUserData";
 import { useSession, signIn } from "next-auth/react";
-import { addToAnimeList } from "@/features/tracking/api";
+import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { ChevronDown, Grid, List } from "lucide-react";
 import Image from "next/image";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
@@ -209,11 +209,17 @@ function LibraryAnimeCard({
 
     setIsUpdating(true);
     try {
-      await addToAnimeList(
-        entry.animeId,
-        status as "WATCHING" | "COMPLETED" | "PLAN_TO_WATCH" | "PAUSED" | "DROPPED" | "REWATCHING",
-        progress
-      );
+      // If status changed, use addToAnimeList (handles status + progress)
+      // If only progress changed, use updateProgress (awards XP)
+      if (status !== entry.status) {
+        await addToAnimeList(
+          entry.animeId,
+          status as "WATCHING" | "COMPLETED" | "PLAN_TO_WATCH" | "PAUSED" | "DROPPED" | "REWATCHING",
+          progress
+        );
+      } else {
+        await updateProgress(entry.animeId, progress);
+      }
       onUpdate();
       setShowModal(false);
     } catch (error) {

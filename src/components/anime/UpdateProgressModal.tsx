@@ -123,6 +123,20 @@ export default function UpdateProgressModal({
                 <span className="text-[#7b7f89]"> (max: {totalEpisodes})</span>
               )}
             </label>
+            
+            {/* Show current progress */}
+            {currentProgress > 0 && (
+              <div className="mb-2 p-2 rounded-lg bg-[#f7f7f7] border border-[#ececec]">
+                <p className="text-[11px] text-[#7b7f89]">
+                  Currently watched: <span className="font-semibold text-[#545863]">{currentProgress} episodes</span>
+                  {progress > currentProgress && (
+                    <span className="text-[#97cc04] ml-1">
+                      (+{progress - currentProgress} new)
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleProgressChange(-1)}
