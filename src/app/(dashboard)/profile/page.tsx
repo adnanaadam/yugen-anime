@@ -115,7 +115,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-24">
       {/* Level Card + Pie Chart side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Level Card */}
@@ -235,8 +235,8 @@ export default function DashboardPage() {
           Badges · {badgeCount}/8
         </h3>
         {stats?.badges && stats.badges.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {stats.badges.map((ub: { id: string; badge: { name: string; icon: string | null; category: string | null } }, index: number) => {
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+            {stats.badges.map((ub: { id: string; badge: { id: string; name: string; description: string | null; icon: string | null; category: string | null } }, index: number) => {
               const badgeColors: Record<string, { color: string; rarityColor: string; glow: string }> = {
                 first_anime: { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
                 episode_master: { color: "#97cc04", rarityColor: "bg-[#97cc04]/10 text-[#97cc04] border-[#97cc04]/20", glow: "rgba(151,204,4,0.2)" },
@@ -248,17 +248,30 @@ export default function DashboardPage() {
                 favorite_curator: { color: "#c084fc", rarityColor: "bg-[#c084fc]/10 text-[#c084fc] border-[#c084fc]/20", glow: "rgba(192,132,252,0.2)" },
               };
 
-              const badgeData = badgeColors[ub.id] || badgeColors.first_anime;
+              const badgeKey = ub.badge.id;
+              const badgeData = badgeColors[badgeKey] || badgeColors.first_anime;
               const rarityLabel = ub.badge.category ? ub.badge.category.charAt(0).toUpperCase() + ub.badge.category.slice(1) : "Common";
+
+              // Unique icon per badge
+              const badgeIcons: Record<string, string> = {
+                first_anime: "/icons/scroll.png",
+                episode_master: "/icons/spellbook.png",
+                anime_veteran: "/icons/c-cat.png",
+                completionist: "/icons/trophy.png",
+                anime_lover: "/icons/ring.png",
+                binge_watcher: "/icons/fire-crystal.png",
+                collector: "/icons/gold-chest.png",
+                favorite_curator: "/icons/golden-bookmark.png",
+              };
 
               return (
                 <BadgeCard
                   key={ub.id}
                   badge={{
-                    id: ub.id,
+                    id: badgeKey,
                     name: ub.badge.name,
-                    description: ub.badge.name,
-                    icon: "/icons/trophy.png",
+                    description: ub.badge.description || "No description available.",
+                    icon: badgeIcons[badgeKey] || "/icons/trophy.png",
                     category: ub.badge.category || "Common",
                   }}
                   color={badgeData.color}
