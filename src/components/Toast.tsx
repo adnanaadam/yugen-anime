@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
-import { X, Sparkles, Zap, Trophy } from "lucide-react";
+import { X, Sparkles, Zap, Trophy, Check } from "lucide-react";
 
 interface Toast {
   id: string;
-  type: "xp" | "badge" | "levelup";
+  type: "xp" | "badge" | "levelup" | "success" | "error";
   message: string;
   amount?: number;
   badgeName?: string;
@@ -69,6 +69,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 ? "bg-[#545863] border-[#f9c846]/30"
                 : toast.type === "badge"
                 ? "bg-gradient-to-r from-[#f9c846]/20 to-[#f96e46]/20 border-[#f9c846]/40"
+                : toast.type === "success"
+                ? "bg-[#97cc04]/10 border-[#97cc04]/30"
+                : toast.type === "error"
+                ? "bg-[#f96e46]/10 border-[#f96e46]/30"
                 : "bg-gradient-to-r from-[#c084fc]/30 to-[#f9c846]/30 border-[#c084fc]/50"
             }`}
           >
@@ -78,12 +82,20 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 ? "bg-[#f9c846]/20"
                 : toast.type === "badge"
                 ? "bg-[#f9c846]/30"
+                : toast.type === "success"
+                ? "bg-[#97cc04]/20"
+                : toast.type === "error"
+                ? "bg-[#f96e46]/20"
                 : "bg-[#c084fc]/30"
             }`}>
               {toast.type === "xp" ? (
                 <Zap size={20} className="text-[#f9c846]" />
               ) : toast.type === "badge" ? (
                 <Trophy size={20} className="text-[#f9c846]" />
+              ) : toast.type === "success" ? (
+                <Check size={20} className="text-[#97cc04]" />
+              ) : toast.type === "error" ? (
+                <X size={20} className="text-[#f96e46]" />
               ) : (
                 <Sparkles size={20} className="text-[#c084fc]" />
               )}

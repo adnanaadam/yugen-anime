@@ -4,7 +4,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { Camera, Loader2, Check, Pencil, X, AlertCircle } from "lucide-react";
+import { Camera, Loader2, Check, Pencil, X, AlertCircle, Globe, Lock } from "lucide-react";
+import { addGlobalToast } from "@/components/Toast";
 
 export default function SettingsPage() {
   const { data: session, update } = useSession();
@@ -17,6 +18,10 @@ export default function SettingsPage() {
   const [username, setUsername] = useState(session?.user?.username || "");
   const [usernameError, setUsernameError] = useState("");
   const [savingUsername, setSavingUsername] = useState(false);
+
+  // Profile visibility
+  const [isProfilePublic, setIsProfilePublic] = useState(true);
+  const [updatingVisibility, setUpdatingVisibility] = useState(false);
 
   // Avatar upload
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,6 +138,58 @@ export default function SettingsPage() {
     setUsername(session?.user?.username || "");
     setUsernameError("");
     setIsEditingUsername(false);
+  };
+
+  // Fetch current visibility setting
+  useEffect(() => {
+    const fetchVisibility = async () => {
+      try {
+        const response = await fetch("/api/user/stats");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user?.isProfilePublic !== undefined) {
+            setIsProfilePublic(data.user.isProfilePublic);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching profile visibility:", error);
+      }
+    };
+    fetchVisibility();
+  }, []);
+
+  const handleToggleVisibility = async () => {
+    setUpdatingVisibility(true);
+    try {
+      const response = await fetch("/api/user/profile-visibility", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isProfilePublic: !isProfilePublic }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        addGlobalToast({
+          type: "error",
+          message: data.error || "Failed to update profile visibility",
+        });
+        return;
+      }
+
+      setIsProfilePublic(!isProfilePublic);
+      addGlobalToast({
+        type: "success",
+        message: data.message,
+      });
+    } catch {
+      addGlobalToast({
+        type: "error",
+        message: "Something went wrong. Try again.",
+      });
+    } finally {
+      setUpdatingVisibility(false);
+    }
   };
 
   const imageSrc = session?.user?.image;
@@ -324,12 +381,27 @@ export default function SettingsPage() {
                 Public Profile
               </p>
               <p className="text-xs text-[#7b7f89] mt-0.5">
-                Allow others to see your anime list
+                Allow others to see your anime activity
               </p>
             </div>
-            <span className="rounded-lg bg-[#f7f7f7] px-2.5 py-1 text-[11px] text-[#7b7f89]">
-              Soon
-            </span>
+            <button
+              onClick={handleToggleVisibility}
+              disabled={updatingVisibility}
+              className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                isProfilePublic
+                  ? "bg-[#97cc04]/10 text-[#97cc04] hover:bg-[#97cc04]/20"
+                  : "bg-[#f7f7f7] text-[#7b7f89] hover:bg-[#ececec]"
+              }`}
+            >
+              {updatingVisibility ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : isProfilePublic ? (
+                <Globe size={12} />
+              ) : (
+                <Lock size={12} />
+              )}
+              {isProfilePublic ? "Public" : "Private"}
+            </button>
           </div>
 
           <div className="p-5 flex items-center justify-between">

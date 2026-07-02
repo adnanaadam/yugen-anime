@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
           xp: true,
           level: true,
           createdAt: true,
+          isProfilePublic: true,
         },
       }),
       prisma.userBadge.findMany({
