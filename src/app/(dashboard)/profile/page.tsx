@@ -15,6 +15,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
 import Image from "next/image";
 import BadgeCard from "@/components/badges/BadgeCard";
+import { Globe, Lock } from "lucide-react";
 
 const COLORS = ["#00e8fc", "#97cc04", "#f9c846", "#f96e46", "#ff4444", "#c084fc"];
 
@@ -57,6 +58,7 @@ export default function DashboardPage() {
   const totalEpisodes = stats?.stats.totalEpisodes || 0;
   const badgeCount = stats?.badges?.length || 0;
   const favoritesCount = stats?.stats.favoritesCount || 0;
+  const isProfilePublic = stats?.user?.isProfilePublic ?? true;
 
   // Fetch user's anime statuses
   useEffect(() => {
@@ -122,6 +124,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-24">
+
       {/* Level Card + Pie Chart side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Level Card */}
