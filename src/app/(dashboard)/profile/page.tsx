@@ -10,6 +10,8 @@ import { ArrowRight, Plus, Check } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList } from "@/features/tracking/api";
 import AnimeCard from "@/components/anime/AnimeCard";
+import FavoriteButton from "@/components/anime/FavoriteButton";
+import { useFavorites } from "@/hooks/useFavorites";
 import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
 import Image from "next/image";
 import BadgeCard from "@/components/badges/BadgeCard";
@@ -47,10 +49,14 @@ export default function DashboardPage() {
   const [statusMap, setStatusMap] = useState<Record<number, { status: string; progress: number }>>({});
   const [statusesLoaded, setStatusesLoaded] = useState(() => !session);
 
+  // Global favorites
+  const { favoriteIds, loaded: favoritesLoaded, toggleFavorite } = useFavorites();
+
   const xpInfo = stats?.user ? xpToNextLevel(stats.user.xp) : null;
   const totalAnime = stats?.stats.totalAnime || 0;
   const totalEpisodes = stats?.stats.totalEpisodes || 0;
   const badgeCount = stats?.badges?.length || 0;
+  const favoritesCount = stats?.stats.favoritesCount || 0;
 
   // Fetch user's anime statuses
   useEffect(() => {
@@ -145,7 +151,7 @@ export default function DashboardPage() {
                 : "Max level"}
             </p>
 
-            <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-[#ececec]">
+            <div className="grid grid-cols-4 gap-3 mt-4 pt-4 border-t border-[#ececec]">
               <div className="text-center">
                 <p className="text-lg font-bold text-[#545863]">{totalAnime}</p>
                 <p className="text-[10px] text-[#7b7f89]">Anime</p>
@@ -157,6 +163,10 @@ export default function DashboardPage() {
               <div className="text-center">
                 <p className="text-lg font-bold text-[#545863]">{badgeCount}/8</p>
                 <p className="text-[10px] text-[#7b7f89]">Badges</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-[#f96e46]">{favoritesCount}</p>
+                <p className="text-[10px] text-[#7b7f89]">Favorites</p>
               </div>
             </div>
           </div>
@@ -258,7 +268,7 @@ export default function DashboardPage() {
                 episode_master: "/icons/spellbook.png",
                 anime_veteran: "/icons/c-cat.png",
                 completionist: "/icons/trophy.png",
-                anime_lover: "/icons/ring.png",
+                anime_lover: "/icons/medal.png",
                 binge_watcher: "/icons/fire-crystal.png",
                 collector: "/icons/gold-chest.png",
                 favorite_curator: "/icons/golden-bookmark.png",
@@ -312,7 +322,9 @@ export default function DashboardPage() {
                 session={session}
                 initialStatus={statusesLoaded ? statusMap[anime.id]?.status || null : null}
                 initialProgress={statusesLoaded ? statusMap[anime.id]?.progress || 0 : 0}
+                initialFavorited={favoritesLoaded ? favoriteIds.has(anime.id) : false}
                 onStatusChange={updateStatus}
+                onFavoriteToggle={toggleFavorite}
               />
             ))}
           </div>
@@ -327,13 +339,17 @@ function TrendingAnimeCard({
   session,
   initialStatus,
   initialProgress,
+  initialFavorited,
   onStatusChange,
+  onFavoriteToggle,
 }: {
   anime: { id: number; title: { english: string | null; romaji: string }; coverImage: { large: string }; averageScore: number | null; episodes: number | null; seasonYear: number | null; type: string | null };
   session: ReturnType<typeof useSession>["data"];
   initialStatus: string | null;
   initialProgress: number;
+  initialFavorited: boolean;
   onStatusChange: (animeId: number, status: string) => void;
+  onFavoriteToggle: (animeId: number, favorited: boolean) => void;
 }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -381,6 +397,15 @@ function TrendingAnimeCard({
                 className="object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-75"
               />
 
+              {/* Favorite button */}
+              <div className="absolute top-2 right-2 z-20">
+                <FavoriteButton
+                  animeId={anime.id}
+                  initialFavorited={initialFavorited}
+                  onToggle={(f) => onFavoriteToggle(anime.id, f)}
+                />
+              </div>
+
               {/* Score badge */}
               {anime.averageScore && (
                 <div className="absolute top-2 left-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-medium text-[#f9c846] backdrop-blur-sm">
@@ -390,7 +415,7 @@ function TrendingAnimeCard({
 
               {/* Episode count */}
               {anime.episodes && (
-                <div className="absolute top-2 right-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-gray-300 backdrop-blur-sm">
+                <div className="absolute top-10 right-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-gray-300 backdrop-blur-sm">
                   {anime.episodes} eps
                 </div>
               )}

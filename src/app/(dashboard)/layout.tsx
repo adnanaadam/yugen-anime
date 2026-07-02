@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Library, User, Settings, LogOut } from "lucide-react";
+import { Library, User, Settings, LogOut, Heart } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Navii } from "@usenavii/react";
 import { CldImage } from "next-cloudinary";
@@ -13,6 +13,7 @@ import { CldImage } from "next-cloudinary";
 const navTabs = [
   { label: "Profile", href: "/profile", icon: User },
   { label: "Library", href: "/library", icon: Library },
+  { label: "Favorites", href: "/favorites", icon: Heart },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 

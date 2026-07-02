@@ -19,6 +19,8 @@ import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { handleFeedback, extractFeedback } from "@/lib/feedback-helper";
 import { lordJuusai } from "@/fonts/fonts";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
+import FavoriteButton from "@/components/anime/FavoriteButton";
+import { useFavorites } from "@/hooks/useFavorites";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 const categories = [
@@ -216,7 +218,9 @@ interface ExploreAnimeCardProps {
   session: ReturnType<typeof useSession>["data"];
   initialStatus: string | null;
   initialProgress: number;
+  initialFavorited: boolean;
   onStatusChange: (animeId: number, status: string, progress: number) => void;
+  onFavoriteToggle: (animeId: number, favorited: boolean) => void;
 }
 
 function ExploreAnimeCard({
@@ -224,7 +228,9 @@ function ExploreAnimeCard({
   session,
   initialStatus,
   initialProgress,
+  initialFavorited,
   onStatusChange,
+  onFavoriteToggle,
 }: ExploreAnimeCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -324,6 +330,14 @@ function ExploreAnimeCard({
                 className={`object-cover transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
                 onLoad={() => setImageLoaded(true)}
               />
+              {/* Favorite button */}
+              <div className="absolute top-2 right-2 z-20">
+                <FavoriteButton
+                  animeId={anime.id}
+                  initialFavorited={initialFavorited}
+                  onToggle={(f) => onFavoriteToggle(anime.id, f)}
+                />
+              </div>
             </div>
           </Link>
 
@@ -537,6 +551,9 @@ function ExploreContent() {
     updateStatus,
   } = useUserAnimeStatuses(session);
 
+  // Global favorites (fetched once, not per-card)
+  const { favoriteIds, loaded: favoritesLoaded, toggleFavorite } = useFavorites();
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
@@ -738,7 +755,9 @@ function ExploreContent() {
                   initialProgress={
                     statusesLoaded ? statusMap[anime.id]?.progress || 0 : 0
                   }
+                  initialFavorited={favoritesLoaded ? favoriteIds.has(anime.id) : false}
                   onStatusChange={updateStatus}
+                  onFavoriteToggle={toggleFavorite}
                 />
               ))}
               {loadingMore &&

@@ -57,7 +57,7 @@ const previewBadges = [
   {
     name: "Anime Lover",
     description: "Added 100 anime to your list",    
-    icon: "/icons/ring.png",
+    icon: "/icons/medal.png",
     color: "#f9c846",
     rarity: "Legendary",
     rarityLabel: "Legendary",

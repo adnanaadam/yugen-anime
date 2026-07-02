@@ -9,6 +9,8 @@ import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { handleFeedback, extractFeedback } from "@/lib/feedback-helper";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
+import FavoriteButton from "@/components/anime/FavoriteButton";
+import { useFavorites } from "@/hooks/useFavorites";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 interface AnimeRowProps {
@@ -35,6 +37,7 @@ export default function AnimeRow({
 }: AnimeRowProps) {
   const safeAnimeList = animeList || [];
   const displayList = safeAnimeList.slice(0, 5);
+  const { favoriteIds, loaded: favoritesLoaded, toggleFavorite } = useFavorites();
 
   return (
     <div className="py-6">
@@ -71,6 +74,8 @@ export default function AnimeRow({
                 anime={anime}
                 index={index}
                 totalCards={displayList.length}
+                initialFavorited={favoritesLoaded ? favoriteIds.has(anime.id) : false}
+                onFavoriteToggle={toggleFavorite}
               />
             ))}
       </div>
@@ -82,10 +87,14 @@ function RowAnimeCard({
   anime,
   index,
   totalCards,
+  initialFavorited,
+  onFavoriteToggle,
 }: {
   anime: TransformedAnime;
   index: number;
   totalCards: number;
+  initialFavorited: boolean;
+  onFavoriteToggle: (animeId: number, favorited: boolean) => void;
 }) {
   const { data: session } = useSession();
   const [isHovered, setIsHovered] = useState(false);
@@ -215,6 +224,14 @@ function RowAnimeCard({
                 className={`object-cover transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
                 onLoad={() => setImageLoaded(true)}
               />
+              {/* Favorite button */}
+              <div className="absolute top-2 right-2 z-20">
+                <FavoriteButton
+                  animeId={anime.id}
+                  initialFavorited={initialFavorited}
+                  onToggle={(f) => onFavoriteToggle(anime.id, f)}
+                />
+              </div>
             </div>
           </Link>
 

@@ -11,6 +11,7 @@ import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { handleFeedback, extractFeedback } from "@/lib/feedback-helper";
 import { lordJuusai } from "@/fonts/fonts";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
+import FavoriteButton from "@/components/anime/FavoriteButton";
 
 // Types
 interface Anime {
@@ -117,6 +118,8 @@ export default function AnimeDetailPage() {
   const [userScore, setUserScore] = useState<number | null>(null);
   const [updating, setUpdating] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoritesLoaded, setFavoritesLoaded] = useState(false);
 
   // Fetch anime details
   useEffect(() => {
@@ -180,6 +183,22 @@ export default function AnimeDetailPage() {
     };
 
     fetchUserStatus();
+
+    // Fetch favorite status
+    const fetchFavoriteStatus = async () => {
+      if (!session || !anime) return;
+      try {
+        const res = await fetch("/api/favorites/ids");
+        if (!res.ok) return;
+        const data: number[] = await res.json();
+        setIsFavorited(data.includes(anime.id));
+      } catch (error) {
+        console.error("Error fetching favorite status:", error);
+      } finally {
+        setFavoritesLoaded(true);
+      }
+    };
+    fetchFavoriteStatus();
   }, [session, anime]);
 
   const handleSave = async (status: string, progress: number) => {
@@ -327,8 +346,20 @@ export default function AnimeDetailPage() {
                   </div>
                 )}
 
-                {/* Library link */}
-                <div className="pt-2 mt-2 border-t border-[#ececec]">
+                {/* Favorite button */}
+                <div className="pt-2 mt-2 border-t border-[#ececec] flex items-center gap-2">
+                  <FavoriteButton
+                    animeId={anime.id}
+                    initialFavorited={isFavorited}
+                    size={18}
+                    className="h-9 w-9"
+                  />
+                  <span className="text-xs text-[#7b7f89]">
+                    {isFavorited ? "Favorited" : "Add to favorites"}
+                  </span>
+                </div>
+
+                <div className="pt-2 border-t border-[#ececec]">
                   {session ? (
                     <Link
                       href="/library"

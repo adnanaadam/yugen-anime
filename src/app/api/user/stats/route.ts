@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const userId = searchParams.get("userId") || session.user.id;
 
-  const [listCounts, totalEpisodes, ratedCount, user, badges] =
+  const [listCounts, totalEpisodes, ratedCount, user, badges, favoritesCount] =
     await Promise.all([
       prisma.animeList.groupBy({
         by: ["status"],
@@ -43,6 +43,9 @@ export async function GET(request: NextRequest) {
         include: { badge: true },
         orderBy: { earnedAt: "desc" },
       }),
+      prisma.favorite.count({
+        where: { userId },
+      }),
     ]);
 
   const statusCounts: Record<string, number> = {};
@@ -62,6 +65,7 @@ export async function GET(request: NextRequest) {
       reWatching: statusCounts["REWATCHING"] || 0,
       totalEpisodes: totalEpisodes._sum.progress || 0,
       ratedCount,
+      favoritesCount,
     },
     badges,
   });
