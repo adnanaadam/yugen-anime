@@ -54,6 +54,9 @@ export const authOptions = {
         }
       }
 
+      // Determine if user needs onboarding (no username set)
+      token.needsOnboarding = !token.username;
+
       return token;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,6 +66,7 @@ export const authOptions = {
         session.user.username = token.username || null;
         session.user.image = token.image || null;
         session.user.name = token.name || null;
+        session.user.needsOnboarding = token.needsOnboarding || false;
       }
       return session;
     },

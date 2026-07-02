@@ -174,9 +174,6 @@ export default function Navbar() {
                     <p className="font-medium text-[var(--color-foreground)]">
                       {session.user?.username || session.user?.name}
                     </p>
-                    <p className="truncate text-xs text-[var(--color-text-secondary)]">
-                      {session.user?.email}
-                    </p>
                   </div>
 
                   <div className="py-2">

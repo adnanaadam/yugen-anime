@@ -51,7 +51,7 @@ export default function SignUpPage() {
           {/* Sign Up Buttons */}
           <div className="space-y-3">
             <button
-              onClick={() => signIn("google", { callbackUrl: "/profile" })}
+              onClick={() => signIn("google", { callbackUrl: "/onboarding" })}
               className="flex items-center cursor-pointer justify-center gap-3 w-full rounded-xl bg-gray-700 px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-gray-800 hover:border-gray-600"
             >
               <GoogleIcon className="size-6" />
@@ -59,7 +59,7 @@ export default function SignUpPage() {
             </button>
 
             <button
-              onClick={() => signIn("discord", { callbackUrl: "/profile" })}
+              onClick={() => signIn("discord", { callbackUrl: "/onboarding" })}
               className="flex items-center cursor-pointer justify-center gap-3 w-full rounded-xl bg-gray-700 px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-gray-800 hover:border-gray-600"
             >
               <DiscordIcon className="size-6" />

@@ -29,8 +29,10 @@ export default function DashboardLayout({
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/signin");
+    } else if (status === "authenticated" && session?.user?.needsOnboarding) {
+      router.push("/onboarding");
     }
-  }, [status, router]);
+  }, [status, router, session]);
 
   if (status === "loading" || status === "unauthenticated") {
     return (
@@ -41,6 +43,11 @@ export default function DashboardLayout({
   }
 
   if (!session) return null;
+
+  // Still needs onboarding — render loading while redirecting
+  if (session.user.needsOnboarding) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-[#fffdf8]">
@@ -70,7 +77,7 @@ export default function DashboardLayout({
                   />
                 )}
                 <span className="text-sm font-medium text-[#545863]">
-                  {session.user?.username || session.user?.name || "User"}
+                  {session.user?.username || "User"}
                 </span>
               </div>
 
