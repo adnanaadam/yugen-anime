@@ -22,13 +22,6 @@ export async function GET(request: NextRequest) {
       level: true,
       createdAt: true,
       isProfilePublic: true,
-      _count: {
-        select: {
-          animeList: true,
-          favorites: true,
-          badges: true,
-        },
-      },
     },
   });
 
@@ -47,15 +40,58 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Fetch detailed stats
+  const [listCounts, totalEpisodes, badges, favorites] = await Promise.all([
+    prisma.animeList.groupBy({
+      by: ["status"],
+      where: { userId: user.id },
+      _count: true,
+    }),
+    prisma.animeList.aggregate({
+      where: { userId: user.id },
+      _sum: { progress: true },
+    }),
+    prisma.userBadge.findMany({
+      where: { userId: user.id },
+      include: { badge: true },
+      orderBy: { earnedAt: "desc" },
+    }),
+    prisma.favorite.findMany({
+      where: { userId: user.id },
+      select: { animeId: true },
+    }),
+  ]);
+
+  const statusCounts: Record<string, number> = {};
+  listCounts.forEach((group) => {
+    statusCounts[group.status] = group._count;
+  });
+
   // Remove sensitive fields
   const { id, ...publicData } = user;
 
   return NextResponse.json({
     ...publicData,
     stats: {
-      totalAnime: user._count.animeList,
-      totalFavorites: user._count.favorites,
-      totalBadges: user._count.badges,
+      watching: statusCounts["WATCHING"] || 0,
+      completed: statusCounts["COMPLETED"] || 0,
+      planToWatch: statusCounts["PLAN_TO_WATCH"] || 0,
+      paused: statusCounts["PAUSED"] || 0,
+      dropped: statusCounts["DROPPED"] || 0,
+      reWatching: statusCounts["REWATCHING"] || 0,
+      totalAnime: listCounts.reduce((sum, g) => sum + g._count, 0),
+      totalEpisodes: totalEpisodes._sum.progress || 0,
+      totalBadges: badges.length,
+      totalFavorites: favorites.length,
     },
+    badges: badges.map((ub) => ({
+      id: ub.badge.id,
+      name: ub.badge.name,
+      description: ub.badge.description,
+      icon: ub.badge.icon,
+      category: ub.badge.category,
+      earnedAt: ub.earnedAt,
+    })),
+    favorites: favorites.map((f) => f.animeId),
   });
 }
