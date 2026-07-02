@@ -12,6 +12,7 @@ enum AnimeStatus {
   PLAN_TO_WATCH
   PAUSED
   DROPPED
+  REWATCHING 
 }
 
 model User {
@@ -24,15 +25,16 @@ model User {
   username      String?  @unique
   xp            Int      @default(0)
   level         Int      @default(1)
-  streak        Int      @default(0)
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  // Relations
   accounts      Account[]
   sessions      Session[]
   animeList     AnimeList[]
   badges        UserBadge[]
+  favorites     Favorite[]
 }
 
 model AnimeList {
@@ -48,19 +50,37 @@ model AnimeList {
   score     Int?
 
   startedAt DateTime?
-  updatedAt DateTime @updatedAt
+  completedAt DateTime?
+  updatedAt DateTime    @updatedAt
 
   @@unique([userId, animeId])
 }
 
-model Badge {
-  id    String @id @default(cuid())
-  name  String
-  icon  String?
-
+// New model for favorites
+model Favorite {
+  id        String   @id @default(cuid())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  animeId   Int      // AniList ID of favorite anime
+  
   createdAt DateTime @default(now())
+  
+  @@unique([userId, animeId])  // Prevent duplicate favorites
+}
 
-  users UserBadge[]
+model Badge {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String?
+  xpReward    Int      @default(0)
+  category    String?
+
+  createdAt   DateTime @default(now())
+
+  users       UserBadge[]
 }
 
 model UserBadge {
