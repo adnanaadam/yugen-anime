@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { apiClient } from "@/lib/api-client";
 import { AnimeStatus } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
@@ -21,28 +22,26 @@ export async function GET(request: NextRequest) {
     orderBy: { updatedAt: "desc" },
   });
 
-  // Fetch anime details from Jikan for each entry
+  // Fetch anime details from Tenrai API for each entry
   const enrichedList = await Promise.all(
     list.map(async (entry) => {
       try {
-        const res = await fetch(`https://api.jikan.moe/v4/anime/${entry.animeId}`);
-        if (!res.ok) return { ...entry, anime: null };
-        const data = await res.json();
-        const anime = data.data;
+        const data = await apiClient.getAnimeById(entry.animeId);
+        const anime = data.data as Record<string, unknown>;
         
         return {
           ...entry,
           anime: {
             title: {
-              english: anime.title_english,
-              romaji: anime.title,
+              english: anime.title_english as string | null,
+              romaji: anime.title as string,
             },
             coverImage: {
-              large: anime.images.jpg.large_image_url,
+              large: (anime.images as Record<string, Record<string, string>>)?.jpg?.large_image_url,
             },
-            averageScore: anime.score ? anime.score * 10 : null,
-            episodes: anime.episodes,
-            status: anime.status,
+            averageScore: anime.score ? (anime.score as number) * 10 : null,
+            episodes: anime.episodes as number | null,
+            status: anime.status as string | null,
           },
         };
       } catch {

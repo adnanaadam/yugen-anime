@@ -3,6 +3,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getServerSession, authOptions } from "@/lib/auth";
+import { apiClient } from "@/lib/api-client";
 import { calculateLevel } from "@/lib/utils";
 import { AnimeStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -289,14 +290,13 @@ export async function addToAnimeList(
     let updatedProgress = progress ?? existing.progress;
     if (status === "COMPLETED" && !progress && existing.progress === 0) {
       try {
-        const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
-        const data = await res.json();
-        const totalEpisodes = data.data?.episodes;
+        const data = await apiClient.getAnimeById(animeId);
+        const totalEpisodes = (data.data as { episodes?: number })?.episodes;
         if (totalEpisodes) {
           updatedProgress = totalEpisodes;
         }
       } catch {
-        console.warn("Could not fetch episode count from Jikan when updating to completed");
+        console.warn("Could not fetch episode count from Tenrai when updating to completed");
       }
     }
 
@@ -335,14 +335,13 @@ export async function addToAnimeList(
   
   if (status === "COMPLETED" && !progress) {
     try {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
-      const data = await res.json();
-      const totalEpisodes = data.data?.episodes;
+      const data = await apiClient.getAnimeById(animeId);
+      const totalEpisodes = (data.data as { episodes?: number })?.episodes;
       if (totalEpisodes) {
         finalProgress = totalEpisodes;
       }
     } catch {
-      console.warn("Could not fetch episode count from Jikan for completed anime");
+      console.warn("Could not fetch episode count from Tenrai for completed anime");
     }
   }
   
@@ -404,11 +403,10 @@ export async function updateProgress(animeId: number, progress: number): Promise
 
   let totalEpisodes: number | null = null;
   try {
-    const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
-    const data = await res.json();
-    totalEpisodes = data.data?.episodes || null;
+    const data = await apiClient.getAnimeById(animeId);
+    totalEpisodes = (data.data as { episodes?: number })?.episodes || null;
   } catch {
-    console.warn("Could not fetch episode count from Jikan");
+    console.warn("Could not fetch episode count from Tenrai");
   }
 
   const validation = validateProgressUpdate(entry.progress, progress, totalEpisodes);

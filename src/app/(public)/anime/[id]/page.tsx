@@ -128,25 +128,9 @@ export default function AnimeDetailPage() {
     const fetchAnime = async () => {
       setLoading(true);
       try {
-        const [animeRes, charsRes, recsRes] = await Promise.all([
-          fetch(`https://api.jikan.moe/v4/anime/${id}`),
-          fetch(`https://api.jikan.moe/v4/anime/${id}/characters`),
-          fetch(`https://api.jikan.moe/v4/anime/${id}/recommendations`),
-        ]);
-
-        const [animeJson, charsJson, recsJson] = await Promise.all([
-          animeRes.json(),
-          charsRes.json(),
-          recsRes.json(),
-        ]);
-
-        if (!animeJson.data) throw new Error("Anime not found");
-
-        const animeData = {
-          ...animeJson.data,
-          characters: charsJson.data,
-          recommendations: recsJson.data,
-        };
+        const res = await fetch(`/api/anime/${id}`);
+        if (!res.ok) throw new Error("Anime not found");
+        const animeData = await res.json();
 
         if (!cancelled) setAnime(transformJikanToAnime(animeData));
       } catch (error) {

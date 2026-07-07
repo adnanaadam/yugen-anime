@@ -103,12 +103,12 @@ export default function Footer() {
           <p className="text-xs text-gray-600">
             Powered by{" "}
             <a
-              href="https://jikan.moe"
+              href="https://tenrai.org"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-500 hover:text-[#f9c846] transition-colors"
             >
-              Jikan API
+              Tenrai API
             </a>
           </p>
         </div>

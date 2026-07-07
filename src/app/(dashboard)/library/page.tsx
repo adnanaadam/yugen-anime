@@ -177,25 +177,25 @@ function LibraryAnimeCard({
   // Use entry.anime if available, otherwise use fetched data
   const enrichedAnime = entry.anime || fetchedAnime;
 
-  // Fetch from Jikan if entry.anime is missing
+  // Fetch anime details from API route if entry.anime is missing
   useEffect(() => {
     if (!entry.anime && !fetchedAnime) {
       let cancelled = false;
-      fetch(`https://api.jikan.moe/v4/anime/${entry.animeId}`)
+      fetch(`/api/anime/${entry.animeId}`)
         .then((res) => res.json())
         .then((data) => {
-          if (!cancelled && data.data) {
+          if (!cancelled && data) {
             setFetchedAnime({
               title: {
-                english: data.data.title_english,
-                romaji: data.data.title,
+                english: data.title_english,
+                romaji: data.title,
               },
               coverImage: {
-                large: data.data.images.jpg.large_image_url,
+                large: data.images?.jpg?.large_image_url,
               },
-              averageScore: data.data.score ? data.data.score * 10 : null,
-              episodes: data.data.episodes,
-              status: data.data.status,
+              averageScore: data.score ? data.score * 10 : null,
+              episodes: data.episodes,
+              status: data.status,
             });
           }
         })

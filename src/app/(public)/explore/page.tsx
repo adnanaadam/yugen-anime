@@ -90,13 +90,17 @@ async function fetchAnimeData({
   sfw?: boolean;
 }) {
   try {
+    let data;
+
     if (searchQuery.trim()) {
+      // Use existing search API route
       const response = await fetch(
-        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchQuery)}&page=${page}&limit=${perPage}&order_by=popularity&sort=desc&sfw=${sfw}`,
+        `/api/anime/search?q=${encodeURIComponent(searchQuery)}&page=${page}&limit=${perPage}`
       );
-      const data = await response.json();
-      let media = data.data?.map(transformJikanToAnime) || [];
-      // Client-side filter for 18+ genres
+      if (!response.ok) throw new Error("Search API error");
+      data = await response.json();
+      // The API route returns transformed media, so no need to transform again
+      let media = data.media || [];
       if (sfw) {
         media = media.filter(
           (anime: TransformedAnime) =>
@@ -104,43 +108,22 @@ async function fetchAnimeData({
         );
       }
       return {
-        media: media,
+        media,
         pageInfo: {
-          hasNextPage: !!data.pagination?.has_next_page,
-          total: data.pagination?.items?.total || 0,
-          currentPage: data.pagination?.current_page || page,
-          lastPage: data.pagination?.last_visible_page || page,
+          hasNextPage: !!data.pageInfo?.has_next_page,
+          total: data.pageInfo?.total || 0,
+          currentPage: data.pageInfo?.current_page || page,
+          lastPage: data.pageInfo?.last_visible_page || page,
         },
       };
     }
 
-    let url = "";
-    switch (activeCategory) {
-      case "trending":
-        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=airing&sfw=${sfw}`;
-        break;
-      case "popular":
-        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=bypopularity&sfw=${sfw}`;
-        break;
-      case "seasonal": {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        let season = "winter";
-        if (month >= 3 && month <= 5) season = "spring";
-        else if (month >= 6 && month <= 8) season = "summer";
-        else if (month >= 9 && month <= 11) season = "fall";
-        url = `https://api.jikan.moe/v4/seasons/${year}/${season}?page=${page}&limit=${perPage}&sfw=${sfw}`;
-        break;
-      }
-      default:
-        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&sfw=${sfw}`;
-    }
+    const apiEndpoint = activeCategory || "trending";
+    const response = await fetch(`/api/anime/${apiEndpoint}?page=${page}&limit=${perPage}`);
+    if (!response.ok) throw new Error("API error");
+    data = await response.json();
 
-    const response = await fetch(url);
-    const data = await response.json();
-    let media = data.data?.map(transformJikanToAnime) || [];
-    // Client-side filter for 18+ genres
+    let media = data.media || [];
     if (sfw) {
       media = media.filter(
         (anime: TransformedAnime) =>
@@ -148,16 +131,16 @@ async function fetchAnimeData({
       );
     }
     return {
-      media: media,
+      media,
       pageInfo: {
-        hasNextPage: !!data.pagination?.has_next_page,
-        total: data.pagination?.items?.total || 0,
-        currentPage: data.pagination?.current_page || page,
-        lastPage: data.pagination?.last_visible_page || page,
+        hasNextPage: !!data.pageInfo?.has_next_page,
+        total: data.pageInfo?.total || 0,
+        currentPage: data.pageInfo?.current_page || page,
+        lastPage: data.pageInfo?.last_visible_page || page,
       },
     };
   } catch (error) {
-    console.error("Error fetching from Jikan API:", error);
+    console.error("Error fetching from API:", error);
     return {
       media: [],
       pageInfo: { hasNextPage: false, total: 0, currentPage: 1, lastPage: 1 },

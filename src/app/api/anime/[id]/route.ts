@@ -1,6 +1,6 @@
 // src/app/api/anime/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { fetchAnimeById } from "@/services/jikan.service";
+import { apiClient } from "@/lib/api-client";
 
 export async function GET(
   request: NextRequest,
@@ -14,8 +14,19 @@ export async function GET(
   }
 
   try {
-    const data = await fetchAnimeById(animeId);
-    return NextResponse.json(data);
+    const [animeData, charsData, recsData] = await Promise.all([
+      apiClient.getAnimeById(animeId),
+      apiClient.getAnimeCharacters(animeId),
+      apiClient.getAnimeRecommendations(animeId),
+    ]);
+
+    const anime = animeData.data as Record<string, unknown>;
+
+    return NextResponse.json({
+      ...anime,
+      characters: charsData.data || [],
+      recommendations: recsData.data || [],
+    });
   } catch (error) {
     console.error("Anime detail fetch error:", error);
     return NextResponse.json(

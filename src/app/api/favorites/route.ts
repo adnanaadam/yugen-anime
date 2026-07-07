@@ -2,17 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-// Rate limit helper for Jikan API (max 3 req/s, use 350ms spacing)
-let lastJikanRequest = 0;
-async function rateLimitJikan() {
-  const now = Date.now();
-  const elapsed = now - lastJikanRequest;
-  if (elapsed < 400) {
-    await new Promise((resolve) => setTimeout(resolve, 400 - elapsed));
-  }
-  lastJikanRequest = Date.now();
-}
+import { apiClient } from "@/lib/api-client";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -25,33 +15,28 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
-  // Enrich with anime details from Jikan (with rate limiting)
+  // Enrich with anime details from Tenrai API
   const enriched: unknown[] = [];
   for (const fav of favorites) {
     try {
-      await rateLimitJikan();
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${fav.animeId}`);
-      if (!res.ok) {
-        enriched.push({ ...fav, anime: null });
-        continue;
-      }
-      const data = await res.json();
-      const anime = data.data;
+      const data = await apiClient.getAnimeById(fav.animeId);
+      const anime = data.data as Record<string, unknown>;
+      const images = (anime.images as Record<string, Record<string, string>>)?.jpg;
       enriched.push({
         ...fav,
         anime: {
-          id: anime.mal_id,
+          id: anime.mal_id as number,
           title: {
-            english: anime.title_english,
-            romaji: anime.title,
+            english: anime.title_english as string | null,
+            romaji: anime.title as string,
           },
           coverImage: {
-            large: anime.images.jpg.large_image_url,
-            medium: anime.images.jpg.image_url,
+            large: images?.large_image_url,
+            medium: images?.image_url,
           },
-          averageScore: anime.score ? anime.score * 10 : null,
-          episodes: anime.episodes,
-          genres: anime.genres?.map((g: { name: string }) => g.name) || [],
+          averageScore: anime.score ? (anime.score as number) * 10 : null,
+          episodes: anime.episodes as number | null,
+          genres: ((anime.genres as { name: string }[]) || []).map((g: { name: string }) => g.name),
         },
       });
     } catch {

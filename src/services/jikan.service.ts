@@ -1,6 +1,6 @@
 // src/services/jikan.service.ts
 
-const JIKAN_BASE = "https://api.jikan.moe/v4";
+import { apiClient } from "@/lib/api-client";
 
 export interface JikanAnime {
   mal_id: number;
@@ -108,39 +108,18 @@ export function transformAnime(anime: JikanAnime): TransformedAnime {
   };
 }
 
-// Rate limit helper - Jikan allows 3 req/s
-let lastRequest = 0;
-async function rateLimit() {
-  const now = Date.now();
-  const elapsed = now - lastRequest;
-  if (elapsed < 350) {
-    await new Promise((resolve) => setTimeout(resolve, 350 - elapsed));
-  }
-  lastRequest = Date.now();
-}
-
 export async function fetchTrendingAnime(page = 1, limit = 15) {
-  await rateLimit();
-  const res = await fetch(
-    `${JIKAN_BASE}/top/anime?filter=airing&page=${page}&limit=${limit}`
-  );
-  if (!res.ok) throw new Error(`Jikan API error: ${res.status}`);
-  const data = await res.json();
+  const data = await apiClient.getTopAnime("airing", page, limit);
   return {
-    media: data.data?.map(transformAnime) || [],
+  media: (data.data as unknown as JikanAnime[])?.map(transformAnime) || [],
     pageInfo: data.pagination || { has_next_page: false },
   };
 }
 
 export async function fetchPopularAnime(page = 1, limit = 15) {
-  await rateLimit();
-  const res = await fetch(
-    `${JIKAN_BASE}/top/anime?filter=bypopularity&page=${page}&limit=${limit}`
-  );
-  if (!res.ok) throw new Error(`Jikan API error: ${res.status}`);
-  const data = await res.json();
+  const data = await apiClient.getTopAnime("bypopularity", page, limit);
   return {
-    media: data.data?.map(transformAnime) || [],
+    media: (data.data as unknown as JikanAnime[])?.map(transformAnime) || [],
     pageInfo: data.pagination || { has_next_page: false },
   };
 }
@@ -151,50 +130,32 @@ export async function fetchSeasonalAnime(
   page = 1,
   limit = 15
 ) {
-  await rateLimit();
   const now = new Date();
   const y = year || now.getFullYear();
   const s = season || getCurrentSeason();
-  const res = await fetch(
-    `${JIKAN_BASE}/seasons/${y}/${s}?page=${page}&limit=${limit}`
-  );
-  if (!res.ok) throw new Error(`Jikan API error: ${res.status}`);
-  const data = await res.json();
+  const data = await apiClient.getSeasonalAnime(y, s, page, limit);
   return {
-    media: data.data?.map(transformAnime) || [],
+    media: (data.data as unknown as JikanAnime[])?.map(transformAnime) || [],
     pageInfo: data.pagination || { has_next_page: false },
     season: { year: y, season: s },
   };
 }
 
 export async function fetchAnimeById(id: number) {
-  await rateLimit();
-  const res = await fetch(`${JIKAN_BASE}/anime/${id}/full`);
-  if (!res.ok) throw new Error(`Jikan API error: ${res.status}`);
-  const data = await res.json();
-  return transformAnime(data.data);
+  const data = await apiClient.getAnimeFull(id);
+  return transformAnime(data.data as unknown as JikanAnime);
 }
 
 export async function searchAnime(query: string, page = 1, limit = 24) {
-  await rateLimit();
-  const res = await fetch(
-    `${JIKAN_BASE}/anime?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}&order_by=popularity&sort=desc`
-  );
-  if (!res.ok) throw new Error(`Jikan API error: ${res.status}`);
-  const data = await res.json();
+  const data = await apiClient.searchAnime(query, page, limit);
   return {
-    media: data.data?.map(transformAnime) || [],
+    media: (data.data as unknown as JikanAnime[])?.map(transformAnime) || [],
     pageInfo: data.pagination || { has_next_page: false, total: 0, current_page: 1, last_visible_page: 1 },
   };
 }
 
 export async function fetchAnimeEpisodes(id: number, page = 1) {
-  await rateLimit();
-  const res = await fetch(
-    `${JIKAN_BASE}/anime/${id}/episodes?page=${page}`
-  );
-  if (!res.ok) throw new Error(`Jikan API error: ${res.status}`);
-  const data = await res.json();
+  const data = await apiClient.getAnimeEpisodes(id, page);
   return {
     episodes: data.data || [],
     pageInfo: data.pagination || { has_next_page: false },
