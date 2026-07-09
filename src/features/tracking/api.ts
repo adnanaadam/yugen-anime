@@ -4,6 +4,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { apiClient } from "@/lib/api-client";
+import { createBadgeNotification, createLevelUpNotification } from "@/lib/notifications";
 import { calculateLevel } from "@/lib/utils";
 import { AnimeStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -125,6 +126,8 @@ async function awardXP(userId: string, amount: number, reason: string): Promise<
       where: { id: userId },
       data: { level: newLevel },
     });
+    // Fire-and-forget level up notification
+    createLevelUpNotification(userId, newLevel).catch(() => {});
   }
 
   console.log(`[XP] User ${userId}: +${amount} XP (${reason}) - Level ${newLevel}`);
@@ -192,6 +195,8 @@ async function checkAndAwardBadge(userId: string, badgeKey: string): Promise<{ n
     });
 
     await awardXP(userId, definition.xpReward, `Earned badge: ${definition.name}`);
+    // Fire-and-forget badge notification
+    createBadgeNotification(userId, definition.name).catch(() => {});
     console.log(`[BADGE] User ${userId} earned: ${definition.name} (${definition.category})`);
     return { name: definition.name, xpReward: definition.xpReward };
   }

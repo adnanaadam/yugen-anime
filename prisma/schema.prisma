@@ -36,6 +36,7 @@ model User {
   animeList     AnimeList[]
   badges        UserBadge[]
   favorites     Favorite[]
+  notifications Notification[]
 }
 
 model AnimeList {
@@ -96,6 +97,21 @@ model UserBadge {
   earnedAt DateTime @default(now())
 
   @@unique([userId, badgeId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "xp_gained" | "badge_earned" | "level_up" | "system"
+  title     String
+  message   String?
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
 }
 
 model Account {

@@ -123,10 +123,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-24">
+    <div className="space-y-14">
 
       {/* Level Card + Pie Chart side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-10">
         {/* Level Card */}
         <div className="rounded-2xl border border-[#ececec] bg-white overflow-hidden">
           <div className="p-5">
