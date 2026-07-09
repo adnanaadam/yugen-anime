@@ -387,12 +387,13 @@ export default function SettingsPage() {
             <button
               onClick={handleToggleVisibility}
               disabled={updatingVisibility}
-              className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+              className={`flex items-center gap-2 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
                 isProfilePublic
                   ? "bg-[#97cc04]/10 text-[#97cc04] hover:bg-[#97cc04]/20"
                   : "bg-[#f7f7f7] text-[#7b7f89] hover:bg-[#ececec]"
               }`}
             >
+             
               {updatingVisibility ? (
                 <Loader2 size={12} className="animate-spin" />
               ) : isProfilePublic ? (

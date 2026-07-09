@@ -95,7 +95,7 @@ export default function FavoriteButton({
     <button
       onClick={handleToggle}
       disabled={loading}
-      className={`flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm border transition-all ${
+      className={`flex h-7 w-7 items-center cursor-pointer justify-center rounded-full backdrop-blur-sm border transition-all ${
         favorited
           ? "bg-[#f96e46]/20 border-[#f96e46]/40 text-[#f96e46] hover:bg-[#f96e46]/30"
           : "bg-black/60 border-white/10 text-white hover:bg-[#f96e46] hover:text-white hover:border-transparent"

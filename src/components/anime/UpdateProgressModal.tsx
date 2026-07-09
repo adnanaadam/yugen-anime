@@ -114,7 +114,7 @@ export default function UpdateProgressModal({
                   key={option.value}
                   onClick={() => setStatus(option.value)}
                   disabled={isUpdating || (option.value === "COMPLETED" && isAiring)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+                  className={`flex items-center cursor-pointer gap-2 px-3 py-2 rounded-lg border transition-colors ${
                     status === option.value
                       ? "border-[#545863] bg-[#f7f7f7]"
                       : "border-[#ececec] hover:border-[#f9c846]/30"
@@ -159,7 +159,7 @@ export default function UpdateProgressModal({
               <button
                 onClick={() => handleProgressChange(-1)}
                 disabled={isUpdating || progress === 0}
-                className="p-2 rounded-lg border border-[#ececec] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg border cursor-pointer border-[#ececec] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
               >
                 <Minus size={16} />
               </button>
@@ -175,7 +175,7 @@ export default function UpdateProgressModal({
               <button
                 onClick={() => handleProgressChange(1)}
                 disabled={isUpdating || (totalEpisodes ? progress >= totalEpisodes : false)}
-                className="p-2 rounded-lg border border-[#ececec] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg border cursor-pointer border-[#ececec] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
               >
                 <Plus size={16} />
               </button>
@@ -188,14 +188,14 @@ export default function UpdateProgressModal({
           <button
             onClick={onClose}
             disabled={isUpdating}
-            className="flex-1 px-4 py-2 rounded-lg border border-[#ececec] text-sm font-medium text-[#545863] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 rounded-lg border cursor-pointer border-[#ececec] text-sm font-medium text-[#545863] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={isUpdating}
-            className="flex-1 px-4 py-2 rounded-lg bg-[#f9c846] text-sm font-medium text-[#545863] hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 rounded-lg bg-[#f9c846] cursor-pointer text-sm font-medium text-[#545863] hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
           >
             {isUpdating ? "Saving..." : "Save"}
           </button>
