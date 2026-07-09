@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { apiClient } from "@/lib/api-client";
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
     prisma.favorite.findMany({
       where: { userId: user.id },
       select: { animeId: true },
+      orderBy: { createdAt: "desc" },
     }),
   ]);
 
@@ -67,11 +69,36 @@ export async function GET(request: NextRequest) {
     statusCounts[group.status] = group._count;
   });
 
-  // Remove sensitive fields
-  const { id, ...publicData } = user;
+  // Enrich favorites with anime details
+  const enrichedFavorites = await Promise.all(
+    favorites.slice(0, 12).map(async (fav) => {
+      try {
+        const data = await apiClient.getAnimeById(fav.animeId);
+        const anime = data.data as Record<string, unknown>;
+        const images = (anime.images as Record<string, Record<string, string>>)?.jpg;
+        return {
+          id: fav.animeId,
+          title: {
+            english: (anime.title_english as string) || null,
+            romaji: anime.title as string,
+          },
+          coverImage: images?.large_image_url || null,
+          averageScore: anime.score ? (anime.score as number) * 10 : null,
+          episodes: anime.episodes as number | null,
+        };
+      } catch {
+        return null;
+      }
+    })
+  );
 
   return NextResponse.json({
-    ...publicData,
+    username: user.username,
+    image: user.image,
+    xp: user.xp,
+    level: user.level,
+    createdAt: user.createdAt,
+    isProfilePublic: user.isProfilePublic,
     stats: {
       watching: statusCounts["WATCHING"] || 0,
       completed: statusCounts["COMPLETED"] || 0,
@@ -92,6 +119,6 @@ export async function GET(request: NextRequest) {
       category: ub.badge.category,
       earnedAt: ub.earnedAt,
     })),
-    favorites: favorites.map((f) => f.animeId),
+    favorites: enrichedFavorites.filter(Boolean),
   });
 }
