@@ -258,7 +258,7 @@ export default function DashboardPage() {
                 anime_lover: { color: "#f96e46", rarityColor: "bg-gradient-to-r from-[#f9c846]/20 via-[#f96e46]/20 to-[#c084fc]/20 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
                 binge_watcher: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
                 collector: { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
-                favorite_curator: { color: "#c084fc", rarityColor: "bg-[#c084fc]/10 text-[#c084fc] border-[#c084fc]/20", glow: "rgba(192,132,252,0.2)" },
+                favorite_curator: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
               };
 
               const badgeKey = ub.badge.id;

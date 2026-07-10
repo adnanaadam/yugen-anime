@@ -19,42 +19,6 @@ const previewBadges = [
     rune: "◆",
   },
   {
-    name: "Episode Master",
-    description: "Watched 500 episodes total",
-    icon: "/icons/spellbook.png",
-    color: "#97cc04",
-    rarity: "Epic",
-    rarityLabel: "Epic",
-    rarityColor: "bg-[#97cc04]/10 text-[#97cc04] border-[#97cc04]/20",
-    glow: "rgba(151,204,4,0.2)",
-    frame: "from-[#97cc04] to-[#6a9e02]",
-    rune: "⬥",
-  },
-  {
-    name: "Anime Veteran",
-    description: "Completed 50 anime",
-    icon: "/icons/c-cat.png",
-    color: "#f9c846",
-    rarity: "Legendary",
-    rarityLabel: "Legendary",
-    rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20",
-    glow: "rgba(249,200,70,0.25)",
-    frame: "from-[#f9c846] via-[#e5a83e] to-[#c8841e]",
-    rune: "⬖",
-  },
-  {
-    name: "Completionist",
-    description: "Completed 100 anime",
-    icon: "/icons/trophy.png",
-    color: "#f9c846",
-    rarity: "Legendary",
-    rarityLabel: "Legendary",
-    rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20",
-    glow: "rgba(249,200,70,0.25)",
-    frame: "from-[#f9c846] via-[#e5a83e] to-[#c8841e]",
-    rune: "⬖",
-  },
-  {
     name: "Anime Lover",
     description: "Added 100 anime to your list",    
     icon: "/icons/medal.png",
@@ -67,32 +31,8 @@ const previewBadges = [
     rune: "⬖",
   },
   {
-    name: "Binge Watcher",
-    description: "Watched 100 episodes in a week",
-    icon: "/icons/fire-crystal.png",
-    color: "#f9c846",
-    rarity: "Legendary",
-    rarityLabel: "Legendary",
-    rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20",
-    glow: "rgba(249,200,70,0.25)",
-    frame: "from-[#f9c846] via-[#e5a83e] to-[#c8841e]",
-    rune: "⬖",
-  },
-  {
-    name: "Collector",
-    description: "Collected 50 badges",
-    icon: "/icons/gold-chest.png",
-    color: "#f9c846",
-    rarity: "Legendary",
-    rarityLabel: "Legendary",
-    rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20",
-    glow: "rgba(249,200,70,0.25)",
-    frame: "from-[#f9c846] via-[#e5a83e] to-[#c8841e]",
-    rune: "⬖",
-  },
-  {
     name: "Favorite Curator",
-    description: "Followed 10 curators",
+    description: "Add 5 anime to your favorites",
     icon: "/icons/golden-bookmark.png",    
     color: "#f9c846",
     rarity: "Legendary",
@@ -222,7 +162,7 @@ export default function AchievementsPreview() {
               <span className="h-1.5 w-1.5 rounded-full bg-[#f96e46]" />
             </div>
             <span className="text-xs text-[#7b7f89]">
-              8 unique badges available · More coming soon
+              8 unique badges available · <a href="/profile" className="text-[#f9c846] hover:underline">View all</a>
             </span>
             <div className="flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-[#f96e46]" />
