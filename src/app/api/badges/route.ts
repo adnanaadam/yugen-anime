@@ -145,18 +145,9 @@ export async function GET() {
       };
     }
 
-    console.log("Debug - Earned badge IDs:", userStats.earnedBadgeIds);
-    console.log("Debug - Available badge IDs:", badges.map((b) => b.id));
-
-    // Create a map of badge IDs to their names for matching
-    const badgeIdToName = new Map(badges.map((b) => [b.id, b.name]));
-
     // Calculate progress for each badge
     const badgesWithProgress = badges.map((badge) => {
       const isEarned = userStats.earnedBadgeIds.includes(badge.id);
-      console.log(
-        `Debug - Badge ${badge.name} (${badge.id}): isEarned=${isEarned}`
-      );
 
       let current = 0;
       let required = 0;
