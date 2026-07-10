@@ -247,59 +247,7 @@ export default function DashboardPage() {
         <h3 className="text-xs font-semibold text-[#545863] mb-4 uppercase tracking-[0.15em]">
           Badges · {badgeCount}/8
         </h3>
-        {stats?.badges && stats.badges.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
-            {stats.badges.map((ub: { id: string; badge: { id: string; name: string; description: string | null; icon: string | null; category: string | null } }, index: number) => {
-              const badgeColors: Record<string, { color: string; rarityColor: string; glow: string }> = {
-                first_anime: { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
-                episode_master: { color: "#97cc04", rarityColor: "bg-[#97cc04]/10 text-[#97cc04] border-[#97cc04]/20", glow: "rgba(151,204,4,0.2)" },
-                anime_veteran: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.25)" },
-                completionist: { color: "#f96e46", rarityColor: "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/20", glow: "rgba(249,110,70,0.15)" },
-                anime_lover: { color: "#f96e46", rarityColor: "bg-gradient-to-r from-[#f9c846]/20 via-[#f96e46]/20 to-[#c084fc]/20 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
-                binge_watcher: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
-                collector: { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
-                favorite_curator: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
-              };
-
-              const badgeKey = ub.badge.id;
-              const badgeData = badgeColors[badgeKey] || badgeColors.first_anime;
-              const rarityLabel = ub.badge.category ? ub.badge.category.charAt(0).toUpperCase() + ub.badge.category.slice(1) : "Common";
-
-              // Unique icon per badge
-              const badgeIcons: Record<string, string> = {
-                first_anime: "/icons/scroll.png",
-                episode_master: "/icons/spellbook.png",
-                anime_veteran: "/icons/c-cat.png",
-                completionist: "/icons/trophy.png",
-                anime_lover: "/icons/medal.png",
-                binge_watcher: "/icons/fire-crystal.png",
-                collector: "/icons/gold-chest.png",
-                favorite_curator: "/icons/golden-bookmark.png",
-              };
-
-              return (
-                <BadgeCard
-                  key={ub.id}
-                  badge={{
-                    id: badgeKey,
-                    name: ub.badge.name,
-                    description: ub.badge.description || "No description available.",
-                    icon: badgeIcons[badgeKey] || "/icons/trophy.png",
-                    category: ub.badge.category || "Common",
-                  }}
-                  color={badgeData.color}
-                  rarityColor={badgeData.rarityColor}
-                  glow={badgeData.glow}
-                  index={index}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-xs text-[#7b7f89]">
-            Start tracking anime to earn your first badge!
-          </p>
-        )}
+        <AllBadgesSection />
       </div>
 
       {/* Trending */}
@@ -333,6 +281,105 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+interface BadgeData {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  xpReward: number;
+  isEarned: boolean;
+  progress: {
+    current: number;
+    required: number;
+    percentage: number;
+  };
+}
+
+function AllBadgesSection() {
+  const [allBadges, setAllBadges] = useState<BadgeData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBadges = async () => {
+      try {
+        const res = await fetch("/api/badges");
+        if (res.ok) {
+          const data = await res.json();
+          setAllBadges(data.badges || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch badges:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBadges();
+  }, []);
+
+  const badgeColors: Record<string, { color: string; rarityColor: string; glow: string }> = {
+    "First Anime": { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
+    "Episode Master": { color: "#97cc04", rarityColor: "bg-[#97cc04]/10 text-[#97cc04] border-[#97cc04]/20", glow: "rgba(151,204,4,0.2)" },
+    "Anime Veteran": { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.25)" },
+    "Completionist": { color: "#f96e46", rarityColor: "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/20", glow: "rgba(249,110,70,0.15)" },
+    "Anime Lover": { color: "#f96e46", rarityColor: "bg-gradient-to-r from-[#f9c846]/20 via-[#f96e46]/20 to-[#c084fc]/20 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
+    "Binge Watcher": { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
+    "Collector": { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
+    "Favorite Curator": { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
+  };
+
+  const badgeIcons: Record<string, string> = {
+    "First Anime": "/icons/scroll.png",
+    "Episode Master": "/icons/spellbook.png",
+    "Anime Veteran": "/icons/c-cat.png",
+    "Completionist": "/icons/trophy.png",
+    "Anime Lover": "/icons/medal.png",
+    "Binge Watcher": "/icons/fire-crystal.png",
+    "Collector": "/icons/gold-chest.png",
+    "Favorite Curator": "/icons/golden-bookmark.png",
+  };
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="animate-pulse">
+            <div className="w-full aspect-square rounded-2xl bg-gray-100" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+      {allBadges.map((badge, index) => {
+        const badgeData = badgeColors[badge.name] || badgeColors["First Anime"];
+
+        return (
+          <BadgeCard
+            key={badge.id}
+            badge={{
+              id: badge.id,
+              name: badge.name,
+              description: badge.description || "No description available.",
+              icon: badgeIcons[badge.name] || "/icons/trophy.png",
+              category: badge.category || "Common",
+            }}
+            color={badgeData.color}
+            rarityColor={badgeData.rarityColor}
+            glow={badgeData.glow}
+            isEarned={badge.isEarned}
+            progress={badge.progress}
+            index={index}
+          />
+        );
+      })}
     </div>
   );
 }
