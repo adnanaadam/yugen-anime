@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { lordJuusai } from "@/fonts/fonts";
-import { ChevronDown, Menu, Search, X, Bell } from "lucide-react";
+import { ChevronDown, Menu, Search, X, Bell, MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Navii } from "@usenavii/react";
 import { CldImage } from "next-cloudinary";
@@ -146,6 +146,14 @@ export default function Navbar() {
             >
               Leaderboard
             </Link>
+            <a
+              href="https://discord.gg/your-invite"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline underline-offset-4"
+            >
+              <MessageCircle size={18} />
+            </a>
           </nav>
 
           {/* Right: Notifications + Search + User - always right-aligned in its column */}
