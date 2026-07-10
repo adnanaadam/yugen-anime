@@ -20,23 +20,33 @@ export async function createNotification(params: {
 }
 
 export async function createBadgeNotification(userId: string, badgeName: string) {
-  return createNotification({
-    userId,
-    type: "badge_earned",
-    title: `Badge Unlocked: ${badgeName}`,
-    message: `You earned the "${badgeName}" badge!`,
-    link: "/profile",
-  });
+  try {
+    return await createNotification({
+      userId,
+      type: "badge_earned",
+      title: `Badge Unlocked: ${badgeName}`,
+      message: `You earned the "${badgeName}" badge!`,
+      link: "/profile",
+    });
+  } catch (error) {
+    console.error("[Notifications] Failed to create badge notification:", error);
+    throw error;
+  }
 }
 
 export async function createLevelUpNotification(userId: string, newLevel: number) {
-  return createNotification({
-    userId,
-    type: "level_up",
-    title: `Level Up! You're now Level ${newLevel}`,
-    message: `Congratulations on reaching Level ${newLevel}!`,
-    link: "/profile",
-  });
+  try {
+    return await createNotification({
+      userId,
+      type: "level_up",
+      title: `Level Up! You're now Level ${newLevel}`,
+      message: `Congratulations on reaching Level ${newLevel}!`,
+      link: "/profile",
+    });
+  } catch (error) {
+    console.error("[Notifications] Failed to create level-up notification:", error);
+    throw error;
+  }
 }
 
 export async function createXpNotification(userId: string, xpAmount: number) {

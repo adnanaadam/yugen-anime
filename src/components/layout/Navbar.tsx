@@ -18,6 +18,7 @@ export default function Navbar() {
     notifications,
     unreadCount,
     loading: notifLoading,
+    error,
     markAsRead,
     markAllAsRead,
   } = useNotifications();
@@ -230,6 +231,10 @@ export default function Navbar() {
                       {notifLoading ? (
                         <div className="p-4 text-center text-xs text-[var(--color-text-secondary)]">
                           Loading...
+                        </div>
+                      ) : error ? (
+                        <div className="p-4 text-center text-xs text-red-500">
+                          {error}
                         </div>
                       ) : notifications.length === 0 ? (
                         <div className="p-8 text-center">
@@ -445,6 +450,10 @@ export default function Navbar() {
               {notifLoading ? (
                 <div className="p-4 text-center text-xs text-[var(--color-surface)]/60">
                   Loading...
+                </div>
+              ) : error ? (
+                <div className="p-4 text-center text-xs text-red-400">
+                  {error}
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="p-6 text-center">

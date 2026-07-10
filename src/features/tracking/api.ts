@@ -126,8 +126,8 @@ async function awardXP(userId: string, amount: number, reason: string): Promise<
       where: { id: userId },
       data: { level: newLevel },
     });
-    // Fire-and-forget level up notification
-    createLevelUpNotification(userId, newLevel).catch(() => {});
+    // Fire-and-forget level up notification (errors are logged)
+    createLevelUpNotification(userId, newLevel);
   }
 
   console.log(`[XP] User ${userId}: +${amount} XP (${reason}) - Level ${newLevel}`);
@@ -195,8 +195,8 @@ async function checkAndAwardBadge(userId: string, badgeKey: string): Promise<{ n
     });
 
     await awardXP(userId, definition.xpReward, `Earned badge: ${definition.name}`);
-    // Fire-and-forget badge notification
-    createBadgeNotification(userId, definition.name).catch(() => {});
+    // Fire-and-forget badge notification (errors are logged)
+    createBadgeNotification(userId, definition.name);
     console.log(`[BADGE] User ${userId} earned: ${definition.name} (${definition.category})`);
     return { name: definition.name, xpReward: definition.xpReward };
   }
