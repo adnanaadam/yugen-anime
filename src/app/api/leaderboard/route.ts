@@ -18,7 +18,7 @@ export async function GET() {
 
   const leaderboard = users.map((user, index) => ({
     rank: index + 1,
-    id: user.id,
+    id: user.isProfilePublic ? user.id : null,
     username: user.isProfilePublic ? user.username : null,
     image: user.isProfilePublic ? user.image : null,
     xp: user.xp,

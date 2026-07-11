@@ -30,7 +30,7 @@ export async function createBadgeNotification(userId: string, badgeName: string)
     });
   } catch (error) {
     console.error("[Notifications] Failed to create badge notification:", error);
-    throw error;
+    // Don't throw — notification failure shouldn't break XP/badge operations
   }
 }
 
@@ -45,7 +45,7 @@ export async function createLevelUpNotification(userId: string, newLevel: number
     });
   } catch (error) {
     console.error("[Notifications] Failed to create level-up notification:", error);
-    throw error;
+    // Don't throw — notification failure shouldn't break XP operations
   }
 }
 

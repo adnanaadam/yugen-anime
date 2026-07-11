@@ -85,19 +85,14 @@ export async function POST(request: NextRequest) {
   });
 
   // Award XP
+  let totalXpEarned = 10;
   const user = await prisma.user.update({
     where: { id: session.user.id },
     data: { xp: { increment: 10 } },
   });
   const { calculateLevel } = await import("@/lib/utils");
   const previousLevel = user.level;
-  const newLevel = calculateLevel(user.xp);
-  if (newLevel !== user.level) {
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { level: newLevel },
-    });
-  }
+  let newLevel = calculateLevel(user.xp);
 
   // Check favorite_curator badge (5 favorites)
   let newBadge: { name: string; xpReward: number } | null = null;
@@ -136,14 +131,30 @@ export async function POST(request: NextRequest) {
         where: { id: session.user.id },
         data: { xp: { increment: badge.xpReward } },
       });
+      totalXpEarned += badge.xpReward;
       newBadge = { name: badge.name, xpReward: badge.xpReward };
+    }
+  }
+
+  // Recalculate level with all XP included
+  const finalUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { xp: true },
+  });
+  if (finalUser) {
+    newLevel = calculateLevel(finalUser.xp);
+    if (newLevel !== user.level) {
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { level: newLevel },
+      });
     }
   }
 
   return NextResponse.json({
     ...created,
     feedback: {
-      xpEarned: 10 + (newBadge?.xpReward || 0),
+      xpEarned: totalXpEarned,
       previousLevel,
       newLevel,
       newBadges: newBadge ? [newBadge] : [],

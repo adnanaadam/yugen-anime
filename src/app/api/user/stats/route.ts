@@ -12,6 +12,25 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const userId = searchParams.get("userId") || session.user.id;
 
+  // If requesting another user's stats, check profile visibility
+  if (userId !== session.user.id) {
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isProfilePublic: true },
+    });
+
+    if (!targetUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (!targetUser.isProfilePublic) {
+      return NextResponse.json(
+        { error: "This profile is private" },
+        { status: 403 }
+      );
+    }
+  }
+
   const [listCounts, totalEpisodes, ratedCount, user, badges, favoritesCount] =
     await Promise.all([
       prisma.animeList.groupBy({

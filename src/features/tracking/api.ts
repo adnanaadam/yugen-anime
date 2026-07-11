@@ -35,7 +35,7 @@ const BADGE_DEFINITIONS: Record<string, { name: string; description: string; ico
   episode_master: {
     name: "Episode Master",
     description: "Watched 500 episodes total",
-    icon: "sword",
+    icon: "spellbook",
     xpReward: 300,
     category: "milestone",
   },
@@ -81,9 +81,17 @@ const BADGE_DEFINITIONS: Record<string, { name: string; description: string; ico
     xpReward: 100,
     category: "collection",
   },
+  early_adopter: {
+    name: "Early Adopter",
+    description: "Joined during the first 1000 users",
+    icon: "star",
+    xpReward: 500,
+    category: "special",
+  },
 };
 
 const EARLY_ADOPTER_LIMIT = 1000;
+
 
 // ============================================================
 // XP REWARD CONFIG
@@ -138,6 +146,8 @@ async function awardXP(userId: string, amount: number, reason: string): Promise<
 // VALIDATION
 // ============================================================
 
+const MAX_PROGRESS_UNKNOWN = 10000;
+
 function validateProgressUpdate(
   currentProgress: number,
   newProgress: number,
@@ -147,13 +157,25 @@ function validateProgressUpdate(
     return { valid: false, episodesWatched: 0, reason: `Cannot exceed ${totalEpisodes} episodes` };
   }
 
+  if (!totalEpisodes && newProgress > MAX_PROGRESS_UNKNOWN) {
+    return { valid: false, episodesWatched: 0, reason: `Cannot exceed ${MAX_PROGRESS_UNKNOWN} episodes without known total` };
+  }
+
+  if (newProgress < 0) {
+    return { valid: false, episodesWatched: 0, reason: "Progress cannot be negative" };
+  }
+
   const jump = newProgress - currentProgress;
   
+  if (jump < 0) {
+    return { valid: false, episodesWatched: 0, reason: "Progress cannot be decreased" };
+  }
+
   if (jump === 0) {
     return { valid: true, episodesWatched: 0 };
   }
 
-  const episodesWatched = jump > 0 ? jump : 0;
+  const episodesWatched = jump;
   
   return { valid: true, episodesWatched };
 }
@@ -284,6 +306,13 @@ export async function addToAnimeList(
   const earnedBadges: { name: string; xpReward: number }[] = [];
   let previousLevel = 1;
   let newLevel = 1;
+
+  // Validate score
+  if (score !== undefined && score !== null) {
+    if (score < 1 || score > 10) {
+      throw new Error("Score must be between 1 and 10");
+    }
+  }
 
   const existing = await prisma.animeList.findUnique({
     where: { userId_animeId: { userId, animeId } },
@@ -515,6 +544,15 @@ async function awardCompletionXP(userId: string, episodesWatched: number) {
 
 export async function addToFavorites(animeId: number) {
   const userId = await getCurrentUser();
+
+  // Check favorite limit
+  const currentCount = await prisma.favorite.count({
+    where: { userId },
+  });
+
+  if (currentCount >= 10) {
+    throw new Error("You can only have up to 10 favorite anime");
+  }
 
   const existing = await prisma.favorite.findUnique({
     where: { userId_animeId: { userId, animeId } },

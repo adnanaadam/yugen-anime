@@ -51,14 +51,19 @@ export async function PATCH(request: NextRequest) {
       where: { userId: session.user.id, read: false },
       data: { read: true },
     });
+    return NextResponse.json({ success: true });
   } else if (id) {
     await prisma.notification.updateMany({
       where: { id, userId: session.user.id },
       data: { read: true },
     });
+    return NextResponse.json({ success: true });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json(
+    { error: "Must provide either 'id' or 'all'" },
+    { status: 400 }
+  );
 }
 
 // ============================================================

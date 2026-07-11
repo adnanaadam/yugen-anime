@@ -44,10 +44,21 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { username: trimmed },
-    });
+    try {
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { username: trimmed },
+      });
+    } catch (error: unknown) {
+      // Handle Prisma unique constraint violation (race condition)
+      if ((error as { code?: string })?.code === "P2002") {
+        return NextResponse.json(
+          { error: "Username is already taken" },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
 
     return NextResponse.json({ username: trimmed, message: "Username updated" });
   } catch (error) {
