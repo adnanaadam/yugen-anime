@@ -14,6 +14,7 @@ import Image from "next/image";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 import EmptyState from "@/components/ui/EmptyState";
 import { showErrorToast } from "@/lib/toast-helper";
+import { useFeedbackPrompts } from "@/hooks/useFeedbackPrompts";
 
 const tabs = [
   { label: "Watching", value: "WATCHING", color: "#00e8fc" },
