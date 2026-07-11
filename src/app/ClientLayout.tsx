@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { ToastProvider, addGlobalToast } from "@/components/Toast";
 import CelebrationModal from "@/components/CelebrationModal";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 import type { FeedbackData } from "@/features/tracking/api";
 import { registerFeedbackHandlers, unregisterFeedbackHandlers } from "@/lib/feedback-helper";
 
@@ -30,7 +32,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <ToastProvider>
-      {children}
+      <ErrorBoundary>
+        <div className="animate-fade-in">
+          {children}
+        </div>
+      </ErrorBoundary>
+      <ScrollToTop />
       <CelebrationModal
         isOpen={celebrationOpen}
         onClose={() => setCelebrationOpen(false)}

@@ -64,7 +64,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 rounded-xl border shadow-xl p-4 min-w-[300px] max-w-[380px] animate-in slide-in-from-right-8 transition-all ${
+            className={`pointer-events-auto flex items-start gap-3 rounded-xl border shadow-xl p-4 min-w-[300px] max-w-[380px] animate-slide-in-right transition-all ${
               toast.type === "xp"
                 ? "bg-[#545863] border-[#f9c846]/30"
                 : toast.type === "badge"
