@@ -33,13 +33,20 @@ export async function GET() {
 
   const rank = higherCount + 1;
 
-  return NextResponse.json({
-    rank,
-    id: currentUser.id,
-    username: currentUser.username,
-    image: currentUser.image,
-    xp: currentUser.xp,
-    level: currentUser.level,
-    isProfilePublic: currentUser.isProfilePublic,
-  });
+  return NextResponse.json(
+    {
+      rank,
+      id: currentUser.id,
+      username: currentUser.username,
+      image: currentUser.image,
+      xp: currentUser.xp,
+      level: currentUser.level,
+      isProfilePublic: currentUser.isProfilePublic,
+    },
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30",
+      },
+    }
+  );
 }

@@ -37,6 +37,8 @@ model User {
   badges        UserBadge[]
   favorites     Favorite[]
   notifications Notification[]
+
+  @@index([xp])
 }
 
 model AnimeList {

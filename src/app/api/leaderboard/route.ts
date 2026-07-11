@@ -26,5 +26,9 @@ export async function GET() {
     isProfilePublic: user.isProfilePublic,
   }));
 
-  return NextResponse.json(leaderboard);
+  return NextResponse.json(leaderboard, {
+    headers: {
+      "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30",
+    },
+  });
 }

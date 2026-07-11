@@ -73,20 +73,27 @@ export async function GET(request: NextRequest) {
     statusCounts[group.status] = group._count;
   });
 
-  return NextResponse.json({
-    user,
-    stats: {
-      totalAnime: listCounts.reduce((sum, g) => sum + g._count, 0),
-      watching: statusCounts["WATCHING"] || 0,
-      completed: statusCounts["COMPLETED"] || 0,
-      planToWatch: statusCounts["PLAN_TO_WATCH"] || 0,
-      paused: statusCounts["PAUSED"] || 0,
-      dropped: statusCounts["DROPPED"] || 0,
-      reWatching: statusCounts["REWATCHING"] || 0,
-      totalEpisodes: totalEpisodes._sum.progress || 0,
-      ratedCount,
-      favoritesCount,
+  return NextResponse.json(
+    {
+      user,
+      stats: {
+        totalAnime: listCounts.reduce((sum, g) => sum + g._count, 0),
+        watching: statusCounts["WATCHING"] || 0,
+        completed: statusCounts["COMPLETED"] || 0,
+        planToWatch: statusCounts["PLAN_TO_WATCH"] || 0,
+        paused: statusCounts["PAUSED"] || 0,
+        dropped: statusCounts["DROPPED"] || 0,
+        reWatching: statusCounts["REWATCHING"] || 0,
+        totalEpisodes: totalEpisodes._sum.progress || 0,
+        ratedCount,
+        favoritesCount,
+      },
+      badges,
     },
-    badges,
-  });
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=15, stale-while-revalidate=45",
+      },
+    }
+  );
 }
