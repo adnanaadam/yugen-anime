@@ -4,8 +4,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 import { Navii } from "@usenavii/react";
-import { Trophy, Medal, Shield, Lock } from "lucide-react";
+import { Trophy, Medal, Shield, Lock, ChevronDown } from "lucide-react";
 import { xpToNextLevel } from "@/lib/utils";
 
 // ============================================================
@@ -41,18 +42,34 @@ function getRankStyle(rank: number) {
 // ============================================================
 
 export default function LeaderboardPage() {
+  const { data: session } = useSession();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [myRank, setMyRank] = useState<LeaderboardEntry | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch("/api/leaderboard");
+        const [res, meRes] = await Promise.all([
+          fetch("/api/leaderboard"),
+          session?.user?.id ? fetch("/api/leaderboard/me") : null,
+        ]);
+
         if (!res.ok) throw new Error("Failed to fetch");
         const data = await res.json();
         if (!cancelled) setEntries(data);
+
+        if (meRes && meRes.ok) {
+          const meData = await meRes.json();
+          if (!cancelled) {
+            setMyRank({
+              ...meData,
+              isProfilePublic: meData.isProfilePublic ?? true,
+            } as LeaderboardEntry);
+          }
+        }
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
       } finally {
@@ -62,7 +79,7 @@ export default function LeaderboardPage() {
 
     fetchLeaderboard();
     return () => { cancelled = true; };
-  }, []);
+  }, [session?.user?.id]);
 
   // ============================================================
   // Loading state
@@ -80,6 +97,16 @@ export default function LeaderboardPage() {
       </div>
     );
   }
+
+  const myRankPosition = myRank ? (entries.findIndex(e => e.id === myRank.id) + 1) : 0;
+  const showMyRankCard = !!myRank && myRankPosition === 0;
+
+  const scrollToMyRank = () => {
+    const el = document.getElementById("my-rank-card");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#1a1a2e]">
@@ -113,6 +140,37 @@ export default function LeaderboardPage() {
           </p>
         </div>
       </div>
+
+      {/* ======================================================== */}
+      {/* MY RANK CARD */}
+      {/* ======================================================== */}
+      {showMyRankCard && (
+        <div className="mx-auto max-w-4xl px-4 -mt-2 mb-6">
+          <button
+            onClick={scrollToMyRank}
+            id="my-rank-card"
+            className="w-full rounded-xl border border-[#f9c846]/30 bg-[#f9c846]/[0.08] p-4 text-left transition-all hover:bg-[#f9c846]/[0.12] hover:border-[#f9c846]/50 active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="shrink-0 rounded-full bg-[#f9c846]/20 px-3 py-1 text-sm font-bold text-[#f9c846]">
+                #{myRank.rank}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate">
+                  {myRank.username || "Anonymous"}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {myRank.xp.toLocaleString()} XP · Level {myRank.level}
+                </p>
+              </div>
+              <div className="shrink-0 flex items-center gap-1 text-xs text-[#f9c846]">
+                <span>Your position</span>
+                <ChevronDown size={14} />
+              </div>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* ======================================================== */}
       {/* TABLE */}
