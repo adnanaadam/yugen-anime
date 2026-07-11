@@ -227,7 +227,7 @@ export default function Navbar() {
                           onClick={() => {
                             markAllAsRead();
                           }}
-                          className="text-xs text-[var(--color-secondary)] hover:underline"
+                          className="text-xs cursor-pointer text-[var(--color-secondary)] hover:underline"
                         >
                           Mark all read
                         </button>

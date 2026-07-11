@@ -53,6 +53,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Verify user still exists in DB (handles stale sessions after DB reset)
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true },
+  });
+  if (!user) {
+    return NextResponse.json({ error: "User not found. Please sign in again." }, { status: 401 });
+  }
+
   const body = await request.json();
   const { animeId } = body;
 
@@ -86,13 +95,13 @@ export async function POST(request: NextRequest) {
 
   // Award XP
   let totalXpEarned = 10;
-  const user = await prisma.user.update({
+  const updatedUser = await prisma.user.update({
     where: { id: session.user.id },
     data: { xp: { increment: 10 } },
   });
   const { calculateLevel } = await import("@/lib/utils");
-  const previousLevel = user.level;
-  let newLevel = calculateLevel(user.xp);
+  const previousLevel = updatedUser.level;
+  let newLevel = calculateLevel(updatedUser.xp);
 
   // Check favorite_curator badge (5 favorites)
   let newBadge: { name: string; xpReward: number } | null = null;
@@ -139,11 +148,11 @@ export async function POST(request: NextRequest) {
   // Recalculate level with all XP included
   const finalUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { xp: true },
+    select: { xp: true, level: true },
   });
   if (finalUser) {
     newLevel = calculateLevel(finalUser.xp);
-    if (newLevel !== user.level) {
+    if (newLevel !== updatedUser.level) {
       await prisma.user.update({
         where: { id: session.user.id },
         data: { level: newLevel },

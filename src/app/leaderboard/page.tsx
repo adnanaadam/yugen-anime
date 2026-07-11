@@ -190,7 +190,7 @@ export default function LeaderboardPage() {
                             style={{ clipPath: "polygon(50% 3%, 93% 28%, 93% 72%, 50% 97%, 7% 72%, 7% 28%)" }}
                           >
                             <Navii
-                              seed={entry.isProfilePublic ? entry.username ?? entry.id : entry.id}
+                              seed={entry.isProfilePublic ? (entry.username ?? entry.id) : entry.rank.toString()}
                               size={36}
                               title={displayName}
                               animated

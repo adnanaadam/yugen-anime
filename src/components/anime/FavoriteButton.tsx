@@ -44,7 +44,13 @@ export default function FavoriteButton({
           const res = await fetch(`/api/favorites?animeId=${animeId}`, {
             method: "DELETE",
           });
-          if (!res.ok) throw new Error("Failed to remove favorite");
+          if (!res.ok) {
+            if (res.status === 401) {
+              addGlobalToast({ type: "error", message: "Session expired. Please sign in again." });
+              return;
+            }
+            throw new Error("Failed to remove favorite");
+          }
           setFavorited(false);
           onToggle?.(false);
         } else {
@@ -65,6 +71,10 @@ export default function FavoriteButton({
               });
               return;
             }
+            if (res.status === 401) {
+              addGlobalToast({ type: "error", message: "Session expired. Please sign in again." });
+              return;
+            }
             throw new Error(errorMsg);
           }
 
@@ -80,9 +90,10 @@ export default function FavoriteButton({
         }
       } catch (error) {
         console.error("Favorite toggle failed:", error);
+        const message = error instanceof Error ? error.message : "Something went wrong. Try again.";
         addGlobalToast({
-          type: "xp",
-          message: "Something went wrong. Try again.",
+          type: "error",
+          message,
         });
       } finally {
         setLoading(false);

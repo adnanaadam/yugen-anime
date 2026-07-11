@@ -112,6 +112,17 @@ const XP_CONFIG = {
 async function getCurrentUser() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new Error("Not authenticated");
+
+  // Verify user still exists in DB (handles stale sessions after DB reset)
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true },
+  });
+
+  if (!user) {
+    throw new Error("User not found. Please sign in again.");
+  }
+
   return session.user.id;
 }
 

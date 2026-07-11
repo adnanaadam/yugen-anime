@@ -295,7 +295,7 @@ export default function PublicProfilePage() {
           {/* Back button */}
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#f9c846] transition-colors mb-6 group"
+            className="inline-flex items-center cursor-pointer gap-1.5 text-xs text-gray-500 hover:text-[#f9c846] transition-colors mb-6 group"
           >
             <ArrowLeft size={12} />
             <span className="tracking-wider uppercase">Back</span>

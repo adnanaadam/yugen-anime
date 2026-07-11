@@ -192,7 +192,7 @@ export default function OnboardingPage() {
               <button
                 type="submit"
                 disabled={saving || !username.trim()}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#f9c846] text-sm font-semibold text-[#545863] hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
+                className="flex h-12 w-full items-center cursor-pointer justify-center gap-2 rounded-xl bg-[#f9c846] text-sm font-semibold text-[#545863] hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
               >
                 {saving ? (
                   <>
@@ -245,7 +245,7 @@ export default function OnboardingPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#ececec] bg-[#fffdf8] text-sm font-medium text-[#545863] hover:border-[#f9c846]/50 hover:bg-[#f9c846]/5 transition-colors disabled:opacity-50"
+                className="flex h-12 w-full items-center cursor-pointer justify-center gap-2 rounded-xl border-2 border-dashed border-[#ececec] bg-[#fffdf8] text-sm font-medium text-[#545863] hover:border-[#f9c846]/50 hover:bg-[#f9c846]/5 transition-colors disabled:opacity-50"
               >
                 {uploading ? (
                   <>

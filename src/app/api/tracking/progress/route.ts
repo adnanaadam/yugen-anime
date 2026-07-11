@@ -10,6 +10,15 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Verify user still exists in DB (handles stale sessions after DB reset)
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true },
+  });
+  if (!user) {
+    return NextResponse.json({ error: "User not found. Please sign in again." }, { status: 401 });
+  }
+
   const body = await request.json();
   const { animeId, progress } = body;
 
