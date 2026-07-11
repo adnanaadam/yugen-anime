@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { Navii } from "@usenavii/react";
 import { CldImage } from "next-cloudinary";
 import { useNotifications } from "@/hooks/useNotifications";
+import DiscordIcon from "@/assets/icons/discord.svg";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -150,9 +151,9 @@ export default function Navbar() {
               href="https://discord.gg/your-invite"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline underline-offset-4"
+              className="hover:underline underline-offset-4 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 transition-colors hover:bg-[var(--color-surface-hover)]"
             >
-              <MessageCircle size={18} />
+            <DiscordIcon className="size-6" />
             </a>
           </nav>
 

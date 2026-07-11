@@ -347,7 +347,7 @@ export default function AnimeDetailPage() {
                   {session ? (
                     <Link
                       href="/library"
-                      className="inline-flex items-center gap-2 text-sm text-[#f96e46] hover:text-[#e55d3a] transition-colors"
+                      className="inline-flex items-center cursor-pointer gap-2 text-sm text-[#f96e46] hover:text-[#e55d3a] transition-colors"
                     >
                       <BookOpen size={14} />
                       View in Library
@@ -355,7 +355,7 @@ export default function AnimeDetailPage() {
                   ) : (
                     <button
                       onClick={() => signIn()}
-                      className="inline-flex items-center gap-2 text-sm text-[#f96e46] hover:text-[#e55d3a] transition-colors"
+                      className="inline-flex items-center cursor-pointer gap-2 text-sm text-[#f96e46] hover:text-[#e55d3a] transition-colors"
                     >
                       <BookOpen size={14} />
                       Sign in to track
@@ -439,14 +439,14 @@ export default function AnimeDetailPage() {
               {session ? (
                 <button
                   onClick={() => setShowModal(true)}
-                  className="w-full rounded-lg border border-[#ececec] bg-[#fffdf8] px-4 py-2.5 text-sm font-medium text-[#545863] hover:border-[#f9c846]/30 transition-colors"
+                  className="w-full rounded-lg border border-[#ececec] cursor-pointer bg-[#fffdf8] px-4 py-2.5 text-sm font-medium text-[#545863] hover:border-[#f9c846]/30 transition-colors"
                 >
                   {userStatus ? "Update Progress" : "Add to Library"}
                 </button>
               ) : (
                 <button
                   onClick={() => signIn()}
-                  className="w-full rounded-lg border border-[#ececec] bg-[#fffdf8] px-4 py-2.5 text-sm font-medium text-[#545863] hover:border-[#f9c846]/30 transition-colors"
+                  className="w-full rounded-lg border border-[#ececec] cursor-pointer bg-[#fffdf8] px-4 py-2.5 text-sm font-medium text-[#545863] hover:border-[#f9c846]/30 transition-colors"
                 >
                   Sign in to track
                 </button>
