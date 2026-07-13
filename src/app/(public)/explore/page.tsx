@@ -225,11 +225,17 @@ function ExploreAnimeCard({
     initialStatus,
   );
   const [isUpdating, setIsUpdating] = useState(false);
+  const [forceHideDetail, setForceHideDetail] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const title = anime.title.english || anime.title.romaji;
   const nativeTitle = anime.title.native;
   const activeStatus = statusColors[currentStatus || ""];
+
+  const closeModal = useCallback(() => {
+    setShowModal(false);
+    setForceHideDetail(false);
+  }, []);
 
   const handleSave = async (status: string, progress: number) => {
     if (!session) {
@@ -255,7 +261,7 @@ function ExploreAnimeCard({
       
       setCurrentStatus(status);
       onStatusChange(anime.id, status, progress);
-      setShowModal(false);
+      closeModal();
     } catch (error) {
       console.error("Failed to update:", error);
     } finally {
@@ -273,6 +279,16 @@ function ExploreAnimeCard({
       );
     }
   }, [isHovered]);
+
+  // Escape key closes modal
+  useEffect(() => {
+    if (!showModal) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeModal();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [showModal, closeModal]);
 
   // Sync local state with parent statusMap (only on initial mount via key)
   useEffect(() => {
@@ -332,6 +348,7 @@ function ExploreAnimeCard({
                       e.preventDefault();
                       e.stopPropagation();
                       setShowModal(true);
+                      setForceHideDetail(true);
                     }}
                     className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-[#ececec] px-3 shadow-sm hover:shadow-md transition-all"
                     disabled={isUpdating}
@@ -363,6 +380,7 @@ function ExploreAnimeCard({
                         return;
                       }
                       setShowModal(true);
+                      setForceHideDetail(true);
                     }}
                     className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
                     disabled={isUpdating}
@@ -389,7 +407,7 @@ function ExploreAnimeCard({
       {/* Hover Detail Box */}
       <div
         className={`absolute top-0 z-50 w-72 transition-all duration-300 pointer-events-none ${
-          isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
+          isHovered && !forceHideDetail ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
         } ${detailPosition === "right" ? "left-[calc(100%+12px)]" : "right-[calc(100%+12px)]"}`}
       >
         <div className="rounded-xl border border-[#ececec] bg-[#545863] shadow-xl p-5">
@@ -480,7 +498,7 @@ function ExploreAnimeCard({
       <UpdateProgressModal
         key={`modal-${anime.id}`}
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={closeModal}
         onSave={handleSave}
         currentStatus={currentStatus || ""}
         currentProgress={initialProgress}
