@@ -301,7 +301,7 @@ export default function PublicProfilePage() {
             <span className="tracking-wider uppercase">Back</span>
           </button>
 
-          <div className="flex flex-col md:flex-row items-start gap-8">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
             {/* ================================================== */}
             {/* HEXAGONAL AVATAR */}
             {/* ================================================== */}
@@ -360,7 +360,7 @@ export default function PublicProfilePage() {
             {/* USER INFO */}
             {/* ================================================== */}
             <div className="flex-1 text-center md:text-left">
-              <div className="flex flex-col md:flex-row md:items-center gap-3">
+              <div className="flex md:items-center gap-3">
                 <h1 className="text-3xl font-bold text-white tracking-tight">
                   {displayName}
                 </h1>

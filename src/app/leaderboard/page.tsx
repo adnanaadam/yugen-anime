@@ -180,9 +180,9 @@ export default function LeaderboardPage() {
           className="relative rounded-xl overflow-hidden"
           style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
         >
-          {/* Column headers */}
+          {/* Column headers - hidden on mobile */}
           <div
-            className="grid grid-cols-[48px_1fr_80px_120px] md:grid-cols-[56px_1fr_100px_160px] gap-2 px-4 py-3 border-b text-[10px] text-gray-500 uppercase tracking-wider font-semibold"
+            className="hidden md:grid grid-cols-[56px_1fr_100px_160px] gap-2 px-4 py-3 border-b text-[10px] text-gray-500 uppercase tracking-wider font-semibold"
             style={{ borderColor: "rgba(255,255,255,0.06)" }}
           >
             <span className="text-center">Rank</span>
@@ -203,7 +203,7 @@ export default function LeaderboardPage() {
               </Link>
             </div>
           ) : (
-            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+              <div className="space-y-2">
               {entries.map((entry) => {
                 const rankStyle = getRankStyle(entry.rank);
                 const xpInfo = xpToNextLevel(entry.xp);
@@ -212,97 +212,99 @@ export default function LeaderboardPage() {
                 return (
                   <div
                     key={entry.id}
-                    className="grid grid-cols-[48px_1fr_80px_120px] md:grid-cols-[56px_1fr_100px_160px] gap-2 px-4 py-3 items-center transition-colors hover:bg-white/[0.02]"
+                    className="rounded-xl p-3 md:p-4 transition-colors hover:bg-white/[0.02]"
+                    style={{ backgroundColor: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.06)" }}
                   >
-                    {/* Rank */}
-                    <div className="flex justify-center">
-                      {entry.rank <= 3 ? (
-                        <span className="text-lg md:text-xl">{rankStyle.label}</span>
-                      ) : (
-                        <span className="text-xs font-bold text-gray-500 tabular-nums">
-                          #{entry.rank}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Player */}
-                    <div className="flex items-center gap-3 min-w-0">
-                      {/* Avatar */}
-                      <div className="relative shrink-0">
-                        {entry.isProfilePublic && entry.image ? (
-                          <div
-                            className="w-8 h-9 md:w-10 md:h-11 overflow-hidden"
-                            style={{ clipPath: "polygon(50% 3%, 93% 28%, 93% 72%, 50% 97%, 7% 72%, 7% 28%)" }}
-                          >
-                            <Image
-                              src={entry.image}
-                              alt={displayName}
-                              width={40}
-                              height={44}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                        ) : (
-                          <div
-                            className="w-8 h-9 md:w-10 md:h-11 flex items-center justify-center"
-                            style={{ clipPath: "polygon(50% 3%, 93% 28%, 93% 72%, 50% 97%, 7% 72%, 7% 28%)" }}
-                          >
-                            <Navii
-                              seed={entry.isProfilePublic ? (entry.username ?? entry.id) : entry.rank.toString()}
-                              size={36}
-                              title={displayName}
-                              animated
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Name */}
-                      <div className="min-w-0">
-                        {entry.isProfilePublic ? (
-                          <Link
-                            href={`/u/${entry.username}`}
-                            className="text-sm font-medium text-white hover:text-[#f9c846] transition-colors truncate block"
-                          >
-                            {displayName}
-                          </Link>
-                        ) : (
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-medium text-gray-400 truncate">
-                              {displayName}
+                    {/* Mobile layout - stacked */}
+                    <div className="flex items-start gap-3">
+                      {/* Rank + Avatar + Name */}
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {/* Rank */}
+                        <div className="shrink-0 w-8 text-center">
+                          {entry.rank <= 3 ? (
+                            <span className="text-lg">{rankStyle.label}</span>
+                          ) : (
+                            <span className="text-xs font-bold text-gray-500 tabular-nums">
+                              #{entry.rank}
                             </span>
-                            <Lock size={11} className="shrink-0 text-gray-600" />
-                          </div>
-                        )}
+                          )}
+                        </div>
+
+                        {/* Avatar */}
+                        <div className="relative shrink-0">
+                          {entry.isProfilePublic && entry.image ? (
+                            <div
+                              className="w-9 h-10 overflow-hidden"
+                              style={{ clipPath: "polygon(50% 3%, 93% 28%, 93% 72%, 50% 97%, 7% 72%, 7% 28%)" }}
+                            >
+                              <Image
+                                src={entry.image}
+                                alt={displayName}
+                                width={40}
+                                height={44}
+                                className="object-cover w-full h-full"
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              className="w-9 h-10 flex items-center justify-center"
+                              style={{ clipPath: "polygon(50% 3%, 93% 28%, 93% 72%, 50% 97%, 7% 72%, 7% 28%)" }}
+                            >
+                              <Navii
+                                seed={entry.isProfilePublic ? (entry.username ?? entry.id) : entry.rank.toString()}
+                                size={36}
+                                title={displayName}
+                                animated
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Name */}
+                        <div className="min-w-0">
+                          {entry.isProfilePublic ? (
+                            <Link
+                              href={`/u/${entry.username}`}
+                              className="text-sm font-medium text-white hover:text-[#f9c846] transition-colors truncate block"
+                            >
+                              {displayName}
+                            </Link>
+                          ) : (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-medium text-gray-400 truncate">
+                                {displayName}
+                              </span>
+                              <Lock size={11} className="shrink-0 text-gray-600" />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Level */}
-                    <div className="flex justify-center">
-                      <span className="inline-flex items-center justify-center rounded-md border text-[11px] font-bold px-2 py-0.5 min-w-[36px] text-center"
-                        style={{
-                          borderColor: "rgba(249,200,70,0.2)",
-                          backgroundColor: "rgba(249,200,70,0.08)",
-                          color: "#f9c846",
-                        }}
-                      >
-                        {entry.level}
-                      </span>
-                    </div>
-
-                    {/* XP */}
-                    <div className="text-right">
-                      <span className="text-sm font-semibold text-white tabular-nums">
-                        {entry.xp.toLocaleString()}
-                      </span>
-                      <div className="mt-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
-                        <div
-                          className="h-full rounded-full"
+                      {/* Level + XP */}
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="inline-flex items-center justify-center rounded-md border text-[11px] font-bold px-2 py-0.5"
                           style={{
-                            width: `${xpInfo?.progress || 0}%`,
-                            background: "linear-gradient(90deg, #f9c846, #f96e46)",
+                            borderColor: "rgba(249,200,70,0.2)",
+                            backgroundColor: "rgba(249,200,70,0.08)",
+                            color: "#f9c846",
                           }}
-                        />
+                        >
+                          Lv.{entry.level}
+                        </span>
+                        <div className="text-right">
+                          <span className="text-xs font-semibold text-white tabular-nums">
+                            {entry.xp.toLocaleString()}
+                          </span>
+                          <div className="mt-0.5 h-1 rounded-full overflow-hidden w-16" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${xpInfo?.progress || 0}%`,
+                                background: "linear-gradient(90deg, #f9c846, #f96e46)",
+                              }}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
