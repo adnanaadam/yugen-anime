@@ -57,8 +57,8 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-[#fffdf8]">
       {/* Top Nav Bar */}
       <header className="sticky top-14 z-40 bg-white border-b border-[#ececec]">
-        <div className="mx-auto max-w-5xl px-4">
-          <div className="flex items-center justify-between h-12">
+        <div className="mx-auto max-w-5xl px-4 py-4 sm:py-0">
+          <div className="flex items-center justify-between sm:h-12 flex-col sm:flex-row gap-4">
             {/* User pill */}
             <div className="flex items-center gap-2">
               {session.user?.image &&
@@ -97,7 +97,7 @@ export default function DashboardLayout({
             </div>
 
             {/* Nav tabs */}
-            <nav className="flex items-center gap-1">
+            <nav className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
               {navTabs.map((tab) => {
                 const isActive =
                   pathname === tab.href ||
@@ -106,13 +106,13 @@ export default function DashboardLayout({
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                       isActive
                         ? "bg-[#f9c846]/10 text-[#f9c846]"
                         : "text-[#7b7f89] hover:text-[#545863] hover:bg-[#f7f7f7]"
                     }`}
                   >
-                    <tab.icon size={15} />
+                    <tab.icon size={16} />
                     <span className="hidden sm:inline">{tab.label}</span>
                   </Link>
                 );
@@ -120,9 +120,9 @@ export default function DashboardLayout({
 
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[#7b7f89] hover:text-[#f96e46] hover:bg-[#fef2f2] transition-colors ml-2"
+                className="flex items-center cursor-pointer gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-[#7b7f89] hover:text-[#f96e46] hover:bg-[#fef2f2] transition-colors flex-shrink-0"
               >
-                <LogOut size={15} />
+                <LogOut size={16} />
                 <span className="hidden sm:inline">Logout</span>
               </button>
             </nav>
@@ -131,7 +131,7 @@ export default function DashboardLayout({
       </header>
 
       {/* Content */}
-      <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 sm:py-6">{children}</main>
     </div>
   );
 }

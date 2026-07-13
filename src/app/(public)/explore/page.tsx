@@ -631,7 +631,7 @@ function ExploreContent() {
   };
 
   return (
-    <div className="min-h-screen mx-auto max-w-5xl w-5xl overflow-hidden bg-[#fffdf8]">
+    <div className="min-h-screen mx-auto max-w-5xl bg-[#fffdf8]">
       {/* Header */}
       <div className="bg-white border-b border-[#ececec]">
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-14">
@@ -729,7 +729,7 @@ function ExploreContent() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5 overflow-hidden">
               {animeList.map((anime, index) => (
                 <ExploreAnimeCard
                   key={`${anime.id}-${index}`}

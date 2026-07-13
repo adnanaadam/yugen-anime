@@ -135,7 +135,7 @@ export default function AchievementsPreview() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-7">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-7">
           {previewBadges.map((badge, index) => (
             <BadgeCard
               key={badge.name}
