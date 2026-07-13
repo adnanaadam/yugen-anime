@@ -1,36 +1,42 @@
 // src/hooks/useFavorites.ts
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 
 export function useFavorites() {
   const { data: session } = useSession();
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [loaded, setLoaded] = useState(!session);
+  const fetchRef = useRef<() => void>(() => {});
 
-  const fetchFavorites = useCallback(async () => {
+  useEffect(() => {
     if (!session) {
-      setFavoriteIds(new Set());
-      setLoaded(true);
       return;
     }
 
-    try {
-      const res = await fetch("/api/favorites/ids");
-      if (!res.ok) throw new Error("Failed to fetch favorites");
-      const data: number[] = await res.json();
-      setFavoriteIds(new Set(data));
-    } catch (error) {
-      console.error("Error fetching favorites:", error);
-    } finally {
-      setLoaded(true);
-    }
-  }, [session]);
+    let cancelled = false;
 
-  useEffect(() => {
-    fetchFavorites();
-  }, [fetchFavorites]);
+    const doFetch = async () => {
+      try {
+        const res = await fetch("/api/favorites/ids");
+        if (!res.ok) throw new Error("Failed to fetch favorites");
+        const data: number[] = await res.json();
+        if (!cancelled) setFavoriteIds(new Set(data));
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+      } finally {
+        if (!cancelled) setLoaded(true);
+      }
+    };
+
+    doFetch();
+    fetchRef.current = doFetch;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
 
   const toggleFavorite = useCallback((animeId: number, isFavorited: boolean) => {
     setFavoriteIds((prev) => {
@@ -44,5 +50,9 @@ export function useFavorites() {
     });
   }, []);
 
-  return { favoriteIds, loaded, toggleFavorite, refetch: fetchFavorites };
+  const refetch = useCallback(() => {
+    fetchRef.current();
+  }, []);
+
+  return { favoriteIds, loaded, toggleFavorite, refetch };
 }
