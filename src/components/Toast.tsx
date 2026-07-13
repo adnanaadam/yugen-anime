@@ -22,6 +22,7 @@ export const useToast = () => useContext(ToastContext);
 
 // Global reference for external use
 let globalAddToast: ((toast: Omit<Toast, "id">) => void) | null = null;
+let toastCounter = 0;
 
 // Helper function that can be called from anywhere (no hook needed)
 export function addGlobalToast(toast: Omit<Toast, "id">) {
@@ -34,7 +35,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = useCallback((toast: Omit<Toast, "id">) => {
-    const id = Date.now().toString();
+    const id = `toast-${++toastCounter}`;
     setToasts((prev) => [...prev, { ...toast, id }]);
     
     // Auto-remove after 4 seconds
