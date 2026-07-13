@@ -526,6 +526,7 @@ function ExploreContent() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
   const [sfwOnly, setSfwOnly] = useState(true);
+  const isAppending = useRef(false);
 
   // Global user statuses (fetched once, not per-card)
   const {
@@ -566,11 +567,12 @@ function ExploreContent() {
 
         if (cancelled) return;
 
-        if (page === 1) {
+        if (page === 1 || !isAppending.current) {
           setAnimeList(result.media);
         } else {
           setAnimeList((prev) => [...prev, ...result.media]);
         }
+        isAppending.current = false;
         setPageInfo(result.pageInfo);
       } catch (error) {
         console.error("Failed to fetch anime", error);
@@ -602,6 +604,7 @@ function ExploreContent() {
 
   const handleLoadMore = useCallback(() => {
     if (pageInfo.hasNextPage && !loadingMore) {
+      isAppending.current = true;
       setPage((prev) => prev + 1);
     }
   }, [pageInfo.hasNextPage, loadingMore]);
@@ -755,7 +758,7 @@ function ExploreContent() {
                   <button
                     onClick={handleLoadMore}
                     disabled={loadingMore}
-                    className="flex items-center gap-2 rounded-lg border border-[#ececec] bg-white px-5 py-2.5 text-sm font-medium text-[#545863] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 cursor-pointer rounded-lg border border-[#ececec] bg-white px-5 py-2.5 text-sm font-medium text-[#545863] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
                   >
                     {loadingMore ? (
                       <>
@@ -785,11 +788,12 @@ function ExploreContent() {
                         key={pageNum}
                         onClick={() => {
                           if (pageNum !== currentPage) {
+                            isAppending.current = false;
                             setPage(pageNum);
                             window.scrollTo({ top: 0, behavior: "smooth" });
                           }
                         }}
-                        className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors ${
+                        className={`min-w-[36px] h-9 rounded-lg cursor-pointer text-sm font-medium transition-colors ${
                           pageNum === currentPage
                             ? "bg-[#f9c846] text-[#545863]"
                             : "bg-white border border-[#ececec] text-[#7b7f89] hover:bg-[#f7f7f7]"
@@ -809,7 +813,7 @@ function ExploreContent() {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-[#f9c846] text-[#545863] shadow-lg hover:bg-[#f5bd29] hover:shadow-xl transition-all"
+          className="fixed bottom-8 right-8 z-50 flex cursor-pointer h-11 w-11 items-center justify-center rounded-full bg-[#f9c846] text-[#545863] shadow-lg hover:bg-[#f5bd29] hover:shadow-xl transition-all"
         >
           <ArrowUp size={18} />
         </button>
