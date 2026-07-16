@@ -5,7 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { lordJuusai } from "@/fonts/fonts";
-import { ChevronDown, Menu, Search, X, Bell, MessageCircle } from "lucide-react";
+import {
+  ChevronDown,
+  Menu,
+  Search,
+  X,
+  Bell,
+  MessageCircle,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Navii } from "@usenavii/react";
 import { CldImage } from "next-cloudinary";
@@ -49,7 +56,10 @@ export default function Navbar() {
   // Close notification menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(event.target as Node)
+      ) {
         setShowNotifMenu(false);
       }
     };
@@ -101,11 +111,16 @@ export default function Navbar() {
 
   const getNotifIcon = (type: string) => {
     switch (type) {
-      case "badge_earned": return "🏆";
-      case "level_up": return "⬆️";
-      case "xp_gained": return "✨";
-      case "system": return "📢";
-      default: return "•";
+      case "badge_earned":
+        return "🏆";
+      case "level_up":
+        return "⬆️";
+      case "xp_gained":
+        return "✨";
+      case "system":
+        return "📢";
+      default:
+        return "•";
     }
   };
 
@@ -153,7 +168,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
               className="hover:underline underline-offset-4 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 transition-colors hover:bg-[var(--color-surface-hover)]"
             >
-            <DiscordIcon className="size-6" />
+              <DiscordIcon className="size-6" />
             </a>
           </nav>
 
@@ -202,10 +217,7 @@ export default function Navbar() {
                   onClick={() => setShowNotifMenu((prev) => !prev)}
                   className="relative flex size-9 items-center justify-center cursor-pointer rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface-hover)]"
                 >
-                  <Bell
-                    className="text-[var(--color-foreground)]"
-                    size={18}
-                  />
+                  <Bell className="text-[var(--color-foreground)]" size={18} />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 rounded-full bg-[#f96e46] text-[9px] font-bold text-white shadow-sm">
                       {unreadCount > 9 ? "9+" : unreadCount}
@@ -236,7 +248,10 @@ export default function Navbar() {
                     </div>
 
                     {/* List */}
-                    <div className="overflow-y-auto" style={{ maxHeight: "340px" }}>
+                    <div
+                      className="overflow-y-auto"
+                      style={{ maxHeight: "340px" }}
+                    >
                       {notifLoading ? (
                         <div className="p-4 text-center text-xs text-[var(--color-text-secondary)]">
                           Loading...
@@ -247,7 +262,10 @@ export default function Navbar() {
                         </div>
                       ) : notifications.length === 0 ? (
                         <div className="p-8 text-center">
-                          <Bell size={24} className="mx-auto mb-2 text-[var(--color-text-secondary)]" />
+                          <Bell
+                            size={24}
+                            className="mx-auto mb-2 text-[var(--color-text-secondary)]"
+                          />
                           <p className="text-xs text-[var(--color-text-secondary)]">
                             No notifications yet
                           </p>
@@ -265,7 +283,9 @@ export default function Navbar() {
                               {getNotifIcon(notif.type)}
                             </span>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-xs ${notif.read ? "text-[var(--color-text-secondary)]" : "text-[var(--color-foreground)] font-medium"}`}>
+                              <p
+                                className={`text-xs ${notif.read ? "text-[var(--color-text-secondary)]" : "text-[var(--color-foreground)] font-medium"}`}
+                              >
                                 {notif.title}
                               </p>
                               {notif.message && (
@@ -298,7 +318,8 @@ export default function Navbar() {
                   onClick={() => setShowUserMenu((prev) => !prev)}
                   className="flex items-center cursor-pointer gap-2 rounded-md border border-[var(--color-border)] bg-white px-1 py-1 transition-colors hover:bg-[var(--color-surface-hover)]"
                 >
-                  {session.user?.image && session.user.image.includes("cloudinary") ? (
+                  {session.user?.image &&
+                  session.user.image.includes("cloudinary") ? (
                     <div className="relative size-7 rounded-full overflow-hidden">
                       <CldImage
                         src={session.user.image}
@@ -378,14 +399,24 @@ export default function Navbar() {
       {/* Mobile */}
       <header className="fixed top-0 left-0 right-0 z-50 md:hidden bg-[var(--color-secondary)]">
         <div className="flex h-14 items-center justify-between px-4">
-          {/* Logo */}
-          <Link href="/" onClick={closeMobile}>
-            <h1
-              className={`text-xl text-[var(--color-surface)] ${lordJuusai.className}`}
+          <div className="flex items-center gap-2">
+            {/* Logo */}
+            <Link href="/" onClick={closeMobile}>
+              <h1
+                className={`text-xl text-[var(--color-surface)] ${lordJuusai.className}`}
+              >
+                OtakuProfile
+              </h1>
+            </Link>
+            <a
+              href="https://discord.gg/jGK4YHzPC"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline underline-offset-4 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 transition-colors hover:bg-[var(--color-surface-hover)]"
             >
-              OtakuProfile
-            </h1>
-          </Link>
+              <DiscordIcon className="size-6" />
+            </a>
+          </div>
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
@@ -419,7 +450,6 @@ export default function Navbar() {
               {searchOpen ? <X size={20} /> : <Search size={20} />}
             </button>
 
-
             {/* Hamburger */}
             <button
               onClick={() => {
@@ -431,7 +461,6 @@ export default function Navbar() {
             >
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-
           </div>
         </div>
 
@@ -483,7 +512,9 @@ export default function Navbar() {
                       {getNotifIcon(notif.type)}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-xs ${notif.read ? "text-[var(--color-surface)]/60" : "text-[var(--color-surface)] font-medium"}`}>
+                      <p
+                        className={`text-xs ${notif.read ? "text-[var(--color-surface)]/60" : "text-[var(--color-surface)] font-medium"}`}
+                      >
                         {notif.title}
                       </p>
                       {notif.message && (
@@ -522,7 +553,6 @@ export default function Navbar() {
             />
           </form>
         </div>
-
 
         {/* Mobile nav menu */}
         <div
