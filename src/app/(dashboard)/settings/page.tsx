@@ -287,7 +287,7 @@ export default function SettingsPage() {
               <div>
                 <p className="text-sm font-medium text-[#545863]">Username</p>
                 <p className="text-xs text-[#7b7f89] mt-0.5">
-                  Your unique identifier on Yugen
+                  Your unique identifier on OtakuProfile
                 </p>
               </div>
 

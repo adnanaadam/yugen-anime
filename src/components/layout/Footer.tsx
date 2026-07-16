@@ -30,9 +30,9 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <h3 className={`text-2xl text-white ${lordJuusai.className}`}>
-              Kaizen
+              OtakuProfile
             </h3>
-            <p className="mt-2 text-xs text-gray-500 leading-relaxed max-w-xs">
+          <p className="mt-2 text-xs text-gray-500 leading-relaxed max-w-xs">
               Track anime, earn XP, collect badges, and level up your otaku
               profile. Your anime journey, gamified.
             </p>
@@ -97,7 +97,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-white/[0.04] flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-600">
-            &copy; {new Date().getFullYear()} Kaizen. Not affiliated with AniList
+            &copy; {new Date().getFullYear()} OtakuProfile. Not affiliated with AniList
             or MyAnimeList.
           </p>
           <div className="flex items-center gap-4">
