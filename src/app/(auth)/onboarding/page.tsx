@@ -15,6 +15,7 @@ export default function OnboardingPage() {
 
   const [username, setUsername] = useState("");
   const [usernameError, setUsernameError] = useState("");
+  const [availability, setAvailability] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -29,6 +30,52 @@ export default function OnboardingPage() {
     }
   }, [session, router]);
 
+  // Real-time username availability check with debounce
+  const checkTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  const checkUsernameAvailability = (value: string) => {
+    if (checkTimerRef.current) {
+      clearTimeout(checkTimerRef.current);
+    }
+
+    checkTimerRef.current = setTimeout(async () => {
+      const trimmed = value.trim().toLowerCase();
+
+      if (trimmed.length < 3 || !/^[a-zA-Z0-9_]+$/.test(trimmed)) {
+        setAvailability("idle");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/user/username/check?username=${encodeURIComponent(trimmed)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setAvailability(data.available ? "available" : "taken");
+        } else {
+          setAvailability("idle");
+        }
+      } catch {
+        setAvailability("idle");
+      }
+    }, 400);
+  };
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUsername(value);
+    setUsernameError("");
+
+    // Show checking state immediately for valid inputs
+    const trimmed = value.trim().toLowerCase();
+    if (trimmed.length >= 3 && /^[a-zA-Z0-9_]+$/.test(trimmed)) {
+      setAvailability("checking");
+    } else {
+      setAvailability("idle");
+    }
+
+    checkUsernameAvailability(value);
+  };
+
   const handleUsernameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -41,6 +88,11 @@ export default function OnboardingPage() {
 
     if (!/^[a-zA-Z0-9_]+$/.test(trimmed)) {
       setUsernameError("Only letters, numbers, and underscores");
+      return;
+    }
+
+    if (availability === "taken") {
+      setUsernameError("This username is already taken");
       return;
     }
 
@@ -169,15 +221,39 @@ export default function OnboardingPage() {
                 <input
                   type="text"
                   value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    setUsernameError("");
-                  }}
+                  onChange={handleUsernameChange}
                   placeholder="Enter your username"
                   className="h-12 w-full rounded-xl border border-[#ececec] bg-[#fffdf8] px-4 text-sm text-[#545863] outline-none focus:border-[#f9c846]/50 transition-colors"
                   maxLength={20}
                   autoFocus
                 />
+                {/* Availability indicator */}
+                {username.trim().length >= 3 && availability !== "idle" && (
+                  <div className="flex items-center gap-1 mt-1.5">
+                    {availability === "checking" && (
+                      <Loader2 size={11} className="text-[#7b7f89] animate-spin shrink-0" />
+                    )}
+                    {availability === "available" && (
+                      <Check size={11} className="text-[#97cc04] shrink-0" />
+                    )}
+                    {availability === "taken" && (
+                      <AlertCircle size={11} className="text-[#f96e46] shrink-0" />
+                    )}
+                    <p
+                      className={`text-[11px] ${
+                        availability === "available"
+                          ? "text-[#97cc04]"
+                          : availability === "taken"
+                          ? "text-[#f96e46]"
+                          : "text-[#7b7f89]"
+                      }`}
+                    >
+                      {availability === "checking" && "Checking..."}
+                      {availability === "available" && "Username available"}
+                      {availability === "taken" && "Username is taken"}
+                    </p>
+                  </div>
+                )}
                 {usernameError && (
                   <div className="flex items-center gap-1 mt-1.5">
                     <AlertCircle size={11} className="text-[#f96e46] shrink-0" />

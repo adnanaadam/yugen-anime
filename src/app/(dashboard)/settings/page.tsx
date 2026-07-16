@@ -1,7 +1,7 @@
 // src/app/(dashboard)/settings/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Camera, Loader2, Check, Pencil, X, AlertCircle, Globe, Lock } from "lucide-react";
@@ -17,6 +17,7 @@ export default function SettingsPage() {
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [username, setUsername] = useState(session?.user?.username || "");
   const [usernameError, setUsernameError] = useState("");
+  const [availability, setAvailability] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [savingUsername, setSavingUsername] = useState(false);
 
   // Profile visibility
@@ -91,6 +92,58 @@ export default function SettingsPage() {
     const fileWithExt = parts.pop()?.split(".")[0];
     const folder = parts.pop();
     return folder ? `${folder}/${fileWithExt}` : fileWithExt;
+  };
+
+  // Real-time username availability check with debounce
+  const checkTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  const checkUsernameAvailability = (value: string) => {
+    if (checkTimerRef.current) {
+      clearTimeout(checkTimerRef.current);
+    }
+
+    checkTimerRef.current = setTimeout(async () => {
+      const trimmed = value.trim().toLowerCase();
+
+      if (trimmed.length < 3 || !/^[a-zA-Z0-9_]+$/.test(trimmed)) {
+        setAvailability("idle");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/user/username/check?username=${encodeURIComponent(trimmed)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setAvailability(data.available ? "available" : "taken");
+        } else {
+          setAvailability("idle");
+        }
+      } catch {
+        setAvailability("idle");
+      }
+    }, 400);
+  };
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUsername(value);
+    setUsernameError("");
+
+    // Only check if different from current username
+    const trimmed = value.trim().toLowerCase();
+    const current = session?.user?.username?.toLowerCase();
+    if (trimmed === current) {
+      setAvailability("idle");
+      return;
+    }
+
+    if (trimmed.length >= 3 && /^[a-zA-Z0-9_]+$/.test(trimmed)) {
+      setAvailability("checking");
+    } else {
+      setAvailability("idle");
+    }
+
+    checkUsernameAvailability(value);
   };
 
   // Username save
@@ -329,10 +382,7 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     value={username}
-                    onChange={(e) => {
-                      setUsername(e.target.value);
-                      setUsernameError("");
-                    }}
+                    onChange={handleUsernameChange}
                     placeholder="Enter username"
                     className="h-9 w-48 rounded-lg border border-[#ececec] bg-[#fffdf8] px-3 text-sm text-[#545863] outline-none focus:border-[#f9c846]/50 transition-colors"
                     maxLength={20}
