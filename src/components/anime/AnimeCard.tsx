@@ -7,14 +7,17 @@ import { useState, useCallback } from "react";
 import { Plus, Play, BookMarked, Check } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList } from "@/features/tracking/api";
+import FavoriteButton from "@/components/anime/FavoriteButton";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 interface AnimeCardProps {
   anime: TransformedAnime;
   size?: "sm" | "md" | "lg";
+  initialFavorited?: boolean;
+  onFavoriteToggle?: (animeId: number, favorited: boolean) => void;
 }
 
-export default function AnimeCard({ anime, size = "md" }: AnimeCardProps) {
+export default function AnimeCard({ anime, size = "md", initialFavorited = false, onFavoriteToggle }: AnimeCardProps) {
   const { data: session } = useSession();
   const [showDropdown, setShowDropdown] = useState(false);
   const [added, setAdded] = useState(false);
@@ -75,9 +78,18 @@ export default function AnimeCard({ anime, size = "md" }: AnimeCardProps) {
               </div>
             )}
 
+            {/* Favorite button */}
+            <div className="absolute top-2 right-2 z-20">
+              <FavoriteButton
+                animeId={anime.id}
+                initialFavorited={initialFavorited}
+                onToggle={(f) => onFavoriteToggle?.(anime.id, f)}
+              />
+            </div>
+
             {/* Episode count */}
             {anime.episodes && (
-              <div className="absolute top-2 right-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-gray-300 backdrop-blur-sm">
+              <div className="absolute top-10 right-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-gray-300 backdrop-blur-sm">
                 {anime.episodes} eps
               </div>
             )}

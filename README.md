@@ -1,4 +1,4 @@
-# Yugen Anime
+# Kaizen Anime
 
 A minimalist anime tracking platform with progress tracking, gamification, and social profiles.
 

@@ -30,7 +30,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <h3 className={`text-2xl text-white ${lordJuusai.className}`}>
-              Yugen
+              Kaizen
             </h3>
             <p className="mt-2 text-xs text-gray-500 leading-relaxed max-w-xs">
               Track anime, earn XP, collect badges, and level up your otaku
@@ -97,20 +97,32 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-white/[0.04] flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-600">
-            &copy; {new Date().getFullYear()} Yugen. Not affiliated with AniList
+            &copy; {new Date().getFullYear()} Kaizen. Not affiliated with AniList
             or MyAnimeList.
           </p>
-          <p className="text-xs text-gray-600">
-            Powered by{" "}
+          <div className="flex items-center gap-4">
             <a
-              href="https://jikan.moe"
+              href="https://x.com/addy_devx"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-500 hover:text-[#f9c846] transition-colors"
+              className="text-gray-500 hover:text-white transition-colors"
             >
-              Jikan API
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
             </a>
-          </p>
+            <p className="text-xs text-gray-600">
+              Powered by{" "}
+              <a
+                href="https://tenrai.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-[#f9c846] transition-colors"
+              >
+                Tenrai API
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

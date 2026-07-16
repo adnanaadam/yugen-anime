@@ -4,11 +4,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
-import { ArrowRight, Star, Tv, ChevronDown } from "lucide-react";
+import { ArrowRight, Star, Tv, ChevronDown, Loader2 } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { handleFeedback, extractFeedback } from "@/lib/feedback-helper";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
+import FavoriteButton from "@/components/anime/FavoriteButton";
+import { useFavorites } from "@/hooks/useFavorites";
+import EmptyState from "@/components/ui/EmptyState";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 interface AnimeRowProps {
@@ -19,12 +22,12 @@ interface AnimeRowProps {
 }
 
 const statusColors: Record<string, string> = {
-  WATCHING: "#00e8fc",
-  COMPLETED: "#97cc04",
-  PLAN_TO_WATCH: "#f9c846",
-  PAUSED: "#f96e46",
-  DROPPED: "#ff4444",
-  REWATCHING: "#c084fc",
+  WATCHING: "var(--color-watching)",
+  COMPLETED: "var(--color-completed)",
+  PLAN_TO_WATCH: "var(--color-primary)",
+  PAUSED: "var(--color-paused)",
+  DROPPED: "var(--color-dropped)",
+  REWATCHING: "var(--color-rewatching)",
 };
 
 export default function AnimeRow({
@@ -35,6 +38,7 @@ export default function AnimeRow({
 }: AnimeRowProps) {
   const safeAnimeList = animeList || [];
   const displayList = safeAnimeList.slice(0, 5);
+  const { favoriteIds, loaded: favoritesLoaded, toggleFavorite } = useFavorites();
 
   return (
     <div className="py-6">
@@ -71,6 +75,8 @@ export default function AnimeRow({
                 anime={anime}
                 index={index}
                 totalCards={displayList.length}
+                initialFavorited={favoritesLoaded ? favoriteIds.has(anime.id) : false}
+                onFavoriteToggle={toggleFavorite}
               />
             ))}
       </div>
@@ -82,10 +88,14 @@ function RowAnimeCard({
   anime,
   index,
   totalCards,
+  initialFavorited,
+  onFavoriteToggle,
 }: {
   anime: TransformedAnime;
   index: number;
   totalCards: number;
+  initialFavorited: boolean;
+  onFavoriteToggle: (animeId: number, favorited: boolean) => void;
 }) {
   const { data: session } = useSession();
   const [isHovered, setIsHovered] = useState(false);
@@ -215,6 +225,14 @@ function RowAnimeCard({
                 className={`object-cover transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
                 onLoad={() => setImageLoaded(true)}
               />
+              {/* Favorite button */}
+              <div className="absolute top-2 right-2 z-20">
+                <FavoriteButton
+                  animeId={anime.id}
+                  initialFavorited={initialFavorited}
+                  onToggle={(f) => onFavoriteToggle(anime.id, f)}
+                />
+              </div>
             </div>
           </Link>
 
@@ -262,10 +280,13 @@ function RowAnimeCard({
                       }
                       setShowModal(true);
                     }}
-                    className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
+                    className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-wait"
                     disabled={isUpdating}
                   >
-                    <span className="text-xs font-medium">Add to Library</span>
+                    {isUpdating ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : null}
+                    <span className="text-xs font-medium">{isUpdating ? "Adding..." : "Add to Library"}</span>
                   </button>
                 )}
               </div>
@@ -306,9 +327,9 @@ function RowAnimeCard({
             <p className="mt-0.5 text-[11px] text-white">{nativeTitle}</p>
           )}
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-[#7b7f89]">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-white/70">
             {anime.type && (
-              <span className="flex items-center gap-1 rounded-md bg-[#f7f7f7] px-2 py-0.5">
+              <span className="flex items-center gap-1 rounded-md bg-white/10 px-2 py-0.5">
                 <Tv size={11} />
                 {anime.type}
               </span>
@@ -319,7 +340,7 @@ function RowAnimeCard({
               </span>
             )}
             {anime.episodes && (
-              <span className="rounded-md bg-[#f7f7f7] px-2 py-0.5">
+              <span className="rounded-md bg-white/10 px-2 py-0.5">
                 {anime.episodes} episodes
               </span>
             )}
@@ -343,7 +364,7 @@ function RowAnimeCard({
                 {anime.genres.map((genre) => (
                   <span
                     key={genre}
-                    className="rounded-full border border-[#ececec] bg-[#fffdf8] px-2.5 py-1 text-[10px] text-[#545863] font-medium"
+                    className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[10px] text-white/80 font-medium"
                   >
                     {genre}
                   </span>
@@ -353,8 +374,8 @@ function RowAnimeCard({
           )}
 
           {anime.studios.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-[#ececec]">
-              <p className="text-[10px] text-white uppercase tracking-wider mb-1">
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">
                 Studio
               </p>
               <p className="text-xs text-white font-medium">
@@ -364,11 +385,11 @@ function RowAnimeCard({
           )}
 
           {anime.description && (
-            <div className="mt-3 pt-3 border-t border-[#ececec]">
-              <p className="text-[10px] text-white uppercase tracking-wider mb-1">
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">
                 Synopsis
               </p>
-              <p className="text-[11px] text-white leading-relaxed line-clamp-4">
+              <p className="text-[11px] text-white/80 leading-relaxed line-clamp-4">
                 {anime.description.replace(/<[^>]*>/g, "").replace(/\\n/g, " ")}
               </p>
             </div>
@@ -380,7 +401,7 @@ function RowAnimeCard({
             }`}
           >
             <div
-              className={`w-3 h-3 bg-[#545863] border border-[#ececec] rotate-45 ${
+              className={`w-3 h-3 bg-[#545863] border border-white/10 rotate-45 ${
                 detailPosition === "right"
                   ? "border-r-0 border-t-0"
                   : "border-l-0 border-b-0"

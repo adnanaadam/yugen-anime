@@ -1,1 +1,0 @@
-export type { Anime, AnimeListResponse } from "@/features/anime/types";

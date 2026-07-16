@@ -12,6 +12,9 @@ import { ChevronDown, Grid, List } from "lucide-react";
 import { handleFeedback, extractFeedback } from "@/lib/feedback-helper";
 import Image from "next/image";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
+import EmptyState from "@/components/ui/EmptyState";
+import { showErrorToast } from "@/lib/toast-helper";
+import { useFeedbackPrompts } from "@/hooks/useFeedbackPrompts";
 
 const tabs = [
   { label: "Watching", value: "WATCHING", color: "#00e8fc" },
@@ -90,7 +93,7 @@ export default function LibraryPage() {
       {/* View Toggle */}
       <div className="flex items-center justify-between">
         <div className="text-xs text-[#7b7f89]">
-          {animeList?.length || 0} {animeList?.length === 1 ? 'anime' : 'anime'}
+          {animeList?.length || 0} anime
         </div>
         <div className="flex items-center gap-1 bg-white border border-[#ececec] rounded-lg p-0.5">
           <button
@@ -124,7 +127,7 @@ export default function LibraryPage() {
         }>
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className={viewMode === "grid" 
-              ? "h-48 rounded-xl bg-[#f7f7f7] animate-pulse"
+              ? "aspect-[2/3] rounded-xl bg-[#f7f7f7] animate-pulse"
               : "h-16 rounded-xl bg-[#f7f7f7] animate-pulse"
             } />
           ))}
@@ -145,15 +148,13 @@ export default function LibraryPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-[#ececec] bg-white p-12 text-center shadow-sm">
-          <p className="text-[#7b7f89] text-sm">No anime found in this category.</p>
-          <Link
-            href="/explore"
-            className="mt-2 inline-block text-sm text-[#f96e46] hover:underline"
-          >
-            Explore Anime →
-          </Link>
-        </div>
+        <EmptyState
+          icon="search"
+          title="No anime found in this category"
+          description="Start exploring to add anime to your library."
+          actionLabel="Explore Anime"
+          actionHref="/explore"
+        />
       )}
     </div>
   );
@@ -177,25 +178,25 @@ function LibraryAnimeCard({
   // Use entry.anime if available, otherwise use fetched data
   const enrichedAnime = entry.anime || fetchedAnime;
 
-  // Fetch from Jikan if entry.anime is missing
+  // Fetch anime details from API route if entry.anime is missing
   useEffect(() => {
     if (!entry.anime && !fetchedAnime) {
       let cancelled = false;
-      fetch(`https://api.jikan.moe/v4/anime/${entry.animeId}`)
+      fetch(`/api/anime/${entry.animeId}`)
         .then((res) => res.json())
         .then((data) => {
-          if (!cancelled && data.data) {
+          if (!cancelled && data) {
             setFetchedAnime({
               title: {
-                english: data.data.title_english,
-                romaji: data.data.title,
+                english: data.title_english,
+                romaji: data.title,
               },
               coverImage: {
-                large: data.data.images.jpg.large_image_url,
+                large: data.images?.jpg?.large_image_url,
               },
-              averageScore: data.data.score ? data.data.score * 10 : null,
-              episodes: data.data.episodes,
-              status: data.data.status,
+              averageScore: data.score ? data.score * 10 : null,
+              episodes: data.episodes,
+              status: data.status,
             });
           }
         })
@@ -233,6 +234,7 @@ function LibraryAnimeCard({
       setShowModal(false);
     } catch (error) {
       console.error("Failed to update:", error);
+      showErrorToast("Failed to update. Please try again.");
     } finally {
       setIsUpdating(false);
     }
@@ -298,7 +300,7 @@ function LibraryAnimeCard({
   // Grid view
   return (
     <div className="group relative">
-      <div className="relative overflow-hidden rounded-lg border border-white/[0.08] bg-white/[0.02] transition-colors duration-200 group-hover:border-white/[0.15]">
+      <div className="relative overflow-hidden rounded-lg border border-[#ececec] bg-white shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:border-[#f9c846]/30">
         {/* Cover Image */}
         <Link href={`/anime/${entry.animeId}`} className="block">
           <div className="relative aspect-[2/3] overflow-hidden">
@@ -324,9 +326,9 @@ function LibraryAnimeCard({
               </div>
             )}
 
-            {/* Episode count */}
+              {/* Episode count */}
               <div className="absolute top-1 right-1 z-10 rounded bg-black/70 px-1 py-0.5 text-[9px] text-gray-300 backdrop-blur-sm">
-                {entry.progress > 0 && `${entry.progress} eps · `}
+                {entry.progress > 0 ? `${entry.progress} eps` : ''}
               </div>
 
             {/* Update button - center bottom position */}
@@ -343,7 +345,7 @@ function LibraryAnimeCard({
                 }}
                 className="flex w-full cursor-pointer text-xs px-2 py-1 items-center justify-center rounded-sm bg-black/60 text-white backdrop-blur-sm border border-white/10 transition-all hover:bg-[#f9c846] hover:text-black hover:border-transparent"
               >
-               <p>Update progress</p>
+               Update progress
               </button>
             </div>
           </div>

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
-import { X, Sparkles, Zap, Trophy } from "lucide-react";
+import { X, Sparkles, Zap, Trophy, Check } from "lucide-react";
 
 interface Toast {
   id: string;
-  type: "xp" | "badge" | "levelup";
+  type: "xp" | "badge" | "levelup" | "success" | "error";
   message: string;
   amount?: number;
   badgeName?: string;
@@ -22,6 +22,7 @@ export const useToast = () => useContext(ToastContext);
 
 // Global reference for external use
 let globalAddToast: ((toast: Omit<Toast, "id">) => void) | null = null;
+let toastCounter = 0;
 
 // Helper function that can be called from anywhere (no hook needed)
 export function addGlobalToast(toast: Omit<Toast, "id">) {
@@ -34,7 +35,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = useCallback((toast: Omit<Toast, "id">) => {
-    const id = Date.now().toString();
+    const id = `toast-${++toastCounter}`;
     setToasts((prev) => [...prev, { ...toast, id }]);
     
     // Auto-remove after 4 seconds
@@ -64,11 +65,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 rounded-xl border shadow-xl p-4 min-w-[300px] max-w-[380px] animate-in slide-in-from-right-8 transition-all ${
+            className={`pointer-events-auto flex items-start gap-3 rounded-xl border shadow-xl p-4 min-w-[300px] max-w-[380px] animate-slide-in-right transition-all ${
               toast.type === "xp"
                 ? "bg-[#545863] border-[#f9c846]/30"
                 : toast.type === "badge"
                 ? "bg-gradient-to-r from-[#f9c846]/20 to-[#f96e46]/20 border-[#f9c846]/40"
+                : toast.type === "success"
+                ? "bg-[#97cc04]/10 border-[#97cc04]/30"
+                : toast.type === "error"
+                ? "bg-[#f96e46]/10 border-[#f96e46]/30"
                 : "bg-gradient-to-r from-[#c084fc]/30 to-[#f9c846]/30 border-[#c084fc]/50"
             }`}
           >
@@ -78,12 +83,20 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 ? "bg-[#f9c846]/20"
                 : toast.type === "badge"
                 ? "bg-[#f9c846]/30"
+                : toast.type === "success"
+                ? "bg-[#97cc04]/20"
+                : toast.type === "error"
+                ? "bg-[#f96e46]/20"
                 : "bg-[#c084fc]/30"
             }`}>
               {toast.type === "xp" ? (
                 <Zap size={20} className="text-[#f9c846]" />
               ) : toast.type === "badge" ? (
                 <Trophy size={20} className="text-[#f9c846]" />
+              ) : toast.type === "success" ? (
+                <Check size={20} className="text-[#97cc04]" />
+              ) : toast.type === "error" ? (
+                <X size={20} className="text-[#f96e46]" />
               ) : (
                 <Sparkles size={20} className="text-[#c084fc]" />
               )}

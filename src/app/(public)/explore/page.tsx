@@ -19,6 +19,8 @@ import { addToAnimeList, updateProgress } from "@/features/tracking/api";
 import { handleFeedback, extractFeedback } from "@/lib/feedback-helper";
 import { lordJuusai } from "@/fonts/fonts";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
+import FavoriteButton from "@/components/anime/FavoriteButton";
+import { useFavorites } from "@/hooks/useFavorites";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 const categories = [
@@ -88,13 +90,17 @@ async function fetchAnimeData({
   sfw?: boolean;
 }) {
   try {
+    let data;
+
     if (searchQuery.trim()) {
+      // Use existing search API route
       const response = await fetch(
-        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchQuery)}&page=${page}&limit=${perPage}&order_by=popularity&sort=desc&sfw=${sfw}`,
+        `/api/anime/search?q=${encodeURIComponent(searchQuery)}&page=${page}&limit=${perPage}`
       );
-      const data = await response.json();
-      let media = data.data?.map(transformJikanToAnime) || [];
-      // Client-side filter for 18+ genres
+      if (!response.ok) throw new Error("Search API error");
+      data = await response.json();
+      // The API route returns transformed media, so no need to transform again
+      let media = data.media || [];
       if (sfw) {
         media = media.filter(
           (anime: TransformedAnime) =>
@@ -102,43 +108,22 @@ async function fetchAnimeData({
         );
       }
       return {
-        media: media,
+        media,
         pageInfo: {
-          hasNextPage: !!data.pagination?.has_next_page,
-          total: data.pagination?.items?.total || 0,
-          currentPage: data.pagination?.current_page || page,
-          lastPage: data.pagination?.last_visible_page || page,
+          hasNextPage: !!data.pageInfo?.has_next_page,
+          total: data.pageInfo?.total || 0,
+          currentPage: data.pageInfo?.current_page || page,
+          lastPage: data.pageInfo?.last_visible_page || page,
         },
       };
     }
 
-    let url = "";
-    switch (activeCategory) {
-      case "trending":
-        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=airing&sfw=${sfw}`;
-        break;
-      case "popular":
-        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&filter=bypopularity&sfw=${sfw}`;
-        break;
-      case "seasonal": {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        let season = "winter";
-        if (month >= 3 && month <= 5) season = "spring";
-        else if (month >= 6 && month <= 8) season = "summer";
-        else if (month >= 9 && month <= 11) season = "fall";
-        url = `https://api.jikan.moe/v4/seasons/${year}/${season}?page=${page}&limit=${perPage}&sfw=${sfw}`;
-        break;
-      }
-      default:
-        url = `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${perPage}&sfw=${sfw}`;
-    }
+    const apiEndpoint = activeCategory || "trending";
+    const response = await fetch(`/api/anime/${apiEndpoint}?page=${page}&limit=${perPage}`);
+    if (!response.ok) throw new Error("API error");
+    data = await response.json();
 
-    const response = await fetch(url);
-    const data = await response.json();
-    let media = data.data?.map(transformJikanToAnime) || [];
-    // Client-side filter for 18+ genres
+    let media = data.media || [];
     if (sfw) {
       media = media.filter(
         (anime: TransformedAnime) =>
@@ -146,16 +131,16 @@ async function fetchAnimeData({
       );
     }
     return {
-      media: media,
+      media,
       pageInfo: {
-        hasNextPage: !!data.pagination?.has_next_page,
-        total: data.pagination?.items?.total || 0,
-        currentPage: data.pagination?.current_page || page,
-        lastPage: data.pagination?.last_visible_page || page,
+        hasNextPage: !!data.pageInfo?.has_next_page,
+        total: data.pageInfo?.total || 0,
+        currentPage: data.pageInfo?.current_page || page,
+        lastPage: data.pageInfo?.last_visible_page || page,
       },
     };
   } catch (error) {
-    console.error("Error fetching from Jikan API:", error);
+    console.error("Error fetching from API:", error);
     return {
       media: [],
       pageInfo: { hasNextPage: false, total: 0, currentPage: 1, lastPage: 1 },
@@ -216,7 +201,9 @@ interface ExploreAnimeCardProps {
   session: ReturnType<typeof useSession>["data"];
   initialStatus: string | null;
   initialProgress: number;
+  initialFavorited: boolean;
   onStatusChange: (animeId: number, status: string, progress: number) => void;
+  onFavoriteToggle: (animeId: number, favorited: boolean) => void;
 }
 
 function ExploreAnimeCard({
@@ -224,7 +211,9 @@ function ExploreAnimeCard({
   session,
   initialStatus,
   initialProgress,
+  initialFavorited,
   onStatusChange,
+  onFavoriteToggle,
 }: ExploreAnimeCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -236,11 +225,17 @@ function ExploreAnimeCard({
     initialStatus,
   );
   const [isUpdating, setIsUpdating] = useState(false);
+  const [forceHideDetail, setForceHideDetail] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const title = anime.title.english || anime.title.romaji;
   const nativeTitle = anime.title.native;
   const activeStatus = statusColors[currentStatus || ""];
+
+  const closeModal = useCallback(() => {
+    setShowModal(false);
+    setForceHideDetail(false);
+  }, []);
 
   const handleSave = async (status: string, progress: number) => {
     if (!session) {
@@ -266,7 +261,7 @@ function ExploreAnimeCard({
       
       setCurrentStatus(status);
       onStatusChange(anime.id, status, progress);
-      setShowModal(false);
+      closeModal();
     } catch (error) {
       console.error("Failed to update:", error);
     } finally {
@@ -284,6 +279,16 @@ function ExploreAnimeCard({
       );
     }
   }, [isHovered]);
+
+  // Escape key closes modal
+  useEffect(() => {
+    if (!showModal) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeModal();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [showModal, closeModal]);
 
   // Sync local state with parent statusMap (only on initial mount via key)
   useEffect(() => {
@@ -324,6 +329,14 @@ function ExploreAnimeCard({
                 className={`object-cover transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
                 onLoad={() => setImageLoaded(true)}
               />
+              {/* Favorite button */}
+              <div className="absolute top-2 right-2 z-20">
+                <FavoriteButton
+                  animeId={anime.id}
+                  initialFavorited={initialFavorited}
+                  onToggle={(f) => onFavoriteToggle(anime.id, f)}
+                />
+              </div>
             </div>
           </Link>
 
@@ -335,6 +348,7 @@ function ExploreAnimeCard({
                       e.preventDefault();
                       e.stopPropagation();
                       setShowModal(true);
+                      setForceHideDetail(true);
                     }}
                     className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-[#ececec] px-3 shadow-sm hover:shadow-md transition-all"
                     disabled={isUpdating}
@@ -366,6 +380,7 @@ function ExploreAnimeCard({
                         return;
                       }
                       setShowModal(true);
+                      setForceHideDetail(true);
                     }}
                     className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
                     disabled={isUpdating}
@@ -392,7 +407,7 @@ function ExploreAnimeCard({
       {/* Hover Detail Box */}
       <div
         className={`absolute top-0 z-50 w-72 transition-all duration-300 pointer-events-none ${
-          isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
+          isHovered && !forceHideDetail ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
         } ${detailPosition === "right" ? "left-[calc(100%+12px)]" : "right-[calc(100%+12px)]"}`}
       >
         <div className="rounded-xl border border-[#ececec] bg-[#545863] shadow-xl p-5">
@@ -483,7 +498,7 @@ function ExploreAnimeCard({
       <UpdateProgressModal
         key={`modal-${anime.id}`}
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={closeModal}
         onSave={handleSave}
         currentStatus={currentStatus || ""}
         currentProgress={initialProgress}
@@ -529,6 +544,7 @@ function ExploreContent() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
   const [sfwOnly, setSfwOnly] = useState(true);
+  const isAppending = useRef(false);
 
   // Global user statuses (fetched once, not per-card)
   const {
@@ -536,6 +552,9 @@ function ExploreContent() {
     loaded: statusesLoaded,
     updateStatus,
   } = useUserAnimeStatuses(session);
+
+  // Global favorites (fetched once, not per-card)
+  const { favoriteIds, loaded: favoritesLoaded, toggleFavorite } = useFavorites();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -566,11 +585,12 @@ function ExploreContent() {
 
         if (cancelled) return;
 
-        if (page === 1) {
+        if (page === 1 || !isAppending.current) {
           setAnimeList(result.media);
         } else {
           setAnimeList((prev) => [...prev, ...result.media]);
         }
+        isAppending.current = false;
         setPageInfo(result.pageInfo);
       } catch (error) {
         console.error("Failed to fetch anime", error);
@@ -602,6 +622,7 @@ function ExploreContent() {
 
   const handleLoadMore = useCallback(() => {
     if (pageInfo.hasNextPage && !loadingMore) {
+      isAppending.current = true;
       setPage((prev) => prev + 1);
     }
   }, [pageInfo.hasNextPage, loadingMore]);
@@ -628,7 +649,7 @@ function ExploreContent() {
   };
 
   return (
-    <div className="min-h-screen mx-auto max-w-5xl w-5xl overflow-hidden bg-[#fffdf8]">
+    <div className="min-h-screen mx-auto max-w-5xl bg-[#fffdf8]">
       {/* Header */}
       <div className="bg-white border-b border-[#ececec]">
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-14">
@@ -726,7 +747,7 @@ function ExploreContent() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5 overflow-hidden">
               {animeList.map((anime, index) => (
                 <ExploreAnimeCard
                   key={`${anime.id}-${index}`}
@@ -738,7 +759,9 @@ function ExploreContent() {
                   initialProgress={
                     statusesLoaded ? statusMap[anime.id]?.progress || 0 : 0
                   }
+                  initialFavorited={favoritesLoaded ? favoriteIds.has(anime.id) : false}
                   onStatusChange={updateStatus}
+                  onFavoriteToggle={toggleFavorite}
                 />
               ))}
               {loadingMore &&
@@ -753,7 +776,7 @@ function ExploreContent() {
                   <button
                     onClick={handleLoadMore}
                     disabled={loadingMore}
-                    className="flex items-center gap-2 rounded-lg border border-[#ececec] bg-white px-5 py-2.5 text-sm font-medium text-[#545863] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 cursor-pointer rounded-lg border border-[#ececec] bg-white px-5 py-2.5 text-sm font-medium text-[#545863] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
                   >
                     {loadingMore ? (
                       <>
@@ -783,11 +806,12 @@ function ExploreContent() {
                         key={pageNum}
                         onClick={() => {
                           if (pageNum !== currentPage) {
+                            isAppending.current = false;
                             setPage(pageNum);
                             window.scrollTo({ top: 0, behavior: "smooth" });
                           }
                         }}
-                        className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors ${
+                        className={`min-w-[36px] h-9 rounded-lg cursor-pointer text-sm font-medium transition-colors ${
                           pageNum === currentPage
                             ? "bg-[#f9c846] text-[#545863]"
                             : "bg-white border border-[#ececec] text-[#7b7f89] hover:bg-[#f7f7f7]"
@@ -807,7 +831,7 @@ function ExploreContent() {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-[#f9c846] text-[#545863] shadow-lg hover:bg-[#f5bd29] hover:shadow-xl transition-all"
+          className="fixed bottom-8 right-8 z-50 flex cursor-pointer h-11 w-11 items-center justify-center rounded-full bg-[#f9c846] text-[#545863] shadow-lg hover:bg-[#f5bd29] hover:shadow-xl transition-all"
         >
           <ArrowUp size={18} />
         </button>

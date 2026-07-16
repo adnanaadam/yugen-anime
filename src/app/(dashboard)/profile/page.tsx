@@ -10,9 +10,12 @@ import { ArrowRight, Plus, Check } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 import { addToAnimeList } from "@/features/tracking/api";
 import AnimeCard from "@/components/anime/AnimeCard";
+import FavoriteButton from "@/components/anime/FavoriteButton";
+import { useFavorites } from "@/hooks/useFavorites";
 import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts";
 import Image from "next/image";
 import BadgeCard from "@/components/badges/BadgeCard";
+import { Globe, Lock } from "lucide-react";
 
 const COLORS = ["#00e8fc", "#97cc04", "#f9c846", "#f96e46", "#ff4444", "#c084fc"];
 
@@ -47,10 +50,15 @@ export default function DashboardPage() {
   const [statusMap, setStatusMap] = useState<Record<number, { status: string; progress: number }>>({});
   const [statusesLoaded, setStatusesLoaded] = useState(() => !session);
 
+  // Global favorites
+  const { favoriteIds, loaded: favoritesLoaded, toggleFavorite } = useFavorites();
+
   const xpInfo = stats?.user ? xpToNextLevel(stats.user.xp) : null;
   const totalAnime = stats?.stats.totalAnime || 0;
   const totalEpisodes = stats?.stats.totalEpisodes || 0;
   const badgeCount = stats?.badges?.length || 0;
+  const favoritesCount = stats?.stats.favoritesCount || 0;
+  const isProfilePublic = stats?.user?.isProfilePublic ?? true;
 
   // Fetch user's anime statuses
   useEffect(() => {
@@ -115,9 +123,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-14">
+
       {/* Level Card + Pie Chart side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-10">
         {/* Level Card */}
         <div className="rounded-2xl border border-[#ececec] bg-white overflow-hidden">
           <div className="p-5">
@@ -145,7 +154,7 @@ export default function DashboardPage() {
                 : "Max level"}
             </p>
 
-            <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-[#ececec]">
+            <div className="grid grid-cols-4 gap-3 mt-4 pt-4 border-t border-[#ececec]">
               <div className="text-center">
                 <p className="text-lg font-bold text-[#545863]">{totalAnime}</p>
                 <p className="text-[10px] text-[#7b7f89]">Anime</p>
@@ -157,6 +166,10 @@ export default function DashboardPage() {
               <div className="text-center">
                 <p className="text-lg font-bold text-[#545863]">{badgeCount}/8</p>
                 <p className="text-[10px] text-[#7b7f89]">Badges</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-[#f96e46]">{favoritesCount}</p>
+                <p className="text-[10px] text-[#7b7f89]">Favorites</p>
               </div>
             </div>
           </div>
@@ -234,46 +247,7 @@ export default function DashboardPage() {
         <h3 className="text-xs font-semibold text-[#545863] mb-4 uppercase tracking-[0.15em]">
           Badges · {badgeCount}/8
         </h3>
-        {stats?.badges && stats.badges.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {stats.badges.map((ub: { id: string; badge: { name: string; icon: string | null; category: string | null } }, index: number) => {
-              const badgeColors: Record<string, { color: string; rarityColor: string; glow: string }> = {
-                first_anime: { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
-                episode_master: { color: "#97cc04", rarityColor: "bg-[#97cc04]/10 text-[#97cc04] border-[#97cc04]/20", glow: "rgba(151,204,4,0.2)" },
-                anime_veteran: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.25)" },
-                completionist: { color: "#f96e46", rarityColor: "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/20", glow: "rgba(249,110,70,0.15)" },
-                anime_lover: { color: "#f96e46", rarityColor: "bg-gradient-to-r from-[#f9c846]/20 via-[#f96e46]/20 to-[#c084fc]/20 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
-                binge_watcher: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
-                collector: { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
-                favorite_curator: { color: "#c084fc", rarityColor: "bg-[#c084fc]/10 text-[#c084fc] border-[#c084fc]/20", glow: "rgba(192,132,252,0.2)" },
-              };
-
-              const badgeData = badgeColors[ub.id] || badgeColors.first_anime;
-              const rarityLabel = ub.badge.category ? ub.badge.category.charAt(0).toUpperCase() + ub.badge.category.slice(1) : "Common";
-
-              return (
-                <BadgeCard
-                  key={ub.id}
-                  badge={{
-                    id: ub.id,
-                    name: ub.badge.name,
-                    description: ub.badge.name,
-                    icon: "/icons/trophy.png",
-                    category: ub.badge.category || "Common",
-                  }}
-                  color={badgeData.color}
-                  rarityColor={badgeData.rarityColor}
-                  glow={badgeData.glow}
-                  index={index}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-xs text-[#7b7f89]">
-            Start tracking anime to earn your first badge!
-          </p>
-        )}
+        <AllBadgesSection />
       </div>
 
       {/* Trending */}
@@ -299,7 +273,9 @@ export default function DashboardPage() {
                 session={session}
                 initialStatus={statusesLoaded ? statusMap[anime.id]?.status || null : null}
                 initialProgress={statusesLoaded ? statusMap[anime.id]?.progress || 0 : 0}
+                initialFavorited={favoritesLoaded ? favoriteIds.has(anime.id) : false}
                 onStatusChange={updateStatus}
+                onFavoriteToggle={toggleFavorite}
               />
             ))}
           </div>
@@ -309,18 +285,121 @@ export default function DashboardPage() {
   );
 }
 
+interface BadgeData {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  xpReward: number;
+  isEarned: boolean;
+  progress: {
+    current: number;
+    required: number;
+    percentage: number;
+  };
+}
+
+function AllBadgesSection() {
+  const [allBadges, setAllBadges] = useState<BadgeData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBadges = async () => {
+      try {
+        const res = await fetch("/api/badges");
+        if (res.ok) {
+          const data = await res.json();
+          setAllBadges(data.badges || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch badges:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBadges();
+  }, []);
+
+  const badgeColors: Record<string, { color: string; rarityColor: string; glow: string }> = {
+    "First Anime": { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
+    "Episode Master": { color: "#97cc04", rarityColor: "bg-[#97cc04]/10 text-[#97cc04] border-[#97cc04]/20", glow: "rgba(151,204,4,0.2)" },
+    "Anime Veteran": { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.25)" },
+    "Completionist": { color: "#f96e46", rarityColor: "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/20", glow: "rgba(249,110,70,0.15)" },
+    "Anime Lover": { color: "#f96e46", rarityColor: "bg-gradient-to-r from-[#f9c846]/20 via-[#f96e46]/20 to-[#c084fc]/20 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
+    "Binge Watcher": { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
+    "Collector": { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
+    "Favorite Curator": { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
+  };
+
+  const badgeIcons: Record<string, string> = {
+    "First Anime": "/icons/scroll.png",
+    "Episode Master": "/icons/spellbook.png",
+    "Anime Veteran": "/icons/c-cat.png",
+    "Completionist": "/icons/trophy.png",
+    "Anime Lover": "/icons/medal.png",
+    "Binge Watcher": "/icons/fire-crystal.png",
+    "Collector": "/icons/gold-chest.png",
+    "Favorite Curator": "/icons/golden-bookmark.png",
+  };
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="animate-pulse">
+            <div className="w-full aspect-square rounded-2xl bg-gray-100" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      {allBadges.map((badge, index) => {
+        const badgeData = badgeColors[badge.name] || badgeColors["First Anime"];
+
+        return (
+          <BadgeCard
+            key={badge.id}
+            badge={{
+              id: badge.id,
+              name: badge.name,
+              description: badge.description || "No description available.",
+              icon: badgeIcons[badge.name] || "/icons/trophy.png",
+              category: badge.category || "Common",
+            }}
+            color={badgeData.color}
+            rarityColor={badgeData.rarityColor}
+            glow={badgeData.glow}
+            isEarned={badge.isEarned}
+            progress={badge.progress}
+            index={index}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 function TrendingAnimeCard({
   anime,
   session,
   initialStatus,
   initialProgress,
+  initialFavorited,
   onStatusChange,
+  onFavoriteToggle,
 }: {
   anime: { id: number; title: { english: string | null; romaji: string }; coverImage: { large: string }; averageScore: number | null; episodes: number | null; seasonYear: number | null; type: string | null };
   session: ReturnType<typeof useSession>["data"];
   initialStatus: string | null;
   initialProgress: number;
+  initialFavorited: boolean;
   onStatusChange: (animeId: number, status: string) => void;
+  onFavoriteToggle: (animeId: number, favorited: boolean) => void;
 }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -368,6 +447,15 @@ function TrendingAnimeCard({
                 className="object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-75"
               />
 
+              {/* Favorite button */}
+              <div className="absolute top-2 right-2 z-20">
+                <FavoriteButton
+                  animeId={anime.id}
+                  initialFavorited={initialFavorited}
+                  onToggle={(f) => onFavoriteToggle(anime.id, f)}
+                />
+              </div>
+
               {/* Score badge */}
               {anime.averageScore && (
                 <div className="absolute top-2 left-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-medium text-[#f9c846] backdrop-blur-sm">
@@ -377,7 +465,7 @@ function TrendingAnimeCard({
 
               {/* Episode count */}
               {anime.episodes && (
-                <div className="absolute top-2 right-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-gray-300 backdrop-blur-sm">
+                <div className="absolute top-10 right-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-gray-300 backdrop-blur-sm">
                   {anime.episodes} eps
                 </div>
               )}

@@ -1,12 +1,13 @@
 {
-  "name": "yugen-anime",
+  "name": "kaizen-anime",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
@@ -16,6 +17,7 @@
     "@usenavii/react": "^0.8.1",
     "cloudinary": "^2.10.0",
     "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.14.0",
     "next": "16.2.6",
@@ -24,7 +26,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
-    "swr": "^2.4.1"
+    "swr": "^2.4.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
@@ -36,6 +39,7 @@
     "eslint-config-next": "16.2.6",
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.0",
     "typescript": "^5"
   }
 }

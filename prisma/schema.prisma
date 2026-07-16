@@ -25,6 +25,7 @@ model User {
   username      String?  @unique
   xp            Int      @default(0)
   level         Int      @default(1)
+  isProfilePublic Boolean @default(true)
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -35,6 +36,10 @@ model User {
   animeList     AnimeList[]
   badges        UserBadge[]
   favorites     Favorite[]
+  notifications Notification[]
+  feedbacks      Feedback[]
+
+  @@index([xp])
 }
 
 model AnimeList {
@@ -97,6 +102,21 @@ model UserBadge {
   @@unique([userId, badgeId])
 }
 
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "xp_gained" | "badge_earned" | "level_up" | "system"
+  title     String
+  message   String?
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -131,4 +151,23 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Feedback {
+  id          String   @id @default(cuid())
+  userId      String?
+  email       String?
+  category    String   @default("general")
+  rating      String?
+  context     String   @default("general")
+  message     String
+  screenshot  String?
+  pagePath    String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([context, createdAt])
 }

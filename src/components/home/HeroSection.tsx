@@ -51,7 +51,7 @@ const badges = [
 
 export default function HeroSection() {
   return (
-    <section className="relative max-h-screen overflow-hidden bg-black py-18">
+    <section className="relative max-h-screen overflow-hidden bg-black py-20">
       {/* Full Anime Background */}
       <div className="absolute inset-0">
         <Image

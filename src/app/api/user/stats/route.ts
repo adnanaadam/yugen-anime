@@ -12,7 +12,26 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const userId = searchParams.get("userId") || session.user.id;
 
-  const [listCounts, totalEpisodes, ratedCount, user, badges] =
+  // If requesting another user's stats, check profile visibility
+  if (userId !== session.user.id) {
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isProfilePublic: true },
+    });
+
+    if (!targetUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (!targetUser.isProfilePublic) {
+      return NextResponse.json(
+        { error: "This profile is private" },
+        { status: 403 }
+      );
+    }
+  }
+
+  const [listCounts, totalEpisodes, ratedCount, user, badges, favoritesCount] =
     await Promise.all([
       prisma.animeList.groupBy({
         by: ["status"],
@@ -36,12 +55,16 @@ export async function GET(request: NextRequest) {
           xp: true,
           level: true,
           createdAt: true,
+          isProfilePublic: true,
         },
       }),
       prisma.userBadge.findMany({
         where: { userId },
         include: { badge: true },
         orderBy: { earnedAt: "desc" },
+      }),
+      prisma.favorite.count({
+        where: { userId },
       }),
     ]);
 
@@ -50,19 +73,27 @@ export async function GET(request: NextRequest) {
     statusCounts[group.status] = group._count;
   });
 
-  return NextResponse.json({
-    user,
-    stats: {
-      totalAnime: listCounts.reduce((sum, g) => sum + g._count, 0),
-      watching: statusCounts["WATCHING"] || 0,
-      completed: statusCounts["COMPLETED"] || 0,
-      planToWatch: statusCounts["PLAN_TO_WATCH"] || 0,
-      paused: statusCounts["PAUSED"] || 0,
-      dropped: statusCounts["DROPPED"] || 0,
-      reWatching: statusCounts["REWATCHING"] || 0,
-      totalEpisodes: totalEpisodes._sum.progress || 0,
-      ratedCount,
+  return NextResponse.json(
+    {
+      user,
+      stats: {
+        totalAnime: listCounts.reduce((sum, g) => sum + g._count, 0),
+        watching: statusCounts["WATCHING"] || 0,
+        completed: statusCounts["COMPLETED"] || 0,
+        planToWatch: statusCounts["PLAN_TO_WATCH"] || 0,
+        paused: statusCounts["PAUSED"] || 0,
+        dropped: statusCounts["DROPPED"] || 0,
+        reWatching: statusCounts["REWATCHING"] || 0,
+        totalEpisodes: totalEpisodes._sum.progress || 0,
+        ratedCount,
+        favoritesCount,
+      },
+      badges,
     },
-    badges,
-  });
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=15, stale-while-revalidate=45",
+      },
+    }
+  );
 }

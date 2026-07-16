@@ -21,7 +21,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Yugen Anime — Track Your Anime Journey Beautifully",
+  title: "Kaizen Anime - Track Your Anime Journey Beautifully",
   description:
     "A minimalist anime tracking platform with progress tracking, gamification, and social profiles.",
 };

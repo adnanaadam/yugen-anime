@@ -5,14 +5,16 @@ import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Library, User, Settings, LogOut } from "lucide-react";
+import { Library, User, Settings, LogOut, Heart, Globe, Lock } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Navii } from "@usenavii/react";
 import { CldImage } from "next-cloudinary";
+import { useUserStats } from "@/hooks/useUserData";
 
 const navTabs = [
   { label: "Profile", href: "/profile", icon: User },
   { label: "Library", href: "/library", icon: Library },
+  { label: "Favorites", href: "/favorites", icon: Heart },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -22,14 +24,19 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const { data: session, status } = useSession();
+  const { data: stats, loading } = useUserStats();
   const router = useRouter();
   const pathname = usePathname();
+
+  const isProfilePublic = stats?.user?.isProfilePublic ?? true;
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/signin");
+    } else if (status === "authenticated" && session?.user?.needsOnboarding) {
+      router.push("/onboarding");
     }
-  }, [status, router]);
+  }, [status, router, session]);
 
   if (status === "loading" || status === "unauthenticated") {
     return (
@@ -41,75 +48,90 @@ export default function DashboardLayout({
 
   if (!session) return null;
 
+  // Still needs onboarding — render loading while redirecting
+  if (session.user.needsOnboarding) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-[#fffdf8]">
-        {/* Top Nav Bar */}
-        <header className="sticky top-14 z-40 bg-white border-b border-[#ececec]">
-          <div className="mx-auto max-w-5xl px-4">
-            <div className="flex items-center justify-between h-12">
-              {/* User pill */}
-              <div className="flex items-center gap-2">
-                {session.user?.image && session.user.image.includes("cloudinary") ? (
-                  <div className="relative size-7 rounded-full overflow-hidden">
-                    <CldImage
-                      src={session.user.image}
-                      alt={session.user?.name || "Avatar"}
-                      fill
-                      className="object-cover"
-                      crop="fill"
-                      gravity="face"
-                    />
-                  </div>
-                ) : (
-                  <Navii
-                    seed={session.user?.email ?? ""}
-                    size={24}
-                    title={session.user?.name ?? ""}
-                    animated
+      {/* Top Nav Bar */}
+      <header className="sticky top-14 z-40 bg-white border-b border-[#ececec]">
+        <div className="mx-auto max-w-5xl px-4 py-4 sm:py-0">
+          <div className="flex items-center justify-between sm:h-12 flex-col sm:flex-row gap-4">
+            {/* User pill */}
+            <div className="flex items-center gap-2">
+              {session.user?.image &&
+              session.user.image.includes("cloudinary") ? (
+                <div className="relative size-7 rounded-full overflow-hidden">
+                  <CldImage
+                    src={session.user.image}
+                    alt={session.user?.name || "Avatar"}
+                    fill
+                    className="object-cover"
+                    crop="fill"
+                    gravity="face"
                   />
-                )}
-                <span className="text-sm font-medium text-[#545863]">
-                  {session.user?.username || session.user?.name || "User"}
-                </span>
-              </div>
-
-              {/* Nav tabs */}
-              <nav className="flex items-center gap-1">
-                {navTabs.map((tab) => {
-                  const isActive =
-                    pathname === tab.href ||
-                    (tab.href === "/profile" && pathname.startsWith("/profile"));
-                  return (
-                    <Link
-                      key={tab.href}
-                      href={tab.href}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                        isActive
-                          ? "bg-[#f9c846]/10 text-[#f9c846]"
-                          : "text-[#7b7f89] hover:text-[#545863] hover:bg-[#f7f7f7]"
-                      }`}
-                    >
-                      <tab.icon size={15} />
-                      <span className="hidden sm:inline">{tab.label}</span>
-                    </Link>
-                  );
-                })}
-
-                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[#7b7f89] hover:text-[#f96e46] hover:bg-[#fef2f2] transition-colors ml-2"
-                >
-                  <LogOut size={15} />
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
-              </nav>
+                </div>
+              ) : (
+                <Navii
+                  seed={session.user?.email ?? ""}
+                  size={24}
+                  title={session.user?.name ?? ""}
+                  animated
+                />
+              )}
+              <span className="text-sm font-medium text-[#545863]">
+                {session.user?.username || "User"}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
+                  isProfilePublic
+                    ? "bg-[#97cc04]/10 text-[#97cc04]"
+                    : "bg-[#f7f7f7] text-[#7b7f89]"
+                }`}
+              >
+                {isProfilePublic ? <Globe size={12} /> : <Lock size={12} />}
+                {isProfilePublic ? "Public Profile" : "Private Profile"}
+              </span>
             </div>
+
+            {/* Nav tabs */}
+            <nav className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              {navTabs.map((tab) => {
+                const isActive =
+                  pathname === tab.href ||
+                  (tab.href === "/profile" && pathname.startsWith("/profile"));
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+                      isActive
+                        ? "bg-[#f9c846]/10 text-[#f9c846]"
+                        : "text-[#7b7f89] hover:text-[#545863] hover:bg-[#f7f7f7]"
+                    }`}
+                  >
+                    <tab.icon size={16} />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </Link>
+                );
+              })}
+
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="flex items-center cursor-pointer gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-[#7b7f89] hover:text-[#f96e46] hover:bg-[#fef2f2] transition-colors flex-shrink-0"
+              >
+                <LogOut size={16} />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </nav>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Content */}
-        <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
-      </div>
-
+      {/* Content */}
+      <main className="mx-auto max-w-5xl px-4 sm:py-6">{children}</main>
+    </div>
   );
 }

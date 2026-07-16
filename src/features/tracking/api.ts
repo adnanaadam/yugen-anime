@@ -3,6 +3,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { getServerSession, authOptions } from "@/lib/auth";
+import { apiClient } from "@/lib/api-client";
+import { createBadgeNotification, createLevelUpNotification } from "@/lib/notifications";
 import { calculateLevel } from "@/lib/utils";
 import { AnimeStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -33,7 +35,7 @@ const BADGE_DEFINITIONS: Record<string, { name: string; description: string; ico
   episode_master: {
     name: "Episode Master",
     description: "Watched 500 episodes total",
-    icon: "sword",
+    icon: "spellbook",
     xpReward: 300,
     category: "milestone",
   },
@@ -79,9 +81,17 @@ const BADGE_DEFINITIONS: Record<string, { name: string; description: string; ico
     xpReward: 100,
     category: "collection",
   },
+  early_adopter: {
+    name: "Early Adopter",
+    description: "Joined during the first 1000 users",
+    icon: "star",
+    xpReward: 500,
+    category: "special",
+  },
 };
 
 const EARLY_ADOPTER_LIMIT = 1000;
+
 
 // ============================================================
 // XP REWARD CONFIG
@@ -102,6 +112,17 @@ const XP_CONFIG = {
 async function getCurrentUser() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new Error("Not authenticated");
+
+  // Verify user still exists in DB (handles stale sessions after DB reset)
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true },
+  });
+
+  if (!user) {
+    throw new Error("User not found. Please sign in again.");
+  }
+
   return session.user.id;
 }
 
@@ -124,6 +145,8 @@ async function awardXP(userId: string, amount: number, reason: string): Promise<
       where: { id: userId },
       data: { level: newLevel },
     });
+    // Fire-and-forget level up notification (errors are logged)
+    createLevelUpNotification(userId, newLevel);
   }
 
   console.log(`[XP] User ${userId}: +${amount} XP (${reason}) - Level ${newLevel}`);
@@ -134,6 +157,8 @@ async function awardXP(userId: string, amount: number, reason: string): Promise<
 // VALIDATION
 // ============================================================
 
+const MAX_PROGRESS_UNKNOWN = 10000;
+
 function validateProgressUpdate(
   currentProgress: number,
   newProgress: number,
@@ -143,13 +168,25 @@ function validateProgressUpdate(
     return { valid: false, episodesWatched: 0, reason: `Cannot exceed ${totalEpisodes} episodes` };
   }
 
+  if (!totalEpisodes && newProgress > MAX_PROGRESS_UNKNOWN) {
+    return { valid: false, episodesWatched: 0, reason: `Cannot exceed ${MAX_PROGRESS_UNKNOWN} episodes without known total` };
+  }
+
+  if (newProgress < 0) {
+    return { valid: false, episodesWatched: 0, reason: "Progress cannot be negative" };
+  }
+
   const jump = newProgress - currentProgress;
   
+  if (jump < 0) {
+    return { valid: false, episodesWatched: 0, reason: "Progress cannot be decreased" };
+  }
+
   if (jump === 0) {
     return { valid: true, episodesWatched: 0 };
   }
 
-  const episodesWatched = jump > 0 ? jump : 0;
+  const episodesWatched = jump;
   
   return { valid: true, episodesWatched };
 }
@@ -191,6 +228,8 @@ async function checkAndAwardBadge(userId: string, badgeKey: string): Promise<{ n
     });
 
     await awardXP(userId, definition.xpReward, `Earned badge: ${definition.name}`);
+    // Fire-and-forget badge notification (errors are logged)
+    createBadgeNotification(userId, definition.name);
     console.log(`[BADGE] User ${userId} earned: ${definition.name} (${definition.category})`);
     return { name: definition.name, xpReward: definition.xpReward };
   }
@@ -279,6 +318,13 @@ export async function addToAnimeList(
   let previousLevel = 1;
   let newLevel = 1;
 
+  // Validate score
+  if (score !== undefined && score !== null) {
+    if (score < 1 || score > 10) {
+      throw new Error("Score must be between 1 and 10");
+    }
+  }
+
   const existing = await prisma.animeList.findUnique({
     where: { userId_animeId: { userId, animeId } },
   });
@@ -289,14 +335,13 @@ export async function addToAnimeList(
     let updatedProgress = progress ?? existing.progress;
     if (status === "COMPLETED" && !progress && existing.progress === 0) {
       try {
-        const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
-        const data = await res.json();
-        const totalEpisodes = data.data?.episodes;
+        const data = await apiClient.getAnimeById(animeId);
+        const totalEpisodes = (data.data as { episodes?: number })?.episodes;
         if (totalEpisodes) {
           updatedProgress = totalEpisodes;
         }
       } catch {
-        console.warn("Could not fetch episode count from Jikan when updating to completed");
+        console.warn("Could not fetch episode count from Tenrai when updating to completed");
       }
     }
 
@@ -335,14 +380,13 @@ export async function addToAnimeList(
   
   if (status === "COMPLETED" && !progress) {
     try {
-      const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
-      const data = await res.json();
-      const totalEpisodes = data.data?.episodes;
+      const data = await apiClient.getAnimeById(animeId);
+      const totalEpisodes = (data.data as { episodes?: number })?.episodes;
       if (totalEpisodes) {
         finalProgress = totalEpisodes;
       }
     } catch {
-      console.warn("Could not fetch episode count from Jikan for completed anime");
+      console.warn("Could not fetch episode count from Tenrai for completed anime");
     }
   }
   
@@ -404,11 +448,10 @@ export async function updateProgress(animeId: number, progress: number): Promise
 
   let totalEpisodes: number | null = null;
   try {
-    const res = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
-    const data = await res.json();
-    totalEpisodes = data.data?.episodes || null;
+    const data = await apiClient.getAnimeById(animeId);
+    totalEpisodes = (data.data as { episodes?: number })?.episodes || null;
   } catch {
-    console.warn("Could not fetch episode count from Jikan");
+    console.warn("Could not fetch episode count from Tenrai");
   }
 
   const validation = validateProgressUpdate(entry.progress, progress, totalEpisodes);
@@ -512,6 +555,15 @@ async function awardCompletionXP(userId: string, episodesWatched: number) {
 
 export async function addToFavorites(animeId: number) {
   const userId = await getCurrentUser();
+
+  // Check favorite limit
+  const currentCount = await prisma.favorite.count({
+    where: { userId },
+  });
+
+  if (currentCount >= 10) {
+    throw new Error("You can only have up to 10 favorite anime");
+  }
 
   const existing = await prisma.favorite.findUnique({
     where: { userId_animeId: { userId, animeId } },
