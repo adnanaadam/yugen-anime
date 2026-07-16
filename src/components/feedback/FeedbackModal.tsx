@@ -80,7 +80,7 @@ function FeedbackModalInner({
                 How was your experience?
               </h2>
               <p className="text-xs text-gray-500">
-                Your feedback helps us improve Yugen for everyone.
+                Your feedback helps us improve OtakuProfile for everyone.
               </p>
             </div>
             <div className="flex items-center justify-center gap-4">
@@ -153,7 +153,7 @@ function FeedbackModalInner({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Thank you!</h3>
             <p className="text-sm text-gray-500 mb-6">
-              Your feedback means a lot to us. It helps make Yugen better every day.
+              Your feedback means a lot to us. It helps make OtakuProfile better every day.
             </p>
             <button
               onClick={onClose}

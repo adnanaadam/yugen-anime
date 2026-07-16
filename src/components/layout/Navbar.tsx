@@ -130,7 +130,7 @@ export default function Navbar() {
         <div className="grid grid-cols-3 items-center w-full text-[var(--color-surface)] px-8 lg:px-16">
           {/* Left: Logo */}
           <Link href="/" className="justify-self-start">
-            <h1 className={`text-2xl ${lordJuusai.className}`}>Kaizen</h1>
+            <h1 className={`text-2xl ${lordJuusai.className}`}>OtakuProfile</h1>
           </Link>
 
           {/* Center: Nav - always centered in its column */}
@@ -383,7 +383,7 @@ export default function Navbar() {
             <h1
               className={`text-xl text-[var(--color-surface)] ${lordJuusai.className}`}
             >
-              Kaizen
+              OtakuProfile
             </h1>
           </Link>
 

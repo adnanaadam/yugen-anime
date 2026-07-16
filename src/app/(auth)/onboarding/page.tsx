@@ -128,7 +128,7 @@ export default function OnboardingPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <h1 className={`text-3xl text-[#545863] ${lordJuusai.className}`}>
-            Yugen
+            OtakuProfile
           </h1>
           <p className="mt-2 text-sm text-[#7b7f89]">
             Set up your profile to get started
@@ -160,7 +160,7 @@ export default function OnboardingPage() {
                 Choose a Username
               </h2>
               <p className="mt-1 text-sm text-[#7b7f89]">
-                This will be your unique identity on Yugen
+                This will be your unique identity on OtakuProfile
               </p>
             </div>
 

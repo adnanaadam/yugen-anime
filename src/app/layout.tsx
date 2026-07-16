@@ -21,7 +21,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Kaizen Anime - Track Your Anime Journey Beautifully",
+  title: "OtakuProfile - Track Your Anime Journey Beautifully",
   description:
     "A minimalist anime tracking platform with progress tracking, gamification, and social profiles.",
 };
