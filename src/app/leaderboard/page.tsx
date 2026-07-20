@@ -232,7 +232,7 @@ export default function LeaderboardPage() {
 
                         {/* Avatar */}
                         <div className="relative shrink-0">
-                          {entry.isProfilePublic && entry.image ? (
+                          {entry.isProfilePublic && entry.image && entry.image.includes("cloudinary") ? (
                             <div
                               className="w-9 h-10 overflow-hidden"
                               style={{ clipPath: "polygon(50% 3%, 93% 28%, 93% 72%, 50% 97%, 7% 72%, 7% 28%)" }}

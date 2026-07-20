@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import HeroSection from "@/components/home/HeroSection";
 import HomeAnimeRows from "@/components/home/HomeAnimeRows";
 import AchievementsPreview from "@/components/home/AchievementsPreview";
+import FAQSection from "@/components/home/FAQSection";
 import Footer from "@/components/layout/Footer";
 
 export default function HomePage() {
@@ -15,6 +16,8 @@ export default function HomePage() {
       </Suspense>
 
       <AchievementsPreview />
+
+      <FAQSection />
 
       <Footer />
     </main>
