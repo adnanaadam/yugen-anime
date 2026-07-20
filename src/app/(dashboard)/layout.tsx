@@ -5,11 +5,12 @@ import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Library, User, Settings, LogOut, Heart, Globe, Lock } from "lucide-react";
+import { Library, User, Settings, LogOut, Heart, Globe, Lock, Share2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Navii } from "@usenavii/react";
 import { CldImage } from "next-cloudinary";
 import { useUserStats } from "@/hooks/useUserData";
+import { addGlobalToast } from "@/components/Toast";
 
 const navTabs = [
   { label: "Profile", href: "/profile", icon: User },
@@ -29,6 +30,40 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const isProfilePublic = stats?.user?.isProfilePublic ?? true;
+  const [copied, setCopied] = useState(false);
+
+  const handleShareProfile = async () => {
+    const username = session?.user?.username;
+    if (!username) return;
+
+    const url = `${window.location.origin}/u/${username}`;
+
+    // Try Web Share API first (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${username}'s Profile`, url });
+        return;
+      } catch {
+        // User cancelled or failed - fall through to clipboard
+      }
+    }
+
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      addGlobalToast({
+        type: "success",
+        message: "Profile link copied to clipboard!",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      addGlobalToast({
+        type: "error",
+        message: "Failed to copy link",
+      });
+    }
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -94,6 +129,13 @@ export default function DashboardLayout({
                 {isProfilePublic ? <Globe size={12} /> : <Lock size={12} />}
                 {isProfilePublic ? "Public Profile" : "Private Profile"}
               </span>
+              <button
+                onClick={handleShareProfile}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-[#f9c846] bg-[#f9c846]/10 hover:bg-[#f9c846]/20 transition-colors cursor-pointer"
+              >
+                <Share2 size={12} />
+                Share Profile
+              </button>
             </div>
 
             {/* Nav tabs */}
