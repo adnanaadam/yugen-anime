@@ -538,13 +538,14 @@ export default function Navbar() {
 
         {/* Mobile search bar */}
         <div
-          className={`overflow-hidden transition-all duration-300 ${
-            searchOpen ? "max-h-16" : "max-h-0"
+          className={`overflow-hidden transition-all duration-300 will-change-[max-height] ${
+            searchOpen ? "max-h-24" : "max-h-0"
           }`}
         >
           <form onSubmit={handleSearch} className="px-4 pb-3">
             <input
               ref={searchInputRef}
+              dir="ltr"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

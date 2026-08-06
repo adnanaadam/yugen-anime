@@ -167,6 +167,7 @@ function RowAnimeCard({
         setCurrentStatus(status);
         setUserProgress(progress);
         setShowModal(false);
+        setIsHovered(false);
       } catch (error) {
         console.error("Failed to update:", error);
       } finally {
@@ -310,7 +311,7 @@ function RowAnimeCard({
 
       {/* Hover Detail Box - slides out to the side */}
       <div
-        className={`absolute top-0 z-50 w-84 transition-all duration-300 pointer-events-none ${
+        className={`hidden md:block absolute top-0 z-50 w-84 transition-all duration-300 pointer-events-none ${
           isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
         } ${
           detailPosition === "right"

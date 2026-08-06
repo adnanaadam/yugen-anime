@@ -4,7 +4,7 @@
 import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Search,
   Plus,
@@ -28,6 +28,35 @@ const categories = [
   { id: "popular", label: "Popular" },
   { id: "seasonal", label: "Seasonal" },
 ];
+
+// Key used to persist explore search results so they can be restored
+// instantly when the user navigates back to this page.
+const SEARCH_CACHE_KEY = "yugen_explore_search_cache";
+
+// Read and validate the cached search results from sessionStorage.
+function readSearchCache() {
+  try {
+    const raw = sessionStorage.getItem(SEARCH_CACHE_KEY);
+    if (!raw) return null;
+    const cache = JSON.parse(raw) as {
+      query: string;
+      category: string;
+      animeList: TransformedAnime[];
+      pageInfo: {
+        hasNextPage: boolean;
+        total: number;
+        currentPage: number;
+        lastPage: number;
+      };
+      timestamp: number;
+    };
+    if (!cache.animeList?.length) return null;
+    if (Date.now() - cache.timestamp >= 5 * 60 * 1000) return null;
+    return cache;
+  } catch {
+    return null;
+  }
+}
 
 const statusColors: Record<string, string> = {
   WATCHING: "#00e8fc",
@@ -225,7 +254,6 @@ function ExploreAnimeCard({
     initialStatus,
   );
   const [isUpdating, setIsUpdating] = useState(false);
-  const [forceHideDetail, setForceHideDetail] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const title = anime.title.english || anime.title.romaji;
@@ -234,7 +262,7 @@ function ExploreAnimeCard({
 
   const closeModal = useCallback(() => {
     setShowModal(false);
-    setForceHideDetail(false);
+    setIsHovered(false);
   }, []);
 
   const handleSave = async (status: string, progress: number) => {
@@ -275,7 +303,7 @@ function ExploreAnimeCard({
       const spaceOnRight = window.innerWidth - rect.right;
       const spaceOnLeft = rect.left;
       setDetailPosition(
-        spaceOnRight < 300 && spaceOnLeft > spaceOnRight ? "left" : "right",
+        spaceOnRight < 500 && spaceOnLeft > spaceOnRight ? "left" : "right",
       );
     }
   }, [isHovered]);
@@ -348,7 +376,6 @@ function ExploreAnimeCard({
                       e.preventDefault();
                       e.stopPropagation();
                       setShowModal(true);
-                      setForceHideDetail(true);
                     }}
                     className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-[#ececec] px-3 shadow-sm hover:shadow-md transition-all"
                     disabled={isUpdating}
@@ -380,7 +407,6 @@ function ExploreAnimeCard({
                         return;
                       }
                       setShowModal(true);
-                      setForceHideDetail(true);
                     }}
                     className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
                     disabled={isUpdating}
@@ -406,8 +432,8 @@ function ExploreAnimeCard({
 
       {/* Hover Detail Box */}
       <div
-        className={`absolute top-0 z-50 w-72 transition-all duration-300 pointer-events-none ${
-          isHovered && !forceHideDetail ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
+        className={`hidden md:block absolute top-0 z-50 w-72 transition-all duration-300 pointer-events-none ${
+          isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
         } ${detailPosition === "right" ? "left-[calc(100%+12px)]" : "right-[calc(100%+12px)]"}`}
       >
         <div className="rounded-xl border border-[#ececec] bg-[#545863] shadow-xl p-5">
@@ -529,22 +555,52 @@ function ExploreContent() {
   const initialQuery = searchParams.get("q") || "";
   const initialCategory = searchParams.get("category") || "trending";
 
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
-  const [animeList, setAnimeList] = useState<TransformedAnime[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Restore cached results on mount (lazy init) so back-navigation shows
+  // results instantly without a loading skeleton or refetch.
+  const [cachedState] = useState(() => {
+    const cache = readSearchCache();
+    if (!cache) return null;
+    const urlQuery = searchParams.get("q") ?? "";
+    const urlCategory = searchParams.get("category") ?? "";
+    const queryMatches = !urlQuery || urlQuery === cache.query;
+    const categoryMatches = !urlCategory || urlCategory === cache.category;
+    if (!queryMatches || !categoryMatches) return null;
+    return cache;
+  });
+
+  const [searchQuery, setSearchQuery] = useState(
+    cachedState?.query ?? initialQuery,
+  );
+  const [activeCategory, setActiveCategory] = useState(
+    cachedState?.category ?? initialCategory,
+  );
+  const [animeList, setAnimeList] = useState<TransformedAnime[]>(
+    cachedState?.animeList ?? [],
+  );
+  const [loading, setLoading] = useState(!cachedState);
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
-  const [pageInfo, setPageInfo] = useState({
-    hasNextPage: false,
-    total: 0,
-    currentPage: 1,
-    lastPage: 1,
-  });
+  const [pageInfo, setPageInfo] = useState(
+    cachedState?.pageInfo ?? {
+      hasNextPage: false,
+      total: 0,
+      currentPage: 1,
+      lastPage: 1,
+    },
+  );
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
+  const [debouncedQuery, setDebouncedQuery] = useState(
+    cachedState?.query ?? initialQuery,
+  );
   const [sfwOnly, setSfwOnly] = useState(true);
   const isAppending = useRef(false);
+  const router = useRouter();
+  const restoredFromCacheRef = useRef(!!cachedState);
+  const lastSyncedParamsRef = useRef(
+    cachedState
+      ? `${searchParams.get("q") ?? ""}|${searchParams.get("category") ?? ""}`
+      : "",
+  );
 
   // Global user statuses (fetched once, not per-card)
   const {
@@ -556,15 +612,52 @@ function ExploreContent() {
   // Global favorites (fetched once, not per-card)
   const { favoriteIds, loaded: favoritesLoaded, toggleFavorite } = useFavorites();
 
+  // Keep local state in sync with the URL search params. This handles the
+  // navbar search (router.push to /explore?q=...) and back/forward navigation.
+  useEffect(() => {
+    const q = searchParams.get("q") ?? "";
+    const cat = searchParams.get("category") ?? "";
+    const key = `${q}|${cat}`;
+    if (key === lastSyncedParamsRef.current) return;
+    lastSyncedParamsRef.current = key;
+
+    setSearchQuery(q);
+    setDebouncedQuery(q);
+    setActiveCategory(cat || "trending");
+    setPage(1);
+  }, [searchParams]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
       setPage(1);
+
+      // Persist the committed query in the URL so back/forward navigation
+      // and the restore logic stay consistent.
+      const params = new URLSearchParams(searchParams.toString());
+      if (searchQuery) {
+        params.set("q", searchQuery);
+      } else {
+        params.delete("q");
+      }
+      const nextSearch = params.toString();
+      if (nextSearch !== searchParams.toString()) {
+        router.replace(
+          nextSearch ? `/explore?${nextSearch}` : "/explore",
+          { scroll: false },
+        );
+      }
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, searchParams, router]);
 
   useEffect(() => {
+    // Skip the initial fetch when results were restored from sessionStorage.
+    if (restoredFromCacheRef.current) {
+      restoredFromCacheRef.current = false;
+      return;
+    }
+
     let cancelled = false;
 
     const fetchData = async () => {
@@ -608,6 +701,25 @@ function ExploreContent() {
     };
   }, [debouncedQuery, activeCategory, page, sfwOnly]);
 
+  // Persist the latest results so returning to this page restores them instantly.
+  useEffect(() => {
+    if (loading || animeList.length === 0) return;
+    try {
+      sessionStorage.setItem(
+        SEARCH_CACHE_KEY,
+        JSON.stringify({
+          query: debouncedQuery,
+          category: activeCategory,
+          animeList,
+          pageInfo,
+          timestamp: Date.now(),
+        }),
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [animeList, debouncedQuery, activeCategory, pageInfo, loading]);
+
   useEffect(() => {
     const handleScroll = () => setShowBackToTop(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -618,6 +730,11 @@ function ExploreContent() {
     setActiveCategory(category);
     setSearchQuery("");
     setPage(1);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("category", category);
+    params.delete("q");
+    router.replace(`/explore?${params.toString()}`, { scroll: false });
   };
 
   const handleLoadMore = useCallback(() => {
@@ -649,7 +766,7 @@ function ExploreContent() {
   };
 
   return (
-    <div className="min-h-screen mx-auto max-w-5xl bg-[#fffdf8]">
+    <div className="min-h-screen mx-auto max-w-5xl overflow-hidden bg-[#fffdf8]">
       {/* Header */}
       <div className="bg-white border-b border-[#ececec]">
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-14">
@@ -716,7 +833,7 @@ function ExploreContent() {
       </div>
 
       {/* Results */}
-      <div className="mx-auto max-w-5xl relative px-4 py-8">
+      <div className="relative px-4 py-8">
         <div className="mb-6 flex items-center relative justify-between">
           <p className="text-sm text-[#7b7f89]">
             {loading
@@ -747,7 +864,7 @@ function ExploreContent() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5 overflow-hidden">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
               {animeList.map((anime, index) => (
                 <ExploreAnimeCard
                   key={`${anime.id}-${index}`}
