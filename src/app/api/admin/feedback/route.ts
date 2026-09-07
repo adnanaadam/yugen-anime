@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession();
-  if (!session?.user?.email || session.user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+  if (!session?.user?.email || session.user.email !== process.env.ADMIN_EMAIL) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
