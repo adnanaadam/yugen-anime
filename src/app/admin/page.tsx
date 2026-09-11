@@ -35,7 +35,7 @@ export default function AdminPage() {
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
 
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "";
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
 
   const loadOverview = useCallback(async () => {
     try {
