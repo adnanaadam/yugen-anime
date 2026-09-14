@@ -1,58 +1,50 @@
 // src/hooks/useFavorites.ts
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function useFavorites() {
   const { data: session } = useSession();
-  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
-  const [loaded, setLoaded] = useState(!session);
-  const fetchRef = useRef<() => void>(() => {});
 
-  useEffect(() => {
-    if (!session) {
-      return;
+  // Shared SWR cache: every component using this hook (AnimeRow, pages)
+  // reads the same cache entry instead of firing duplicate requests.
+  const { data, isLoading, mutate } = useSWR<number[]>(
+    session ? "/api/favorites/ids" : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 30_000,
     }
+  );
 
-    let cancelled = false;
+  const favoriteIds = useMemo(() => new Set(data ?? []), [data]);
 
-    const doFetch = async () => {
-      try {
-        const res = await fetch("/api/favorites/ids");
-        if (!res.ok) throw new Error("Failed to fetch favorites");
-        const data: number[] = await res.json();
-        if (!cancelled) setFavoriteIds(new Set(data));
-      } catch (error) {
-        console.error("Error fetching favorites:", error);
-      } finally {
-        if (!cancelled) setLoaded(true);
-      }
-    };
-
-    doFetch();
-    fetchRef.current = doFetch;
-
-    return () => {
-      cancelled = true;
-    };
-  }, [session]);
-
-  const toggleFavorite = useCallback((animeId: number, isFavorited: boolean) => {
-    setFavoriteIds((prev) => {
-      const next = new Set(prev);
-      if (isFavorited) {
-        next.add(animeId);
-      } else {
-        next.delete(animeId);
-      }
-      return next;
-    });
-  }, []);
+  // Optimistic toggle — updates the shared cache without a refetch.
+  const toggleFavorite = useCallback(
+    (animeId: number, isFavorited: boolean) => {
+      mutate(
+        (current) => {
+          const ids = new Set(current ?? []);
+          if (isFavorited) {
+            ids.add(animeId);
+          } else {
+            ids.delete(animeId);
+          }
+          return Array.from(ids);
+        },
+        { revalidate: false }
+      );
+    },
+    [mutate]
+  );
 
   const refetch = useCallback(() => {
-    fetchRef.current();
-  }, []);
+    void mutate();
+  }, [mutate]);
 
-  return { favoriteIds, loaded, toggleFavorite, refetch };
+  return { favoriteIds, loaded: !session ? true : !isLoading, toggleFavorite, refetch };
 }

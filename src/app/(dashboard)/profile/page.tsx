@@ -1,8 +1,8 @@
 // src/app/(dashboard)/dashboard/page.tsx
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useUserStats } from "@/hooks/useUserData";
+import { useEffect, useMemo, useState } from "react";
+import { useUserStats, useAnimeStatusMap } from "@/hooks/useUserData";
 import { useTrendingAnime } from "@/hooks/useAnimeData";
 import { xpToNextLevel } from "@/lib/utils";
 import Link from "next/link";
@@ -47,8 +47,10 @@ export default function DashboardPage() {
   const { data: trending } = useTrendingAnime(6);
   const { data: session } = useSession();
 
-  const [statusMap, setStatusMap] = useState<Record<number, { status: string; progress: number }>>({});
-  const [statusesLoaded, setStatusesLoaded] = useState(() => !session);
+  // Shared, cached tracking statuses — same SWR key as the library page, so
+  // this no longer refetches /api/tracking/list on every profile visit.
+  const { statusMap: sharedStatusMap, loaded: statusesLoaded } = useAnimeStatusMap();
+  const [statusOverrides, setStatusOverrides] = useState<Record<number, { status: string; progress: number }>>({});
 
   // Global favorites
   const { favoriteIds, loaded: favoritesLoaded, toggleFavorite } = useFavorites();
@@ -60,47 +62,15 @@ export default function DashboardPage() {
   const favoritesCount = stats?.stats.favoritesCount || 0;
   const isProfilePublic = stats?.user?.isProfilePublic ?? true;
 
-  // Fetch user's anime statuses
-  useEffect(() => {
-    if (!session) return;
-
-    let cancelled = false;
-    const fetchStatuses = async () => {
-      try {
-        const response = await fetch("/api/tracking/list");
-        if (!response.ok) return;
-        const data = await response.json();
-        if (Array.isArray(data) && !cancelled) {
-          const map: Record<number, { status: string; progress: number }> = {};
-          data.forEach(
-            (item: { animeId: number; status: string; progress: number }) => {
-              map[item.animeId] = {
-                status: item.status,
-                progress: item.progress || 0,
-              };
-            },
-          );
-          setStatusMap(map);
-        }
-      } catch (error) {
-        console.error("Error fetching anime statuses:", error);
-      } finally {
-        if (!cancelled) {
-          setStatusesLoaded(true);
-        }
-      }
-    };
-
-    fetchStatuses();
-    return () => {
-      cancelled = true;
-    };
-  }, [session]);
+  const statusMap = useMemo(
+    () => ({ ...sharedStatusMap, ...statusOverrides }),
+    [sharedStatusMap, statusOverrides]
+  );
 
   const updateStatus = (animeId: number, status: string) => {
-    setStatusMap((prev) => ({
+    setStatusOverrides((prev) => ({
       ...prev,
-      [animeId]: { status, progress: prev[animeId]?.progress || 0 },
+      [animeId]: { status, progress: prev[animeId]?.progress || sharedStatusMap[animeId]?.progress || 0 },
     }));
   };
 

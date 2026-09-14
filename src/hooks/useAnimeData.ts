@@ -1,7 +1,7 @@
 // src/hooks/useAnimeData.ts
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 interface AnimeDataResponse {
@@ -15,145 +15,51 @@ interface AnimeDataResponse {
   season?: { year: number; season: string };
 }
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+// SWR caches these keys globally, so navigating between home, explore and
+// profile renders instantly from cache and revalidates quietly afterwards.
+const listConfig = {
+  revalidateOnFocus: false,
+  revalidateOnReconnect: true,
+  dedupingInterval: 60_000,
+  keepPreviousData: true,
+};
+
+function useAnimeListData(key: string) {
+  const { data, error, isLoading } = useSWR<AnimeDataResponse>(key, fetcher, listConfig);
+  return {
+    data: data?.media ?? [],
+    loading: isLoading,
+    error: error ? (error instanceof Error ? error.message : "Unknown error") : null,
+  };
+}
+
 export function useTrendingAnime(limit = 7) {
-  const [data, setData] = useState<TransformedAnime[]>([]);  // Start with empty array
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    
-    async function fetchData() {
-      try {
-        const res = await fetch(`/api/anime/trending?limit=${limit}`);
-        const json: AnimeDataResponse = await res.json();
-        if (!cancelled) {
-          setData(json.media || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch trending:", error);
-        if (!cancelled) {
-          setData([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-    fetchData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [limit]);
-
-  return { data, loading };
+  return useAnimeListData(`/api/anime/trending?limit=${limit}`);
 }
 
 export function usePopularAnime(limit = 15) {
-  const [data, setData] = useState<TransformedAnime[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchData() {
-      try {
-        const res = await fetch(`/api/anime/popular?limit=${limit}`);
-        const json: AnimeDataResponse = await res.json();
-        if (!cancelled) {
-          setData(json.media || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch popular:", error);
-        if (!cancelled) {
-          setData([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-    fetchData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [limit]);
-
-  return { data, loading };
+  return useAnimeListData(`/api/anime/popular?limit=${limit}`);
 }
 
 export function useSeasonalAnime(limit = 15) {
-  const [data, setData] = useState<TransformedAnime[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchData() {
-      try {
-        const res = await fetch(`/api/anime/seasonal?limit=${limit}`);
-        const json: AnimeDataResponse = await res.json();
-        if (!cancelled) {
-          setData(json.media || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch seasonal:", error);
-        if (!cancelled) {
-          setData([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-    fetchData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [limit]);
-
-  return { data, loading };
+  return useAnimeListData(`/api/anime/seasonal?limit=${limit}`);
 }
 
 export function useAnimeDetail(id: number) {
-  const [data, setData] = useState<TransformedAnime | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const res = await fetch(`/api/anime/${id}`);
-        if (!res.ok) throw new Error("Failed to fetch");
-        const json: TransformedAnime = await res.json();
-        if (!cancelled) {
-          setData(json);
-          setError(null);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Unknown error");
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+  const { data, error, isLoading } = useSWR<TransformedAnime>(
+    id ? `/api/anime/${id}` : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 300_000,
     }
-    if (id) fetchData();
+  );
 
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  return { data, loading, error };
+  return {
+    data: data ?? null,
+    loading: isLoading,
+    error: error ? (error instanceof Error ? error.message : "Unknown error") : null,
+  };
 }
