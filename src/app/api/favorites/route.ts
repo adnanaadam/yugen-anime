@@ -15,34 +15,37 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
-  // Enrich with anime details from Tenrai API
-  const enriched: unknown[] = [];
-  for (const fav of favorites) {
-    try {
-      const data = await apiClient.getAnimeById(fav.animeId);
-      const anime = data.data as Record<string, unknown>;
-      const images = (anime.images as Record<string, Record<string, string>>)?.jpg;
-      enriched.push({
-        ...fav,
-        anime: {
-          id: anime.mal_id as number,
-          title: {
-            english: anime.title_english as string | null,
-            romaji: anime.title as string,
+  // Enrich with anime details from Tenrai API.
+  // Runs in parallel — apiClient dedupes and caches upstream responses and
+  // only rate-limits actual network misses, so this is fast after warm-up.
+  const enriched = await Promise.all(
+    favorites.map(async (fav) => {
+      try {
+        const data = await apiClient.getAnimeById(fav.animeId);
+        const anime = data.data as Record<string, unknown>;
+        const images = (anime.images as Record<string, Record<string, string>>)?.jpg;
+        return {
+          ...fav,
+          anime: {
+            id: anime.mal_id as number,
+            title: {
+              english: anime.title_english as string | null,
+              romaji: anime.title as string,
+            },
+            coverImage: {
+              large: images?.large_image_url,
+              medium: images?.image_url,
+            },
+            averageScore: anime.score ? (anime.score as number) * 10 : null,
+            episodes: anime.episodes as number | null,
+            genres: ((anime.genres as { name: string }[]) || []).map((g: { name: string }) => g.name),
           },
-          coverImage: {
-            large: images?.large_image_url,
-            medium: images?.image_url,
-          },
-          averageScore: anime.score ? (anime.score as number) * 10 : null,
-          episodes: anime.episodes as number | null,
-          genres: ((anime.genres as { name: string }[]) || []).map((g: { name: string }) => g.name),
-        },
-      });
-    } catch {
-      enriched.push({ ...fav, anime: null });
-    }
-  }
+        };
+      } catch {
+        return { ...fav, anime: null };
+      }
+    })
+  );
 
   return NextResponse.json(enriched);
 }

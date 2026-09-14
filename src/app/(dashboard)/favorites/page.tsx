@@ -1,12 +1,13 @@
 // src/app/(dashboard)/favorites/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Star, ArrowLeft } from "lucide-react";
 import FavoriteButton from "@/components/anime/FavoriteButton";
 import { lordJuusai } from "@/fonts/fonts";
+import { useSession } from "next-auth/react";
+import useSWR from "swr";
 
 interface FavoriteAnime {
   id: string;
@@ -29,31 +30,23 @@ interface FavoriteAnime {
 }
 
 export default function FavoritesPage() {
-  const [favorites, setFavorites] = useState<FavoriteAnime[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
-  useEffect(() => {
-    let cancelled = false;
+  // Cached with SWR — revisits render instantly from cache.
+  const { data, isLoading, mutate } = useSWR<FavoriteAnime[]>(
+    session ? "/api/favorites" : null,
+    (url) => fetch(url).then((res) => res.json()),
+    { revalidateOnFocus: false, dedupingInterval: 60_000 }
+  );
+  const favorites = data ?? [];
+  const loading = !session ? true : isLoading;
 
-    const fetchFavorites = async () => {
-      try {
-        const res = await fetch("/api/favorites");
-        if (!res.ok) throw new Error("Failed to fetch");
-        const data = await res.json();
-        if (!cancelled) setFavorites(data);
-      } catch (error) {
-        console.error("Error fetching favorites:", error);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    fetchFavorites();
-    return () => { cancelled = true; };
-  }, []);
-
+  // Optimistic remove — updates the cache without a refetch.
   const handleRemoveFavorite = (animeId: number) => {
-    setFavorites((prev) => prev.filter((f) => f.animeId !== animeId));
+    void mutate(
+      (current) => (current ?? []).filter((f) => f.animeId !== animeId),
+      { revalidate: false }
+    );
   };
 
   if (loading) {

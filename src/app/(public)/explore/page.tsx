@@ -1,7 +1,7 @@
 // src/app/(public)/explore/page.tsx
 "use client";
 
-import { useEffect, useState, useCallback, useRef, Suspense } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -21,6 +21,7 @@ import { lordJuusai } from "@/fonts/fonts";
 import UpdateProgressModal from "@/components/anime/UpdateProgressModal";
 import FavoriteButton from "@/components/anime/FavoriteButton";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useAnimeStatusMap } from "@/hooks/useUserData";
 import type { TransformedAnime } from "@/services/jikan.service";
 
 const categories = [
@@ -177,46 +178,23 @@ async function fetchAnimeData({
   }
 }
 
-// Track user's anime statuses globally so we don't fetch per-card
-function useUserAnimeStatuses(session: ReturnType<typeof useSession>["data"]) {
-  const [statusMap, setStatusMap] = useState<
+// Track user's anime statuses globally so we don't fetch per-card.
+// Backed by the shared SWR hook (same cache as the library page) with a
+// local override layer for optimistic updates made on this page.
+function useUserAnimeStatuses() {
+  const { statusMap: sharedMap, loaded } = useAnimeStatusMap();
+  const [overrides, setOverrides] = useState<
     Record<number, { status: string; progress: number }>
   >({});
-  const [loaded, setLoaded] = useState(!session);
 
-  useEffect(() => {
-    if (!session) return;
-
-    const fetchStatuses = async () => {
-      try {
-        const response = await fetch("/api/tracking/list");
-        if (!response.ok) return;
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          const map: Record<number, { status: string; progress: number }> = {};
-          data.forEach(
-            (item: { animeId: number; status: string; progress: number }) => {
-              map[item.animeId] = {
-                status: item.status,
-                progress: item.progress || 0,
-              };
-            },
-          );
-          setStatusMap(map);
-        }
-      } catch (error) {
-        console.error("Error fetching anime statuses:", error);
-      } finally {
-        setLoaded(true);
-      }
-    };
-
-    fetchStatuses();
-  }, [session]);
+  const statusMap = useMemo(
+    () => ({ ...sharedMap, ...overrides }),
+    [sharedMap, overrides]
+  );
 
   // Function to update a single status locally
   const updateStatus = (animeId: number, status: string, progress: number) => {
-    setStatusMap((prev) => ({
+    setOverrides((prev) => ({
       ...prev,
       [animeId]: { status, progress },
     }));
@@ -607,7 +585,7 @@ function ExploreContent() {
     statusMap,
     loaded: statusesLoaded,
     updateStatus,
-  } = useUserAnimeStatuses(session);
+  } = useUserAnimeStatuses();
 
   // Global favorites (fetched once, not per-card)
   const { favoriteIds, loaded: favoritesLoaded, toggleFavorite } = useFavorites();

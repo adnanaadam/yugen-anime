@@ -60,7 +60,7 @@ export default function LibraryPage() {
   const searchParams = useSearchParams();
   const [activeStatus, setActiveStatus] = useState(searchParams.get("status") || "");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const { data: animeList, loading, mutate } = useAnimeList(activeStatus || undefined);
+  const { data: animeList, loading, error, mutate } = useAnimeList(activeStatus || undefined);
   const { data: session } = useSession();
 
   return (
@@ -120,7 +120,17 @@ export default function LibraryPage() {
       </div>
 
       {/* Anime list */}
-      {loading ? (
+      {error && !animeList ? (
+        <div className="rounded-xl border border-[#ececec] bg-white p-10 text-center">
+          <p className="text-sm text-[#7b7f89]">Couldn&apos;t load your library. Please try again.</p>
+          <button
+            onClick={() => mutate()}
+            className="mt-4 inline-flex items-center rounded-lg bg-[#f9c846] px-5 py-2.5 text-sm font-medium text-[#545863] hover:bg-[#f5bd29] transition-colors cursor-pointer"
+          >
+            Retry
+          </button>
+        </div>
+      ) : loading ? (
         <div className={viewMode === "grid" 
           ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"
           : "space-y-2"
