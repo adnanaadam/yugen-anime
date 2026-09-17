@@ -46,7 +46,7 @@ const previewBadges = [
 
 export default function AchievementsPreview() {
   return (
-    <section className="relative py-24 px-4 bg-[#545863]/10 overflow-hidden">
+    <section className="relative py-24 px-4 bg-foreground/10 overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -bottom-8 -left-8 md:bottom-0 md:left-0 w-48 h-48 md:w-64 md:h-64">
           <Image
@@ -103,24 +103,24 @@ export default function AchievementsPreview() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="flex items-center gap-1">
-              <div className="h-px w-8 bg-gradient-to-r from-transparent to-[#f9c846]/50" />
+              <div className="h-px w-8 bg-[#f9c846]/40" />
               <span className="text-[#f9c846]/50 text-[6px]">◆</span>
             </div>
-            <span className="text-[11px] uppercase tracking-[0.3em] text-[#7b7f89] font-semibold">
+            <span className="text-[11px] uppercase tracking-[0.3em] text-muted font-semibold">
               Badge Collection
             </span>
             <div className="flex items-center gap-1">
               <span className="text-[#f9c846]/50 text-[6px]">◆</span>
-              <div className="h-px w-8 bg-gradient-to-l from-transparent to-[#f9c846]/50" />
+              <div className="h-px w-8 bg-[#f9c846]/40" />
             </div>
           </div>
 
           <h2
-            className={`text-4xl md:text-5xl text-[#545863] ${lordJuusai.className}`}
+            className={`text-4xl md:text-5xl text-foreground ${lordJuusai.className}`}
           >
             Collect{" "}
             <span
-              className="bg-gradient-to-r from-[#f9c846] via-[#f96e46] to-[#f9c846] bg-clip-text text-transparent"
+              className="text-[#f9c846]"
               style={{
                 backgroundSize: "200% auto",
                 animation: "shimmer 3s linear infinite",
@@ -129,7 +129,7 @@ export default function AchievementsPreview() {
               Badges
             </span>
           </h2>
-          <p className="mt-3 text-sm text-[#7b7f89] max-w-lg mx-auto leading-relaxed">
+          <p className="mt-3 text-sm text-muted max-w-lg mx-auto leading-relaxed">
             Unlock achievements as you watch. Like in-game trophies, but for
             your anime journey. Each badge tells a story.
           </p>
@@ -155,13 +155,13 @@ export default function AchievementsPreview() {
         </div>
 
         <div className="mt-14 text-center">
-          <div className="inline-flex items-center gap-3 rounded-full border border-[#ececec] bg-white px-5 py-2.5 shadow-sm">
+          <div className="inline-flex items-center gap-3 rounded-full border border-border bg-surface px-5 py-2.5 shadow-sm">
             <div className="flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-[#97cc04]" />
               <span className="h-1.5 w-1.5 rounded-full bg-[#f9c846]" />
               <span className="h-1.5 w-1.5 rounded-full bg-[#f96e46]" />
             </div>
-            <span className="text-xs text-[#7b7f89]">
+            <span className="text-xs text-muted">
               8 unique badges available · <a href="/profile" className="text-[#f9c846] hover:underline">View all</a>
             </span>
             <div className="flex items-center gap-1">

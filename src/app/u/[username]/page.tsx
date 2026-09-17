@@ -102,7 +102,7 @@ const badgeColors: Record<string, { color: string; rarityColor: string; glow: st
   episode_master: { color: "#97cc04", rarityColor: "bg-[#97cc04]/10 text-[#97cc04] border-[#97cc04]/20", glow: "rgba(151,204,4,0.2)" },
   anime_veteran: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.25)" },
   completionist: { color: "#f96e46", rarityColor: "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/20", glow: "rgba(249,110,70,0.15)" },
-  anime_lover: { color: "#f96e46", rarityColor: "bg-gradient-to-r from-[#f9c846]/20 via-[#f96e46]/20 to-[#c084fc]/20 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
+  anime_lover: { color: "#f96e46", rarityColor: "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
   binge_watcher: { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
   collector: { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
   favorite_curator:  { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
@@ -170,7 +170,7 @@ export default function PublicProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-16 h-16">
             <div className="absolute inset-0 rounded-full border-2 border-[#f9c846] border-t-transparent animate-spin" />
@@ -187,7 +187,7 @@ export default function PublicProfilePage() {
 
   if (error === "not_found") {
     return (
-      <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md px-6">
           <div className="relative mx-auto mb-6 w-24 h-24">
             <div
@@ -198,8 +198,8 @@ export default function PublicProfilePage() {
               <User size={36} className="text-[#f96e46]" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">User Not Found</h2>
-          <p className="text-sm text-gray-400 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">User Not Found</h2>
+          <p className="text-sm text-muted mb-6">
             The user <span className="text-[#f9c846] font-medium">@{username}</span> doesn&apos;t exist in our realm.
           </p>
           <Link
@@ -216,7 +216,7 @@ export default function PublicProfilePage() {
 
   if (error === "private") {
     return (
-      <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md px-6">
           <div className="relative mx-auto mb-6 w-24 h-24">
             <div
@@ -227,8 +227,8 @@ export default function PublicProfilePage() {
               <Lock size={36} className="text-[#7b7f89]" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Private Profile</h2>
-          <p className="text-sm text-gray-400 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Private Profile</h2>
+          <p className="text-sm text-muted mb-6">
             <span className="text-[#f9c846] font-medium">@{username}</span> has set their profile to private.
           </p>
           <Link
@@ -267,14 +267,14 @@ export default function PublicProfilePage() {
   const displayName = username.startsWith("@") ? username.slice(1) : username;
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e]">
+    <div className="min-h-screen bg-background">
       {/* ======================================================== */}
       {/* DECORATIVE TOP ORNAMENT */}
       {/* ======================================================== */}
       <div className="relative h-2 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#f9c846]/30 to-transparent" />
+        <div className="absolute inset-0 bg-[#f9c846]/20" />
         <div className="absolute inset-0" style={{
-          backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(249,200,70,0.05) 20px, rgba(249,200,70,0.05) 21px)",
+          backgroundImage: "none",
         }} />
       </div>
 
@@ -288,14 +288,14 @@ export default function PublicProfilePage() {
           backgroundSize: "200px 200px",
         }} />
         <div className="absolute inset-0" style={{
-          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(249,200,70,0.02) 40px, rgba(249,200,70,0.02) 41px)",
+          backgroundImage: "none",
         }} />
 
         <div className="relative mx-auto max-w-5xl px-4 pt-6 pb-10">
           {/* Back button */}
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center cursor-pointer gap-1.5 text-xs text-gray-500 hover:text-[#f9c846] transition-colors mb-6 group"
+            className="inline-flex items-center cursor-pointer gap-1.5 text-xs text-muted hover:text-[#f9c846] transition-colors mb-6 group"
           >
             <ArrowLeft size={12} />
             <span className="tracking-wider uppercase">Back</span>
@@ -336,7 +336,7 @@ export default function PublicProfilePage() {
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#f9c846]/20 to-[#f96e46]/20 flex items-center justify-center">
+                  <div className="w-full h-full bg-[#f9c846]/15 flex items-center justify-center">
                     <span className="text-5xl font-bold text-[#f9c846]">
                       {displayName.charAt(0).toUpperCase()}
                     </span>
@@ -350,7 +350,7 @@ export default function PublicProfilePage() {
               />
               {/* Level badge */}
               <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 z-10">
-                <div className="bg-[#1a1a2e] border border-[#f9c846]/30 rounded-full px-3 py-0.5 shadow-lg shadow-[#f9c846]/10">
+                <div className="bg-background border border-[#f9c846]/30 rounded-full px-3 py-0.5 shadow-lg shadow-[#f9c846]/10">
                   <span className="text-xs font-bold text-[#f9c846]">Lv.{profile.level}</span>
                 </div>
               </div>
@@ -361,7 +361,7 @@ export default function PublicProfilePage() {
             {/* ================================================== */}
             <div className="flex-1 text-center md:text-left">
               <div className="flex md:items-center gap-3">
-                <h1 className="text-3xl font-bold text-white tracking-tight">
+                <h1 className="text-3xl font-bold text-foreground tracking-tight">
                   {displayName}
                 </h1>
                 <div className="flex items-center justify-center md:justify-start gap-2">
@@ -373,7 +373,7 @@ export default function PublicProfilePage() {
               </div>
 
               {/* Join date + XP */}
-              <div className="mt-2 flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-gray-400">
+              <div className="mt-2 flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-muted">
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar size={13} />
                   Joined {joinDate}
@@ -388,7 +388,7 @@ export default function PublicProfilePage() {
               {/* XP BAR (styled like dashboard) */}
               {/* ================================================== */}
               <div className="mt-5 max-w-md mx-auto md:mx-0">
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                <div className="flex items-center justify-between text-xs text-muted mb-1.5">
                   <span>Progress</span>
                   <span className="text-[#f9c846] font-medium">
                     {xpInfo?.next && xpInfo.current !== undefined
@@ -396,18 +396,18 @@ export default function PublicProfilePage() {
                       : "Max Level"}
                   </span>
                 </div>
-                <div className="relative h-2.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
+                <div className="relative h-2.5 w-full rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
                   <div
                     className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
                     style={{
                       width: `${xpInfo?.progress || 0}%`,
-                      background: "linear-gradient(90deg, #f9c846, #f96e46)",
+                      background: "#f9c846",
                       boxShadow: "0 0 12px rgba(249,200,70,0.3)",
                     }}
                   />
                   {/* Scanline effect */}
                   <div className="absolute inset-0 opacity-10" style={{
-                    backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(255,255,255,0.1) 4px, rgba(255,255,255,0.1) 5px)",
+                    backgroundImage: "none",
                   }} />
                 </div>
               </div>
@@ -432,7 +432,7 @@ export default function PublicProfilePage() {
           {/* ==================================================== */}
           <div
             className="relative rounded-xl overflow-hidden group"
-            style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ backgroundColor: "var(--surface)", border: "1px solid rgba(255,255,255,0.06)" }}
           >
             <div className="absolute inset-0 opacity-[0.02]" style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
@@ -442,16 +442,16 @@ export default function PublicProfilePage() {
               {/* Header */}
               <div className="flex items-center gap-2 mb-3">
                 <Trophy size={16} className="text-[#f9c846]" />
-                <h3 className="text-[11px] font-semibold text-gray-300 uppercase tracking-[0.15em]">
+                <h3 className="text-[11px] font-semibold text-muted uppercase tracking-[0.15em]">
                   Player Stats
                 </h3>
               </div>
 
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-white">
+                <span className="text-3xl font-bold text-foreground">
                   Lv. {profile.level}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted">
                   {profile.xp.toLocaleString()} / {xpInfo?.next?.toLocaleString() || "MAX"} XP
                 </span>
               </div>
@@ -459,20 +459,20 @@ export default function PublicProfilePage() {
               {/* Stat grid */}
               <div className="grid grid-cols-4 gap-3 mt-4 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-white">{profile.stats.totalAnime}</p>
-                  <p className="text-[10px] text-gray-500">Anime</p>
+                  <p className="text-lg font-bold text-foreground">{profile.stats.totalAnime}</p>
+                  <p className="text-[10px] text-muted">Anime</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-white">{profile.stats.totalEpisodes}</p>
-                  <p className="text-[10px] text-gray-500">Episodes</p>
+                  <p className="text-lg font-bold text-foreground">{profile.stats.totalEpisodes}</p>
+                  <p className="text-[10px] text-muted">Episodes</p>
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-[#f9c846]">{profile.stats.totalBadges}/8</p>
-                  <p className="text-[10px] text-gray-500">Badges</p>
+                  <p className="text-[10px] text-muted">Badges</p>
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-[#f96e46]">{profile.stats.totalFavorites}</p>
-                  <p className="text-[10px] text-gray-500">Favorites</p>
+                  <p className="text-[10px] text-muted">Favorites</p>
                 </div>
               </div>
             </div>
@@ -483,10 +483,10 @@ export default function PublicProfilePage() {
           {/* ==================================================== */}
           <div
             className="relative rounded-xl overflow-hidden"
-            style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ backgroundColor: "var(--surface)", border: "1px solid rgba(255,255,255,0.06)" }}
           >
             <div className="p-5">
-              <h3 className="text-[11px] font-semibold text-gray-300 uppercase tracking-[0.15em] mb-3">
+              <h3 className="text-[11px] font-semibold text-muted uppercase tracking-[0.15em] mb-3">
                 Library Breakdown
               </h3>
               <div className="flex items-center gap-4">
@@ -512,7 +512,7 @@ export default function PublicProfilePage() {
                     </ResponsiveContainer>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-[70px] h-[70px] rounded-full border-[4px]" style={{ borderColor: "rgba(255,255,255,0.06)" }} />
+                      <div className="w-[70px] h-[70px] rounded-full border-[4px]" style={{ borderColor: "var(--border)" }} />
                     </div>
                   )}
                 </div>
@@ -534,16 +534,16 @@ export default function PublicProfilePage() {
                       <div
                         key={key}
                         className="flex items-center justify-between rounded-md px-2 py-1 transition-colors"
-                        style={{ backgroundColor: "rgba(255,255,255,0.02)" }}
+                        style={{ backgroundColor: "var(--surface)" }}
                       >
                         <div className="flex items-center gap-2">
                           <span
                             className="w-2 h-2 rounded-full shrink-0"
                             style={{ backgroundColor: COLORS[i] }}
                           />
-                          <span className="text-[11px] text-gray-400">{label}</span>
+                          <span className="text-[11px] text-muted">{label}</span>
                         </div>
-                        <span className="text-[11px] font-semibold text-white tabular-nums">{count}</span>
+                        <span className="text-[11px] font-semibold text-foreground tabular-nums">{count}</span>
                       </div>
                     );
                   })}
@@ -558,12 +558,12 @@ export default function PublicProfilePage() {
         {/* ====================================================== */}
         <div
           className="relative rounded-xl overflow-hidden"
-          style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ backgroundColor: "var(--surface)", border: "1px solid rgba(255,255,255,0.06)" }}
         >
           <div className="p-5">
             <div className="flex items-center gap-2 mb-4">
               <Trophy size={16} className="text-[#f9c846]" />
-              <h3 className="text-[11px] font-semibold text-gray-300 uppercase tracking-[0.15em]">
+              <h3 className="text-[11px] font-semibold text-muted uppercase tracking-[0.15em]">
                 Badges · {profile.stats.totalBadges}/8
               </h3>
             </div>
@@ -594,7 +594,7 @@ export default function PublicProfilePage() {
                 })}
               </div>
             ) : (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted">
                 This adventurer hasn&apos;t earned any badges yet.
               </p>
             )}
@@ -606,12 +606,12 @@ export default function PublicProfilePage() {
         {/* ====================================================== */}
         <div
           className="relative rounded-xl overflow-hidden"
-          style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ backgroundColor: "var(--surface)", border: "1px solid rgba(255,255,255,0.06)" }}
         >
           <div className="p-5">
             <div className="flex items-center gap-2 mb-4">
               <Heart size={16} className="text-[#f96e46]" />
-              <h3 className="text-[11px] font-semibold text-gray-300 uppercase tracking-[0.15em]">
+              <h3 className="text-[11px] font-semibold text-muted uppercase tracking-[0.15em]">
                 Favorites · {profile.stats.totalFavorites}
               </h3>
             </div>
@@ -626,7 +626,7 @@ export default function PublicProfilePage() {
                       key={fav.id}
                       href={`/anime/${fav.id}`}
                       className="group block rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1"
-                      style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                      style={{ backgroundColor: "var(--surface)", border: "1px solid rgba(255,255,255,0.06)" }}
                     >
                       <div className="relative aspect-[2/3] overflow-hidden">
                         {fav.coverImage ? (
@@ -638,8 +638,8 @@ export default function PublicProfilePage() {
                             className="object-cover transition-all duration-300 group-hover:scale-105"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
-                            <span className="text-xs text-gray-600">No cover</span>
+                          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "var(--surface)" }}>
+                            <span className="text-xs text-muted">No cover</span>
                           </div>
                         )}
                         {/* Score badge */}
@@ -650,15 +650,15 @@ export default function PublicProfilePage() {
                         )}
                         {/* Overlay on hover */}
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-                          <span className="text-[10px] text-white font-medium tracking-wider uppercase">View</span>
+                          <span className="text-[10px] text-foreground font-medium tracking-wider uppercase">View</span>
                         </div>
                       </div>
                       <div className="p-2">
-                        <p className="text-[11px] text-gray-400 line-clamp-2 leading-tight group-hover:text-[#f9c846] transition-colors">
+                        <p className="text-[11px] text-muted line-clamp-2 leading-tight group-hover:text-[#f9c846] transition-colors">
                           {title}
                         </p>
                         {fav.episodes && (
-                          <p className="text-[9px] text-gray-600 mt-0.5">{fav.episodes} eps</p>
+                          <p className="text-[9px] text-muted mt-0.5">{fav.episodes} eps</p>
                         )}
                       </div>
                     </Link>
@@ -666,7 +666,7 @@ export default function PublicProfilePage() {
                 })}
               </div>
             ) : (
-              <p className="text-xs text-gray-500">No favorites yet.</p>
+              <p className="text-xs text-muted">No favorites yet.</p>
             )}
           </div>
         </div>

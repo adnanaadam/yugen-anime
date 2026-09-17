@@ -1,61 +1,63 @@
+// src/lib/theme.tsx
 "use client";
 
-import { useEffect } from "react";
-import { themeColors } from "./theme-colors";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-export function ThemeProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export type Theme = "dark" | "light";
+
+const STORAGE_KEY = "yugen-theme";
+const DEFAULT_THEME: Theme = "dark";
+
+interface ThemeContextValue {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+}
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+/**
+ * Applies the selected theme to <html data-theme="..."> and persists it.
+ * The initial value is set before paint by the inline script in layout.tsx
+ * (defaults to dark), and this provider syncs with it on mount.
+ */
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
+
+  // Sync with whatever the blocking script applied pre-paint.
   useEffect(() => {
-    const root = document.documentElement;
-
-    root.style.setProperty(
-      "--color-background",
-      themeColors.background
-    );
-
-    root.style.setProperty(
-      "--color-foreground",
-      themeColors.text.primary
-    );
-
-    root.style.setProperty(
-      "--color-text-secondary",
-      themeColors.text.secondary
-    );
-
-    root.style.setProperty(
-      "--color-primary",
-      themeColors.primary
-    );
-
-    root.style.setProperty(
-      "--color-secondary",
-      themeColors.secondary
-    );
-
-    root.style.setProperty(
-      "--color-info",
-      themeColors.info
-    );
-
-    root.style.setProperty(
-      "--color-success",
-      themeColors.success
-    );
-
-    root.style.setProperty(
-      "--color-surface",
-      themeColors.surface
-    );
-
-    root.style.setProperty(
-      "--color-border",
-      themeColors.border
-    );
+    const attr = document.documentElement.getAttribute("data-theme");
+    if (attr === "light" || attr === "dark") {
+      setThemeState(attr);
+    }
   }, []);
 
-  return <>{children}</>;
+  const setTheme = useCallback((next: Theme) => {
+    setThemeState(next);
+    document.documentElement.setAttribute("data-theme", next);
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // storage unavailable — theme still applies for this session
+    }
+  }, []);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) {
+    throw new Error("useTheme must be used within ThemeProvider");
+  }
+  return ctx;
 }

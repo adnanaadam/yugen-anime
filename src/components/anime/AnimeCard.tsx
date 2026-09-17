@@ -95,7 +95,7 @@ export default function AnimeCard({ anime, size = "md", initialFavorited = false
             )}
 
             {/* Hover overlay with genres */}
-            <div className="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 bg-gradient-to-t from-black/80 via-transparent to-transparent">
+            <div className="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 bg-black/70">
               <div className="flex flex-wrap gap-1">
                 {anime.genres.slice(0, 3).map((genre) => (
                   <span
@@ -156,14 +156,14 @@ export default function AnimeCard({ anime, size = "md", initialFavorited = false
 
           {/* Title below */}
           <div className="p-2">
-            <h3 className="text-[13px] font-medium text-gray-500 line-clamp-2 leading-tight group-hover:text-white transition-colors">
+            <h3 className="text-[13px] font-medium text-muted line-clamp-2 leading-tight group-hover:text-white transition-colors">
               {title}
             </h3>
-            <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-500">
+            <div className="mt-1 flex items-center gap-2 text-[11px] text-muted">
               {anime.seasonYear && <span>{anime.seasonYear}</span>}
               {anime.type && (
                 <>
-                  <span className="text-gray-600">·</span>
+                  <span className="text-muted">·</span>
                   <span>{anime.type === "TV" ? "TV" : anime.type}</span>
                 </>
               )}

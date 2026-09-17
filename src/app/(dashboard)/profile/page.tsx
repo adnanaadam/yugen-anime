@@ -90,7 +90,7 @@ function ProfileAvatar({
   return (
     <div className="relative shrink-0">
       <div
-        className="relative flex h-24 w-20 items-center justify-center overflow-hidden bg-gradient-to-br from-[#f9c846]/25 to-[#f96e46]/25 sm:h-28 sm:w-24"
+        className="relative flex h-24 w-20 items-center justify-center overflow-hidden bg-[#f9c846]/15 sm:h-28 sm:w-24"
         style={{ clipPath: HEX_CLIP }}
       >
         {image && image.includes("cloudinary") ? (
@@ -108,8 +108,8 @@ function ProfileAvatar({
       </div>
       {/* Level pill */}
       <div className="absolute -bottom-1.5 left-1/2 z-10 -translate-x-1/2">
-        <div className="rounded-full border border-[#f9c846]/40 bg-white px-3 py-0.5 shadow-sm">
-          <span className="text-[11px] font-bold text-[#545863]">Lv.{level}</span>
+        <div className="rounded-full border border-[#f9c846]/40 bg-surface px-3 py-0.5 shadow-sm">
+          <span className="text-[11px] font-bold text-foreground">Lv.{level}</span>
         </div>
       </div>
     </div>
@@ -130,7 +130,7 @@ function StatCard({
   href?: string;
 }) {
   const content = (
-    <div className="h-full rounded-2xl border border-[#ececec] bg-white p-4 transition-all hover:border-[#f9c846]/50 hover:shadow-sm">
+    <div className="h-full rounded-2xl border border-border bg-surface p-4 transition-all hover:border-[#f9c846]/50 hover:shadow-sm">
       <div className="flex items-center gap-3">
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
@@ -139,8 +139,8 @@ function StatCard({
           <Icon size={18} color={accent} />
         </div>
         <div className="min-w-0">
-          <p className="text-xl font-bold leading-tight text-[#545863] tabular-nums">{value}</p>
-          <p className="text-[11px] text-[#7b7f89]">{label}</p>
+          <p className="text-xl font-bold leading-tight text-foreground tabular-nums">{value}</p>
+          <p className="text-[11px] text-muted">{label}</p>
         </div>
       </div>
     </div>
@@ -254,14 +254,14 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="mt-10 space-y-4">
-        <div className="h-40 rounded-2xl bg-[#f7f7f7] animate-pulse" />
+        <div className="h-40 rounded-2xl bg-surface-hover animate-pulse" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-20 rounded-2xl bg-[#f7f7f7] animate-pulse" />
+            <div key={i} className="h-20 rounded-2xl bg-surface-hover animate-pulse" />
           ))}
         </div>
-        <div className="h-48 rounded-2xl bg-[#f7f7f7] animate-pulse" />
-        <div className="h-56 rounded-2xl bg-[#f7f7f7] animate-pulse" />
+        <div className="h-48 rounded-2xl bg-surface-hover animate-pulse" />
+        <div className="h-56 rounded-2xl bg-surface-hover animate-pulse" />
       </div>
     );
   }
@@ -271,8 +271,7 @@ export default function DashboardPage() {
       {/* ======================================================== */}
       {/* HERO — identity, level & XP, quick actions               */}
       {/* ======================================================== */}
-      <section className="relative overflow-hidden rounded-2xl border border-[#ececec] bg-white">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-r from-[#f9c846]/15 via-[#f9c846]/[0.04] to-transparent" />
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-surface">
         <div className="relative p-5 sm:p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
             <ProfileAvatar
@@ -284,14 +283,14 @@ export default function DashboardPage() {
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="truncate text-xl font-bold text-[#545863] sm:text-2xl">
+                <h1 className="truncate text-xl font-bold text-foreground sm:text-2xl">
                   {displayName}
                 </h1>
                 <span
                   className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
                     isProfilePublic
                       ? "bg-[#97cc04]/10 text-[#97cc04]"
-                      : "bg-[#f7f7f7] text-[#7b7f89]"
+                      : "bg-surface-hover text-muted"
                   }`}
                 >
                   {isProfilePublic ? <Globe size={11} /> : <Lock size={11} />}
@@ -300,7 +299,7 @@ export default function DashboardPage() {
               </div>
 
               {joinDate && (
-                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#7b7f89]">
+                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted">
                   <Calendar size={12} />
                   Member since {joinDate}
                 </p>
@@ -309,20 +308,20 @@ export default function DashboardPage() {
               {/* Level + XP progress */}
               <div className="mt-4 max-w-md">
                 <div className="mb-1.5 flex items-baseline gap-2">
-                  <span className="text-sm font-bold text-[#545863]">
+                  <span className="text-sm font-bold text-foreground">
                     Level {stats?.user?.level || 1}
                   </span>
-                  <span className="text-[11px] text-[#7b7f89]">
+                  <span className="text-[11px] text-muted">
                     {(stats?.user?.xp || 0).toLocaleString()} XP total
                   </span>
                 </div>
-                <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-[#f7f7f7]">
+                <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-surface-hover">
                   <div
-                    className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#f9c846] to-[#f96e46] transition-all duration-700"
+                    className="absolute inset-y-0 left-0 rounded-full bg-[#f9c846] transition-all duration-700"
                     style={{ width: `${xpInfo?.progress || 0}%` }}
                   />
                 </div>
-                <p className="mt-1.5 text-[11px] text-[#7b7f89]">
+                <p className="mt-1.5 text-[11px] text-muted">
                   {xpInfo?.next && xpInfo.current !== undefined
                     ? `${(xpInfo.next - xpInfo.current).toLocaleString()} XP to Level ${(stats?.user?.level || 1) + 1}`
                     : "Max level reached"}
@@ -335,7 +334,7 @@ export default function DashboardPage() {
               {isProfilePublic && profileUsername && (
                 <Link
                   href={`/u/${profileUsername}`}
-                  className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#ececec] bg-white px-4 py-2 text-xs font-medium text-[#545863] transition-colors hover:bg-[#f7f7f7]"
+                  className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border bg-surface px-4 py-2 text-xs font-medium text-foreground transition-colors hover:bg-surface-hover"
                 >
                   Public profile
                   <ArrowRight size={13} />
@@ -343,7 +342,7 @@ export default function DashboardPage() {
               )}
               <button
                 onClick={handleShareProfile}
-                className="inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#f9c846] px-4 py-2 text-xs font-semibold text-[#545863] transition-colors hover:bg-[#f5bd29]"
+                className="inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#f9c846] px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-[#f5bd29]"
               >
                 <Share2 size={13} />
                 Share profile
@@ -367,9 +366,9 @@ export default function DashboardPage() {
       {/* ======================================================== */}
       <div className={`grid gap-4 ${continueWatching.length > 0 ? "lg:grid-cols-2" : ""}`}>
         {continueWatching.length > 0 && (
-          <div className="rounded-2xl border border-[#ececec] bg-white p-5">
+          <div className="rounded-2xl border border-border bg-surface p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#545863]">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-foreground">
                 Continue Watching
               </h3>
               <Link
@@ -392,9 +391,9 @@ export default function DashboardPage() {
                   <Link
                     key={entry.id}
                     href={`/anime/${entry.animeId}`}
-                    className="group flex items-center gap-3 rounded-xl border border-[#ececec] p-2.5 transition-colors hover:border-[#f9c846]/50 hover:bg-[#fdfaf2]"
+                    className="group flex items-center gap-3 rounded-xl border border-border p-2.5 transition-colors hover:border-[#f9c846]/50 hover:bg-[#fdfaf2]"
                   >
-                    <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg bg-[#f7f7f7]">
+                    <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-hover">
                       {entry.anime?.coverImage?.large ? (
                         <Image
                           src={entry.anime.coverImage.large}
@@ -404,22 +403,22 @@ export default function DashboardPage() {
                           className="object-cover"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-[9px] text-[#7b7f89]">
+                        <div className="flex h-full items-center justify-center text-[9px] text-muted">
                           No img
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-[#545863] transition-colors group-hover:text-[#f96e46]">
+                      <p className="truncate text-sm font-medium text-foreground transition-colors group-hover:text-[#f96e46]">
                         {title}
                       </p>
-                      <p className="mt-0.5 text-[11px] text-[#7b7f89]">
+                      <p className="mt-0.5 text-[11px] text-muted">
                         {entry.progress} ep{entry.progress === 1 ? "" : "s"} watched
                       </p>
                       {pct !== null && (
-                        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[#f7f7f7]">
+                        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-surface-hover">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-[#f9c846] to-[#f96e46]"
+                            className="h-full rounded-full bg-[#f9c846]"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -432,8 +431,8 @@ export default function DashboardPage() {
           </div>
         )}
         {/* Library Breakdown */}
-        <div className="rounded-2xl border border-[#ececec] bg-white p-5">
-          <h3 className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#545863]">
+        <div className="rounded-2xl border border-border bg-surface p-5">
+          <h3 className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-foreground">
             Library Breakdown
           </h3>
           <div className="flex items-center gap-4">
@@ -478,18 +477,18 @@ export default function DashboardPage() {
                   <Link
                     key={key}
                     href={`/library?status=${key}`}
-                    className="group flex items-center justify-between rounded-md px-2 py-1 transition-colors hover:bg-[#f7f7f7]"
+                    className="group flex items-center justify-between rounded-md px-2 py-1 transition-colors hover:bg-surface-hover"
                   >
                     <div className="flex items-center gap-2">
                       <span
                         className="h-2.5 w-2.5 shrink-0 rounded-full"
                         style={{ backgroundColor: COLORS[i] }}
                       />
-                      <span className="text-[11px] text-[#7b7f89] transition-colors group-hover:text-[#545863]">
+                      <span className="text-[11px] text-muted transition-colors group-hover:text-foreground">
                         {label}
                       </span>
                     </div>
-                    <span className="text-[11px] font-semibold text-[#545863] tabular-nums">{count}</span>
+                    <span className="text-[11px] font-semibold text-foreground tabular-nums">{count}</span>
                   </Link>
                 );
               })}
@@ -500,9 +499,9 @@ export default function DashboardPage() {
       {/* ======================================================== */}
       {/* BADGES                                                   */}
       {/* ======================================================== */}
-      <div id="badges" className="scroll-mt-28 rounded-2xl border border-[#ececec] bg-white p-5">
+      <div id="badges" className="scroll-mt-28 rounded-2xl border border-border bg-surface p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#545863]">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-foreground">
             Badges
           </h3>
           <span className="rounded-full bg-[#f9c846]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#b8901e]">
@@ -518,7 +517,7 @@ export default function DashboardPage() {
       {trending && trending.length > 0 && (
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#545863]">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-foreground">
               Trending Now
             </h2>
             <Link
@@ -590,7 +589,7 @@ function AllBadgesSection() {
     "Episode Master": { color: "#97cc04", rarityColor: "bg-[#97cc04]/10 text-[#97cc04] border-[#97cc04]/20", glow: "rgba(151,204,4,0.2)" },
     "Anime Veteran": { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.25)" },
     "Completionist": { color: "#f96e46", rarityColor: "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/20", glow: "rgba(249,110,70,0.15)" },
-    "Anime Lover": { color: "#f96e46", rarityColor: "bg-gradient-to-r from-[#f9c846]/20 via-[#f96e46]/20 to-[#c084fc]/20 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
+    "Anime Lover": { color: "#f96e46", rarityColor: "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/30", glow: "rgba(249,110,70,0.3)" },
     "Binge Watcher": { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
     "Collector": { color: "#00e8fc", rarityColor: "bg-slate-100 text-slate-500 border-slate-200", glow: "rgba(0,232,252,0.15)" },
     "Favorite Curator": { color: "#f9c846", rarityColor: "bg-[#f9c846]/10 text-[#b8901e] border-[#f9c846]/20", glow: "rgba(249,200,70,0.2)" },
@@ -612,7 +611,7 @@ function AllBadgesSection() {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="animate-pulse">
-            <div className="w-full aspect-square rounded-2xl bg-gray-100" />
+            <div className="w-full aspect-square rounded-2xl bg-surface-hover" />
           </div>
         ))}
       </div>
@@ -786,14 +785,14 @@ function TrendingAnimeCard({
 
         {/* Title below */}
         <div className="p-2">
-          <h3 className="text-[13px] font-medium text-gray-500 line-clamp-2 leading-tight group-hover:text-gray-800 transition-colors">
+          <h3 className="text-[13px] font-medium text-muted line-clamp-2 leading-tight group-hover:text-foreground transition-colors">
             {title}
           </h3>
-          <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-500">
+          <div className="mt-1 flex items-center gap-2 text-[11px] text-muted">
             {anime.seasonYear && <span>{anime.seasonYear}</span>}
             {anime.type && (
               <>
-                <span className="text-gray-600">·</span>
+                <span className="text-muted">·</span>
                 <span>{anime.type === "TV" ? "TV" : anime.type}</span>
               </>
             )}

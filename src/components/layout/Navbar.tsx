@@ -140,16 +140,16 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop */}
-      <header className="fixed top-0 left-0 right-0 z-50 hidden md:flex items-center justify-center h-14 bg-[var(--color-secondary)]">
+      <header className="fixed top-0 left-0 right-0 z-50 hidden md:flex items-center justify-center h-14 bg-[#f96e46]">
         {/* Grid layout: 3 equal columns so center stays centered */}
-        <div className="grid grid-cols-3 items-center w-full text-[var(--color-surface)] px-8 lg:px-16">
+        <div className="grid grid-cols-3 items-center w-full text-[#ffffff] px-8 lg:px-16">
           {/* Left: Logo */}
           <Link href="/" className="justify-self-start">
             <h1 className={`text-2xl ${lordJuusai.className}`}>OtakuProfile</h1>
           </Link>
 
           {/* Center: Nav - always centered in its column */}
-          <nav className="flex items-center justify-center gap-8 text-[var(--color-surface)]">
+          <nav className="flex items-center justify-center gap-8 text-[#ffffff]">
             <Link
               href="/explore"
               className="hover:underline underline-offset-4"
@@ -166,7 +166,7 @@ export default function Navbar() {
               href="https://discord.gg/jGK4YHzPC"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline underline-offset-4 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 transition-colors hover:bg-[var(--color-surface-hover)]"
+              className="hover:underline underline-offset-4 rounded-md border border-[#ececec] bg-[#ffffff] px-2 py-1 transition-colors hover:bg-[#f7f7f7]"
             >
               <DiscordIcon className="size-6" />
             </a>
@@ -184,7 +184,7 @@ export default function Navbar() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search anime..."
-                    className="h-9 w-48 lg:w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-foreground)] outline-none placeholder:text-[var(--color-text-secondary)] focus:border-[var(--color-primary)] transition-colors"
+                    className="h-9 w-48 lg:w-56 rounded-md border border-[#ececec] bg-[#ffffff] px-3 py-2 text-sm text-[#545863] outline-none placeholder:text-[#7b7f89] focus:border-[#f9c846] transition-colors"
                   />
                   <button
                     type="button"
@@ -192,7 +192,7 @@ export default function Navbar() {
                       setSearchOpen(false);
                       setSearchQuery("");
                     }}
-                    className="ml-1 flex size-8 items-center cursor-pointer justify-center rounded-lg text-[var(--color-surface)] hover:text-white transition-colors"
+                    className="ml-1 flex size-8 items-center cursor-pointer justify-center rounded-lg text-[#ffffff] hover:text-white transition-colors"
                   >
                     <X size={16} />
                   </button>
@@ -200,10 +200,10 @@ export default function Navbar() {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="flex size-9 items-center justify-center cursor-pointer rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface-hover)]"
+                  className="flex size-9 items-center justify-center cursor-pointer rounded-md border border-[#ececec] bg-[#ffffff] transition-colors hover:bg-[#f7f7f7]"
                 >
                   <Search
-                    className="text-[var(--color-foreground)]"
+                    className="text-[#545863]"
                     size={18}
                   />
                 </button>
@@ -215,9 +215,9 @@ export default function Navbar() {
               <div className="relative" ref={notifRef}>
                 <button
                   onClick={() => setShowNotifMenu((prev) => !prev)}
-                  className="relative flex size-9 items-center justify-center cursor-pointer rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface-hover)]"
+                  className="relative flex size-9 items-center justify-center cursor-pointer rounded-md border border-[#ececec] bg-[#ffffff] transition-colors hover:bg-[#f7f7f7]"
                 >
-                  <Bell className="text-[var(--color-foreground)]" size={18} />
+                  <Bell className="text-[#545863]" size={18} />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 rounded-full bg-[#f96e46] text-[9px] font-bold text-white shadow-sm">
                       {unreadCount > 9 ? "9+" : unreadCount}
@@ -227,12 +227,12 @@ export default function Navbar() {
 
                 {showNotifMenu && (
                   <div
-                    className="absolute right-0 mt-2 w-80 rounded-2xl border border-[var(--color-border)] bg-white shadow-lg overflow-hidden"
+                    className="absolute right-0 mt-2 w-80 rounded-2xl border border-[#ececec] bg-white shadow-lg overflow-hidden"
                     style={{ maxHeight: "400px" }}
                   >
                     {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
-                      <h3 className="text-sm font-semibold text-[var(--color-foreground)]">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-[#ececec]">
+                      <h3 className="text-sm font-semibold text-[#545863]">
                         Notifications
                       </h3>
                       {unreadCount > 0 && (
@@ -240,7 +240,7 @@ export default function Navbar() {
                           onClick={() => {
                             markAllAsRead();
                           }}
-                          className="text-xs cursor-pointer text-[var(--color-secondary)] hover:underline"
+                          className="text-xs cursor-pointer text-[#f96e46] hover:underline"
                         >
                           Mark all read
                         </button>
@@ -253,7 +253,7 @@ export default function Navbar() {
                       style={{ maxHeight: "340px" }}
                     >
                       {notifLoading ? (
-                        <div className="p-4 text-center text-xs text-[var(--color-text-secondary)]">
+                        <div className="p-4 text-center text-xs text-[#7b7f89]">
                           Loading...
                         </div>
                       ) : error ? (
@@ -264,9 +264,9 @@ export default function Navbar() {
                         <div className="p-8 text-center">
                           <Bell
                             size={24}
-                            className="mx-auto mb-2 text-[var(--color-text-secondary)]"
+                            className="mx-auto mb-2 text-[#7b7f89]"
                           />
-                          <p className="text-xs text-[var(--color-text-secondary)]">
+                          <p className="text-xs text-[#7b7f89]">
                             No notifications yet
                           </p>
                         </div>
@@ -275,8 +275,8 @@ export default function Navbar() {
                           <button
                             key={notif.id}
                             onClick={() => handleNotifClick(notif)}
-                            className={`w-full text-left flex items-start gap-3 px-4 py-3 transition-colors hover:bg-[var(--color-surface)] ${
-                              !notif.read ? "bg-[var(--color-primary)]/5" : ""
+                            className={`w-full text-left flex items-start gap-3 px-4 py-3 transition-colors hover:bg-[#ffffff] ${
+                              !notif.read ? "bg-[#f9c846]/5" : ""
                             }`}
                           >
                             <span className="text-base shrink-0 mt-0.5">
@@ -284,16 +284,16 @@ export default function Navbar() {
                             </span>
                             <div className="flex-1 min-w-0">
                               <p
-                                className={`text-xs ${notif.read ? "text-[var(--color-text-secondary)]" : "text-[var(--color-foreground)] font-medium"}`}
+                                className={`text-xs ${notif.read ? "text-[#7b7f89]" : "text-[#545863] font-medium"}`}
                               >
                                 {notif.title}
                               </p>
                               {notif.message && (
-                                <p className="text-[11px] text-[var(--color-text-secondary)] mt-0.5 line-clamp-2">
+                                <p className="text-[11px] text-[#7b7f89] mt-0.5 line-clamp-2">
                                   {notif.message}
                                 </p>
                               )}
-                              <p className="text-[10px] text-[var(--color-text-secondary)] mt-1">
+                              <p className="text-[10px] text-[#7b7f89] mt-1">
                                 {formatTime(notif.createdAt)}
                               </p>
                             </div>
@@ -316,7 +316,7 @@ export default function Navbar() {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowUserMenu((prev) => !prev)}
-                  className="flex items-center cursor-pointer gap-2 rounded-md border border-[var(--color-border)] bg-white px-1 py-1 transition-colors hover:bg-[var(--color-surface-hover)]"
+                  className="flex items-center cursor-pointer gap-2 rounded-md border border-[#ececec] bg-white px-1 py-1 transition-colors hover:bg-[#f7f7f7]"
                 >
                   {session.user?.image &&
                   session.user.image.includes("cloudinary") ? (
@@ -340,21 +340,21 @@ export default function Navbar() {
                   )}
                   <ChevronDown
                     size={14}
-                    className={`text-[var(--color-foreground)] transition-transform duration-200 ${
+                    className={`text-[#545863] transition-transform duration-200 ${
                       showUserMenu ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
                 <div
-                  className={`absolute right-0 mt-2 w-56 rounded-2xl border border-[var(--color-border)] bg-white p-2 shadow-lg transition-all duration-200 ${
+                  className={`absolute right-0 mt-2 w-56 rounded-2xl border border-[#ececec] bg-white p-2 shadow-lg transition-all duration-200 ${
                     showUserMenu
                       ? "visible translate-y-0 opacity-100"
                       : "invisible -translate-y-2 opacity-0"
                   }`}
                 >
-                  <div className="border-b border-[var(--color-border)] p-3">
-                    <p className="font-medium text-[var(--color-foreground)]">
+                  <div className="border-b border-[#ececec] p-3">
+                    <p className="font-medium text-[#545863]">
                       {session.user?.username || session.user?.name}
                     </p>
                   </div>
@@ -362,14 +362,14 @@ export default function Navbar() {
                   <div className="py-2">
                     <Link
                       href="/profile"
-                      className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
+                      className="block rounded-xl px-3 py-2 text-sm text-[#545863] hover:bg-[#ffffff]"
                       onClick={() => setShowUserMenu(false)}
                     >
                       Profile
                     </Link>
                     <Link
                       href="/library"
-                      className="block rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)]"
+                      className="block rounded-xl px-3 py-2 text-sm text-[#545863] hover:bg-[#ffffff]"
                       onClick={() => setShowUserMenu(false)}
                     >
                       Library
@@ -378,7 +378,7 @@ export default function Navbar() {
 
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="w-full rounded-xl cursor-pointer px-3 py-2 text-left text-sm text-[var(--color-secondary)] hover:bg-[var(--color-surface)]"
+                    className="w-full rounded-xl cursor-pointer px-3 py-2 text-left text-sm text-[#f96e46] hover:bg-[#ffffff]"
                   >
                     Log Out
                   </button>
@@ -397,13 +397,13 @@ export default function Navbar() {
       </header>
 
       {/* Mobile */}
-      <header className="fixed top-0 left-0 right-0 z-50 md:hidden bg-[var(--color-secondary)]">
+      <header className="fixed top-0 left-0 right-0 z-50 md:hidden bg-[#f96e46]">
         <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             {/* Logo */}
             <Link href="/" onClick={closeMobile}>
               <h1
-                className={`text-xl text-[var(--color-surface)] ${lordJuusai.className}`}
+                className={`text-xl text-[#ffffff] ${lordJuusai.className}`}
               >
                 OtakuProfile
               </h1>
@@ -412,7 +412,7 @@ export default function Navbar() {
               href="https://discord.gg/jGK4YHzPC"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline underline-offset-4 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 transition-colors hover:bg-[var(--color-surface-hover)]"
+              className="hover:underline underline-offset-4 rounded-md border border-[#ececec] bg-[#ffffff] px-2 py-1 transition-colors hover:bg-[#f7f7f7]"
             >
               <DiscordIcon className="size-6" />
             </a>
@@ -427,7 +427,7 @@ export default function Navbar() {
                   setShowNotifMenu(!showNotifMenu);
                   setMobileOpen(false);
                 }}
-                className="relative flex size-9 items-center justify-center rounded-lg text-[var(--color-surface)]"
+                className="relative flex size-9 items-center justify-center rounded-lg text-[#ffffff]"
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
@@ -445,7 +445,7 @@ export default function Navbar() {
                 setMobileOpen(false);
                 setShowNotifMenu(false);
               }}
-              className="flex size-9 items-center justify-center rounded-lg text-[var(--color-surface)]"
+              className="flex size-9 items-center justify-center rounded-lg text-[#ffffff]"
             >
               {searchOpen ? <X size={20} /> : <Search size={20} />}
             </button>
@@ -457,7 +457,7 @@ export default function Navbar() {
                 setSearchOpen(false);
                 setShowNotifMenu(false);
               }}
-              className="flex size-9 items-center justify-center rounded-lg text-[var(--color-surface)]"
+              className="flex size-9 items-center justify-center rounded-lg text-[#ffffff]"
             >
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -466,19 +466,19 @@ export default function Navbar() {
 
         {/* Mobile notifications panel */}
         <div
-          className={`overflow-hidden border-t border-[var(--color-surface)]/10 transition-all duration-300 ${
+          className={`overflow-hidden border-t border-[#ffffff]/10 transition-all duration-300 ${
             showNotifMenu ? "max-h-80" : "max-h-0"
           }`}
         >
-          <div className="bg-[var(--color-secondary)]">
+          <div className="bg-[#f96e46]">
             <div className="flex items-center justify-between px-4 py-3">
-              <h3 className="text-sm font-semibold text-[var(--color-surface)]">
+              <h3 className="text-sm font-semibold text-[#ffffff]">
                 Notifications
               </h3>
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllAsRead()}
-                  className="text-xs text-[var(--color-primary)] hover:underline"
+                  className="text-xs text-[#f9c846] hover:underline"
                 >
                   Mark all read
                 </button>
@@ -486,7 +486,7 @@ export default function Navbar() {
             </div>
             <div className="overflow-y-auto max-h-60">
               {notifLoading ? (
-                <div className="p-4 text-center text-xs text-[var(--color-surface)]/60">
+                <div className="p-4 text-center text-xs text-[#ffffff]/60">
                   Loading...
                 </div>
               ) : error ? (
@@ -495,7 +495,7 @@ export default function Navbar() {
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="p-6 text-center">
-                  <p className="text-xs text-[var(--color-surface)]/60">
+                  <p className="text-xs text-[#ffffff]/60">
                     No notifications yet
                   </p>
                 </div>
@@ -504,8 +504,8 @@ export default function Navbar() {
                   <button
                     key={notif.id}
                     onClick={() => handleNotifClick(notif)}
-                    className={`w-full text-left flex items-start gap-3 px-4 py-3 transition-colors hover:bg-[var(--color-surface)]/10 ${
-                      !notif.read ? "bg-[var(--color-surface)]/5" : ""
+                    className={`w-full text-left flex items-start gap-3 px-4 py-3 transition-colors hover:bg-[#ffffff]/10 ${
+                      !notif.read ? "bg-[#ffffff]/5" : ""
                     }`}
                   >
                     <span className="text-base shrink-0 mt-0.5">
@@ -513,16 +513,16 @@ export default function Navbar() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`text-xs ${notif.read ? "text-[var(--color-surface)]/60" : "text-[var(--color-surface)] font-medium"}`}
+                        className={`text-xs ${notif.read ? "text-[#ffffff]/60" : "text-[#ffffff] font-medium"}`}
                       >
                         {notif.title}
                       </p>
                       {notif.message && (
-                        <p className="text-[11px] text-[var(--color-surface)]/50 mt-0.5 line-clamp-2">
+                        <p className="text-[11px] text-[#ffffff]/50 mt-0.5 line-clamp-2">
                           {notif.message}
                         </p>
                       )}
-                      <p className="text-[10px] text-[var(--color-surface)]/40 mt-1">
+                      <p className="text-[10px] text-[#ffffff]/40 mt-1">
                         {formatTime(notif.createdAt)}
                       </p>
                     </div>
@@ -550,28 +550,28 @@ export default function Navbar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search anime..."
-              className="h-10 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm text-[var(--color-foreground)] outline-none placeholder:text-[var(--color-text-secondary)]"
+              className="h-10 w-full rounded-xl border border-[#ececec] bg-[#ffffff] px-4 py-2 text-sm text-[#545863] outline-none placeholder:text-[#7b7f89]"
             />
           </form>
         </div>
 
         {/* Mobile nav menu */}
         <div
-          className={`overflow-hidden border-t border-[var(--color-surface)]/10 transition-all duration-300 ${
+          className={`overflow-hidden border-t border-[#ffffff]/10 transition-all duration-300 ${
             mobileOpen ? "max-h-96" : "max-h-0"
           }`}
         >
-          <nav className="flex flex-col p-4 bg-[var(--color-secondary)]">
+          <nav className="flex flex-col p-4 bg-[#f96e46]">
             <Link
               href="/explore"
-              className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+              className="rounded-xl px-3 py-3 text-[#ffffff] hover:bg-[#ffffff]/10 transition-colors"
               onClick={closeMobile}
             >
               Explore
             </Link>
             <Link
               href="/leaderboard"
-              className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+              className="rounded-xl px-3 py-3 text-[#ffffff] hover:bg-[#ffffff]/10 transition-colors"
               onClick={closeMobile}
             >
               Leaderboard
@@ -581,7 +581,7 @@ export default function Navbar() {
               <>
                 <Link
                   href="/profile"
-                  className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+                  className="rounded-xl px-3 py-3 text-[#ffffff] hover:bg-[#ffffff]/10 transition-colors"
                   onClick={closeMobile}
                 >
                   Profile
@@ -589,7 +589,7 @@ export default function Navbar() {
 
                 <Link
                   href="/library"
-                  className="rounded-xl px-3 py-3 text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+                  className="rounded-xl px-3 py-3 text-[#ffffff] hover:bg-[#ffffff]/10 transition-colors"
                   onClick={closeMobile}
                 >
                   Library
@@ -597,14 +597,14 @@ export default function Navbar() {
               </>
             )}
 
-            <div className="mt-3 pt-3 border-t border-[var(--color-surface)]/10">
+            <div className="mt-3 pt-3 border-t border-[#ffffff]/10">
               {session ? (
                 <button
                   onClick={() => {
                     closeMobile();
                     signOut({ callbackUrl: "/" });
                   }}
-                  className="w-full rounded-xl px-3 py-3 text-left text-[var(--color-surface)] hover:bg-[var(--color-surface)]/10 transition-colors"
+                  className="w-full rounded-xl px-3 py-3 text-left text-[#ffffff] hover:bg-[#ffffff]/10 transition-colors"
                 >
                   Log Out
                 </button>
@@ -614,7 +614,7 @@ export default function Navbar() {
                     closeMobile();
                     signIn();
                   }}
-                  className="w-full rounded-xl bg-[var(--color-primary)] px-3 py-3 text-center font-medium text-[var(--color-foreground)]"
+                  className="w-full rounded-xl bg-[#f9c846] px-3 py-3 text-center font-medium text-[#545863]"
                 >
                   Login
                 </button>

@@ -67,14 +67,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={toast.id}
             className={`pointer-events-auto flex items-start gap-3 rounded-xl border shadow-xl p-4 min-w-[300px] max-w-[380px] animate-slide-in-right transition-all ${
               toast.type === "xp"
-                ? "bg-[#545863] border-[#f9c846]/30"
+                ? "bg-foreground border-[#f9c846]/30"
                 : toast.type === "badge"
-                ? "bg-gradient-to-r from-[#f9c846]/20 to-[#f96e46]/20 border-[#f9c846]/40"
+                ? "bg-[#f9c846]/15 border-[#f9c846]/40"
                 : toast.type === "success"
                 ? "bg-[#97cc04]/10 border-[#97cc04]/30"
                 : toast.type === "error"
                 ? "bg-[#f96e46]/10 border-[#f96e46]/30"
-                : "bg-gradient-to-r from-[#c084fc]/30 to-[#f9c846]/30 border-[#c084fc]/50"
+                : "bg-[#c084fc]/15 border-[#c084fc]/50"
             }`}
           >
             {/* Icon */}
@@ -105,14 +105,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             {/* Content */}
             <div className="flex-1 min-w-0">
               <p className={`text-sm font-semibold ${
-                toast.type === "xp" ? "text-white" : "text-[#545863]"
+                toast.type === "xp" ? "text-background" : "text-foreground"
               }`}>
                 {toast.message}
               </p>
               {toast.amount && (
-                <p className={`text-xs mt-0.5 ${
-                  toast.type === "xp" ? "text-[#f9c846]" : "text-[#7b7f89]"
-                }`}>
+                <p className="text-xs mt-0.5 text-muted">
                   {toast.type === "xp" ? `+${toast.amount} XP` : `+${toast.amount} XP bonus`}
                 </p>
               )}
@@ -126,7 +124,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               onClick={() => removeToast(toast.id)}
               className="shrink-0 p-1 rounded-full hover:bg-white/10 transition-colors"
             >
-              <X size={14} className="text-[#7b7f89]" />
+              <X size={14} className="text-muted" />
             </button>
           </div>
         ))}

@@ -67,8 +67,8 @@ export default function LibraryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-[#545863]">My Library</h1>
-        <p className="mt-1 text-sm text-[#7b7f89]">
+        <h1 className="text-xl font-bold text-foreground">My Library</h1>
+        <p className="mt-1 text-sm text-muted">
           {animeList?.length || 0} anime tracked
         </p>
       </div>
@@ -81,8 +81,8 @@ export default function LibraryPage() {
             onClick={() => setActiveStatus(tab.value)}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               activeStatus === tab.value
-                ? "bg-[#545863] text-white"
-                : "bg-white border border-[#ececec] text-[#7b7f89] hover:bg-[#f7f7f7]"
+                ? "bg-foreground text-background"
+                : "bg-surface border border-border text-muted hover:bg-surface-hover"
             }`}
           >
             {tab.label}
@@ -92,16 +92,16 @@ export default function LibraryPage() {
 
       {/* View Toggle */}
       <div className="flex items-center justify-between">
-        <div className="text-xs text-[#7b7f89]">
+        <div className="text-xs text-muted">
           {animeList?.length || 0} anime
         </div>
-        <div className="flex items-center gap-1 bg-white border border-[#ececec] rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-0.5">
           <button
             onClick={() => setViewMode("grid")}
             className={`p-1.5 rounded transition-colors ${
               viewMode === "grid"
-                ? "bg-[#545863] text-white"
-                : "text-[#7b7f89] hover:text-[#545863]"
+                ? "bg-foreground text-background"
+                : "text-muted hover:text-foreground"
             }`}
           >
             <Grid size={14} />
@@ -110,8 +110,8 @@ export default function LibraryPage() {
             onClick={() => setViewMode("list")}
             className={`p-1.5 rounded transition-colors ${
               viewMode === "list"
-                ? "bg-[#545863] text-white"
-                : "text-[#7b7f89] hover:text-[#545863]"
+                ? "bg-foreground text-background"
+                : "text-muted hover:text-foreground"
             }`}
           >
             <List size={14} />
@@ -121,11 +121,11 @@ export default function LibraryPage() {
 
       {/* Anime list */}
       {error && !animeList ? (
-        <div className="rounded-xl border border-[#ececec] bg-white p-10 text-center">
-          <p className="text-sm text-[#7b7f89]">Couldn&apos;t load your library. Please try again.</p>
+        <div className="rounded-xl border border-border bg-surface p-10 text-center">
+          <p className="text-sm text-muted">Couldn&apos;t load your library. Please try again.</p>
           <button
             onClick={() => mutate()}
-            className="mt-4 inline-flex items-center rounded-lg bg-[#f9c846] px-5 py-2.5 text-sm font-medium text-[#545863] hover:bg-[#f5bd29] transition-colors cursor-pointer"
+            className="mt-4 inline-flex items-center rounded-lg bg-[#f9c846] px-5 py-2.5 text-sm font-medium text-foreground hover:bg-[#f5bd29] transition-colors cursor-pointer"
           >
             Retry
           </button>
@@ -137,8 +137,8 @@ export default function LibraryPage() {
         }>
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className={viewMode === "grid" 
-              ? "aspect-[2/3] rounded-xl bg-[#f7f7f7] animate-pulse"
-              : "h-16 rounded-xl bg-[#f7f7f7] animate-pulse"
+              ? "aspect-[2/3] rounded-xl bg-surface-hover animate-pulse"
+              : "h-16 rounded-xl bg-surface-hover animate-pulse"
             } />
           ))}
         </div>
@@ -257,11 +257,11 @@ function LibraryAnimeCard({
 
   if (viewMode === "list") {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-[#ececec] bg-white p-3 shadow-sm hover:shadow-md hover:border-[#f9c846]/30 transition-all">
+      <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 shadow-sm hover:shadow-md hover:border-[#f9c846]/30 transition-all">
         {/* Cover Image */}
         <Link href={`/anime/${entry.animeId}`} className="relative w-12 h-16 flex-shrink-0">
           {!entry.anime && !enrichedAnime ? (
-            <div className="w-full h-full bg-[#f7f7f7] rounded animate-pulse" />
+            <div className="w-full h-full bg-surface-hover rounded animate-pulse" />
           ) : enrichedAnime?.coverImage?.large ? (
             <Image
               src={enrichedAnime.coverImage.large}
@@ -270,8 +270,8 @@ function LibraryAnimeCard({
               className="object-cover rounded"
             />
           ) : (
-            <div className="w-full h-full bg-[#f7f7f7] rounded flex items-center justify-center">
-              <span className="text-xs text-[#7b7f89]">No img</span>
+            <div className="w-full h-full bg-surface-hover rounded flex items-center justify-center">
+              <span className="text-xs text-muted">No img</span>
             </div>
           )}
         </Link>
@@ -279,7 +279,7 @@ function LibraryAnimeCard({
         {/* Info */}
         <div className="flex-1 min-w-0">
           <Link href={`/anime/${entry.animeId}`}>
-            <h3 className="text-sm font-medium text-[#545863] truncate hover:text-[#f96e46] transition-colors">
+            <h3 className="text-sm font-medium text-foreground truncate hover:text-[#f96e46] transition-colors">
               {title}
             </h3>
           </Link>
@@ -288,7 +288,7 @@ function LibraryAnimeCard({
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: currentStatusColor }}
             />
-            <span className="text-xs text-[#7b7f89]">
+            <span className="text-xs text-muted">
               {entry.progress > 0 && `${entry.progress} eps · `}
               {currentStatusLabel}
               {entry.score && ` · Rated ${entry.score}/10`}
@@ -299,7 +299,7 @@ function LibraryAnimeCard({
         {/* Update Button */}
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#ececec] text-xs font-medium text-[#545863] hover:bg-[#f7f7f7] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-foreground hover:bg-surface-hover transition-colors"
         >
           Update
         </button>
@@ -310,12 +310,12 @@ function LibraryAnimeCard({
   // Grid view
   return (
     <div className="group relative">
-      <div className="relative overflow-hidden rounded-lg border border-[#ececec] bg-white shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:border-[#f9c846]/30">
+      <div className="relative overflow-hidden rounded-lg border border-border bg-surface shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:border-[#f9c846]/30">
         {/* Cover Image */}
         <Link href={`/anime/${entry.animeId}`} className="block">
           <div className="relative aspect-[2/3] overflow-hidden">
             {!entry.anime && !enrichedAnime ? (
-              <div className="w-full h-full bg-[#f7f7f7] animate-pulse" />
+              <div className="w-full h-full bg-surface-hover animate-pulse" />
             ) : enrichedAnime?.coverImage?.large ? (
               <Image
                 src={enrichedAnime.coverImage.large}
@@ -324,8 +324,8 @@ function LibraryAnimeCard({
                 className="object-cover transition-all duration-300 group-hover:scale-105 group-hover:brightness-75"
               />
             ) : (
-              <div className="w-full h-full bg-[#f7f7f7] flex items-center justify-center">
-                <span className="text-xs text-[#7b7f89]">No image</span>
+              <div className="w-full h-full bg-surface-hover flex items-center justify-center">
+                <span className="text-xs text-muted">No image</span>
               </div>
             )}
 
@@ -364,7 +364,7 @@ function LibraryAnimeCard({
         {/* Title below */}
         <div className="p-1.5">
           <Link href={`/anime/${entry.animeId}`}>
-            <h3 className="text-[11px] font-medium text-gray-500 line-clamp-2 leading-tight group-hover:text-[#f96e46] transition-colors">
+            <h3 className="text-[11px] font-medium text-muted line-clamp-2 leading-tight group-hover:text-[#f96e46] transition-colors">
               {title}
             </h3>
           </Link>
@@ -373,7 +373,7 @@ function LibraryAnimeCard({
               className="w-1.5 h-1.5 rounded-full shrink-0"
               style={{ backgroundColor: currentStatusColor }}
             />
-            <span className="text-[10px] text-[#7b7f89]">
+            <span className="text-[10px] text-muted">
               {currentStatusLabel}
             </span>
           </div>

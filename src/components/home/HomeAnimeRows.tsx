@@ -10,7 +10,7 @@ export default function HomeAnimeRows() {
   const { data: seasonal, loading: seasonalLoading } = useSeasonalAnime(5);
 
   return (
-    <section className="py-4 bg-[#fffdf8] overflow-hidden">
+    <section className="py-4 bg-background overflow-hidden">
       <div className="mx-auto max-w-5xl">
         <AnimeRow
           title="Trending Now"

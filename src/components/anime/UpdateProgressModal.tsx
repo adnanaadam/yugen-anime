@@ -84,16 +84,16 @@ export default function UpdateProgressModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#ececec]">
-          <h3 className="text-sm font-semibold text-[#545863]">Update Progress</h3>
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h3 className="text-sm font-semibold text-foreground">Update Progress</h3>
           <button
             onClick={onClose}
             disabled={isUpdating}
-            className="p-1 rounded-lg hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+            className="p-1 rounded-lg hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            <X size={18} className="text-[#7b7f89]" />
+            <X size={18} className="text-muted" />
           </button>
         </div>
 
@@ -101,13 +101,13 @@ export default function UpdateProgressModal({
         <div className="p-4 space-y-4">
           {/* Anime Title */}
           <div>
-            <p className="text-xs text-[#7b7f89] mb-1">Anime</p>
-            <p className="text-sm font-medium text-[#545863] line-clamp-2">{animeTitle}</p>
+            <p className="text-xs text-muted mb-1">Anime</p>
+            <p className="text-sm font-medium text-foreground line-clamp-2">{animeTitle}</p>
           </div>
 
           {/* Status Selector */}
           <div>
-            <label className="text-xs text-[#7b7f89] mb-2 block">Status</label>
+            <label className="text-xs text-muted mb-2 block">Status</label>
             <div className="grid grid-cols-2 gap-2">
               {statusOptions.map((option) => (
                 <button
@@ -116,17 +116,17 @@ export default function UpdateProgressModal({
                   disabled={isUpdating || (option.value === "COMPLETED" && isAiring)}
                   className={`flex items-center cursor-pointer gap-2 px-3 py-2 rounded-lg border transition-colors ${
                     status === option.value
-                      ? "border-[#545863] bg-[#f7f7f7]"
-                      : "border-[#ececec] hover:border-[#f9c846]/30"
+                      ? "border-[#545863] bg-surface-hover"
+                      : "border-border hover:border-[#f9c846]/30"
                   } ${option.value === "COMPLETED" && isAiring ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <span
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: option.color }}
                   />
-                  <span className="text-xs font-medium text-[#545863]">{option.label}</span>
+                  <span className="text-xs font-medium text-foreground">{option.label}</span>
                   {option.value === "COMPLETED" && isAiring && (
-                    <span className="text-[10px] text-[#7b7f89]">(Currently Airing)</span>
+                    <span className="text-[10px] text-muted">(Currently Airing)</span>
                   )}
                 </button>
               ))}
@@ -135,18 +135,18 @@ export default function UpdateProgressModal({
 
           {/* Episode Progress */}
           <div>
-            <label className="text-xs text-[#7b7f89] mb-2 block">
+            <label className="text-xs text-muted mb-2 block">
               Episodes Watched
               {totalEpisodes && totalEpisodes > 0 && (
-                <span className="text-[#7b7f89]"> (max: {totalEpisodes})</span>
+                <span className="text-muted"> (max: {totalEpisodes})</span>
               )}
             </label>
             
             {/* Show current progress */}
             {currentProgress > 0 && (
-              <div className="mb-2 p-2 rounded-lg bg-[#f7f7f7] border border-[#ececec]">
-                <p className="text-[11px] text-[#7b7f89]">
-                  Currently watched: <span className="font-semibold text-[#545863]">{currentProgress} episodes</span>
+              <div className="mb-2 p-2 rounded-lg bg-surface-hover border border-border">
+                <p className="text-[11px] text-muted">
+                  Currently watched: <span className="font-semibold text-foreground">{currentProgress} episodes</span>
                   {progress > currentProgress && (
                     <span className="text-[#97cc04] ml-1">
                       (+{progress - currentProgress} new)
@@ -159,7 +159,7 @@ export default function UpdateProgressModal({
               <button
                 onClick={() => handleProgressChange(-1)}
                 disabled={isUpdating || progress === 0}
-                className="p-2 rounded-lg border cursor-pointer border-[#ececec] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg border cursor-pointer border-border hover:bg-surface-hover transition-colors disabled:opacity-50"
               >
                 <Minus size={16} />
               </button>
@@ -168,14 +168,14 @@ export default function UpdateProgressModal({
                 value={progress}
                 onChange={(e) => handleProgressInputChange(e.target.value)}
                 disabled={isUpdating}
-                className="flex-1 px-3 py-2 text-center text-sm font-medium text-[#545863] border border-[#ececec] rounded-lg focus:outline-none focus:border-[#f9c846] disabled:opacity-50"
+                className="flex-1 px-3 py-2 text-center text-sm font-medium text-foreground border border-border rounded-lg focus:outline-none focus:border-[#f9c846] disabled:opacity-50"
                 min="0"
                 max={totalEpisodes || undefined}
               />
               <button
                 onClick={() => handleProgressChange(1)}
                 disabled={isUpdating || (totalEpisodes ? progress >= totalEpisodes : false)}
-                className="p-2 rounded-lg border cursor-pointer border-[#ececec] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg border cursor-pointer border-border hover:bg-surface-hover transition-colors disabled:opacity-50"
               >
                 <Plus size={16} />
               </button>
@@ -184,18 +184,18 @@ export default function UpdateProgressModal({
         </div>
 
         {/* Footer */}
-        <div className="flex gap-2 p-4 border-t border-[#ececec]">
+        <div className="flex gap-2 p-4 border-t border-border">
           <button
             onClick={onClose}
             disabled={isUpdating}
-            className="flex-1 px-4 py-2 rounded-lg border cursor-pointer border-[#ececec] text-sm font-medium text-[#545863] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 rounded-lg border cursor-pointer border-border text-sm font-medium text-foreground hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={isUpdating}
-            className="flex-1 px-4 py-2 rounded-lg bg-[#f9c846] cursor-pointer text-sm font-medium text-[#545863] hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 rounded-lg bg-[#f9c846] cursor-pointer text-sm font-medium text-foreground hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
           >
             {isUpdating ? "Saving..." : "Save"}
           </button>

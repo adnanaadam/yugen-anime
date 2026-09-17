@@ -27,10 +27,10 @@ interface LeaderboardEntry {
 // CONSTANTS & HELPERS
 // ============================================================
 
-const CARD_BG = "rgba(255,255,255,0.03)";
-const CARD_BORDER = "rgba(255,255,255,0.06)";
-const XP_BAR_BG = "rgba(255,255,255,0.06)";
-const XP_BAR_FILL = "linear-gradient(90deg, #f9c846, #f96e46)";
+const CARD_BG = "var(--surface)";
+const CARD_BORDER = "var(--border)";
+const XP_BAR_BG = "var(--border)";
+const XP_BAR_FILL = "#f9c846";
 const HEX_CLIP = "polygon(50% 3%, 93% 28%, 93% 72%, 50% 97%, 7% 72%, 7% 28%)";
 
 // Column template shared by the desktop header row and the desktop data
@@ -111,7 +111,7 @@ function PlayerName({
       <div className="flex items-center gap-1.5 min-w-0">
         <Link
           href={`/u/${entry.username}`}
-          className={`${large ? "text-base md:text-lg" : "text-sm"} font-medium text-white hover:text-[#f9c846] transition-colors truncate`}
+          className={`${large ? "text-base md:text-lg" : "text-sm"} font-medium text-foreground hover:text-[#f9c846] transition-colors truncate`}
         >
           {displayName}
         </Link>
@@ -122,10 +122,10 @@ function PlayerName({
 
   return (
     <div className="flex items-center gap-1.5 min-w-0">
-      <span className={`${large ? "text-base md:text-lg" : "text-sm"} font-medium text-gray-400 truncate`}>
+      <span className={`${large ? "text-base md:text-lg" : "text-sm"} font-medium text-muted truncate`}>
         {displayName}
       </span>
-      <Lock size={11} className="shrink-0 text-gray-600" />
+      <Lock size={11} className="shrink-0 text-muted" />
       {youBadge}
     </div>
   );
@@ -175,7 +175,7 @@ function PodiumCard({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean })
       id={isMe ? "my-rank-card" : undefined}
       className="relative rounded-xl overflow-hidden"
       style={{
-        background: `linear-gradient(180deg, ${medal}1f 0%, rgba(255,255,255,0.02) 65%)`,
+        background: "var(--surface)",
         border: `1px solid ${medal}2e`,
         boxShadow: isFirst ? `0 8px 30px ${medal}14` : "none",
       }}
@@ -199,7 +199,7 @@ function PodiumCard({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean })
           <EntryAvatar entry={entry} displayName={displayName} w={avatarW} h={avatarH} naviiSize={isFirst ? 72 : 52} />
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-10">
             <div
-              className="rounded-full bg-[#1a1a2e] border px-2.5 py-0.5 whitespace-nowrap"
+              className="rounded-full bg-background border px-2.5 py-0.5 whitespace-nowrap"
               style={{ borderColor: `${medal}4d` }}
             >
               <span className="text-[10px] font-bold" style={{ color: medal }}>
@@ -215,9 +215,9 @@ function PodiumCard({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean })
         </div>
 
         {/* XP */}
-        <p className="text-sm font-semibold text-white tabular-nums">
+        <p className="text-sm font-semibold text-foreground tabular-nums">
           {entry.xp.toLocaleString()}{" "}
-          <span className="text-[10px] font-medium text-gray-500">XP</span>
+          <span className="text-[10px] font-medium text-muted">XP</span>
         </p>
 
         {/* XP progress */}
@@ -238,7 +238,7 @@ function LeaderboardRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolea
   return (
     <div
       id={isMe ? "my-rank-card" : undefined}
-      className="transition-colors hover:bg-white/[0.02]"
+      className="transition-colors hover:bg-surface"
       style={
         isMe
           ? { backgroundColor: "rgba(249,200,70,0.07)", boxShadow: "inset 2px 0 0 #f9c846" }
@@ -249,7 +249,7 @@ function LeaderboardRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolea
       <div className="md:hidden px-3 py-3">
         <div className="flex items-center gap-3">
           <div className="shrink-0 w-8 text-center">
-            <span className="text-xs font-bold text-gray-500 tabular-nums">#{entry.rank}</span>
+            <span className="text-xs font-bold text-muted tabular-nums">#{entry.rank}</span>
           </div>
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <EntryAvatar entry={entry} displayName={displayName} w={36} h={40} naviiSize={36} />
@@ -258,9 +258,9 @@ function LeaderboardRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolea
         </div>
         <div className="mt-2.5 pl-[92px] flex items-center gap-3">
           <LevelBadge level={entry.level} />
-          <span className="text-xs font-semibold text-white tabular-nums whitespace-nowrap">
+          <span className="text-xs font-semibold text-foreground tabular-nums whitespace-nowrap">
             {entry.xp.toLocaleString()}
-            <span className="ml-1 text-[10px] font-medium text-gray-500">XP</span>
+            <span className="ml-1 text-[10px] font-medium text-muted">XP</span>
           </span>
           <XpBar progress={xpInfo.progress} className="flex-1 min-w-8" />
         </div>
@@ -269,7 +269,7 @@ function LeaderboardRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolea
       {/* Desktop: grid columns aligned with the header row */}
       <div className={`hidden md:grid ${GRID_COLS} gap-3 items-center px-4 py-3`}>
         <div className="text-center">
-          <span className="text-xs font-bold text-gray-500 tabular-nums">#{entry.rank}</span>
+          <span className="text-xs font-bold text-muted tabular-nums">#{entry.rank}</span>
         </div>
         <div className="flex items-center gap-3 min-w-0">
           <EntryAvatar entry={entry} displayName={displayName} w={36} h={40} naviiSize={36} />
@@ -279,7 +279,7 @@ function LeaderboardRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolea
           <LevelBadge level={entry.level} />
         </div>
         <div className="flex flex-col items-end gap-1.5">
-          <span className="text-sm font-semibold text-white tabular-nums">
+          <span className="text-sm font-semibold text-foreground tabular-nums">
             {entry.xp.toLocaleString()}
           </span>
           <XpBar progress={xpInfo.progress} className="w-full" />
@@ -339,7 +339,7 @@ export default function LeaderboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-16 h-16">
             <div className="absolute inset-0 rounded-full border-2 border-[#f9c846] border-t-transparent animate-spin" />
@@ -374,14 +374,14 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e]">
+    <div className="min-h-screen bg-background">
       {/* ======================================================== */}
       {/* DECORATIVE TOP ORNAMENT */}
       {/* ======================================================== */}
       <div className="relative h-2 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#f9c846]/30 to-transparent" />
+        <div className="absolute inset-0 bg-[#f9c846]/20" />
         <div className="absolute inset-0" style={{
-          backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(249,200,70,0.05) 20px, rgba(249,200,70,0.05) 21px)",
+          backgroundImage: "none",
         }} />
       </div>
 
@@ -396,11 +396,11 @@ export default function LeaderboardPage() {
         <div className="relative mx-auto max-w-4xl px-4 pt-12 pb-10 text-center">
           <div className="flex items-center justify-center gap-3 mb-3">
             <Trophy size={28} className="text-[#f9c846]" />
-            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
               Leaderboard
             </h1>
           </div>
-          <p className="text-sm text-gray-400 max-w-md mx-auto">
+          <p className="text-sm text-muted max-w-md mx-auto">
             Top 100 adventurers ranked by experience points. Earn XP by tracking anime, completing series, and collecting badges.
           </p>
         </div>
@@ -431,10 +431,10 @@ export default function LeaderboardPage() {
                 naviiSize={36}
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
+                <p className="text-sm font-semibold text-foreground truncate">
                   {myRank.username || "Anonymous"}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-muted">
                   {myRank.xp.toLocaleString()} XP · Level {myRank.level}
                 </p>
               </div>
@@ -454,8 +454,8 @@ export default function LeaderboardPage() {
             className="rounded-xl p-12 text-center"
             style={{ backgroundColor: CARD_BG, border: `1px solid ${CARD_BORDER}` }}
           >
-            <Shield size={36} className="mx-auto mb-3 text-gray-600" />
-            <p className="text-sm text-gray-500">No adventurers have registered yet.</p>
+            <Shield size={36} className="mx-auto mb-3 text-muted" />
+            <p className="text-sm text-muted">No adventurers have registered yet.</p>
             <Link
               href="/signup"
               className="inline-block mt-3 text-xs text-[#f9c846] hover:text-[#f5bd29] transition-colors"
@@ -495,7 +495,7 @@ export default function LeaderboardPage() {
               <>
                 <div className="flex items-center gap-3 my-5">
                   <div className="h-px flex-1" style={{ backgroundColor: CARD_BORDER }} />
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-600">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
                     Full Rankings
                   </span>
                   <div className="h-px flex-1" style={{ backgroundColor: CARD_BORDER }} />
@@ -507,7 +507,7 @@ export default function LeaderboardPage() {
                 >
                   {/* Column headers - desktop only, aligned with data rows */}
                   <div
-                    className={`hidden md:grid ${GRID_COLS} gap-3 px-4 py-3 border-b text-[10px] text-gray-500 uppercase tracking-wider font-semibold`}
+                    className={`hidden md:grid ${GRID_COLS} gap-3 px-4 py-3 border-b text-[10px] text-muted uppercase tracking-wider font-semibold`}
                     style={{ borderColor: CARD_BORDER }}
                   >
                     <span className="text-center">Rank</span>
@@ -516,7 +516,7 @@ export default function LeaderboardPage() {
                     <span className="text-right">XP</span>
                   </div>
 
-                  <div className="divide-y divide-white/[0.06]">
+                  <div className="divide-y divide-border">
                     {rest.map((entry) => (
                       <LeaderboardRow
                         key={entry.id ?? `rank-${entry.rank}`}
@@ -532,7 +532,7 @@ export default function LeaderboardPage() {
         )}
 
         {/* Footer note */}
-        <p className="mt-4 text-[10px] text-gray-600 text-center">
+        <p className="mt-4 text-[10px] text-muted text-center">
           Rankings update in real-time as XP changes
         </p>
       </div>

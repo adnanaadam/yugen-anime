@@ -52,10 +52,10 @@ export default function FavoritesPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-48 rounded bg-[#f7f7f7] animate-pulse" />
+        <div className="h-8 w-48 rounded bg-surface-hover animate-pulse" />
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] rounded-xl bg-[#f7f7f7] animate-pulse" />
+            <div key={i} className="aspect-[2/3] rounded-xl bg-surface-hover animate-pulse" />
           ))}
         </div>
       </div>
@@ -67,16 +67,16 @@ export default function FavoritesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className={`text-2xl text-[#545863] ${lordJuusai.className}`}>
+          <h1 className={`text-2xl text-foreground ${lordJuusai.className}`}>
             My Favorites
           </h1>
-          <p className="text-sm text-[#7b7f89] mt-1">
+          <p className="text-sm text-muted mt-1">
             {favorites.length} / 10 anime in your favorites
           </p>
         </div>
         <Link
           href="/explore"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#ececec] bg-white px-4 py-2 text-sm text-[#545863] hover:bg-[#f7f7f7] transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-4 py-2 text-sm text-foreground hover:bg-surface-hover transition-colors"
         >
           <Heart size={14} className="text-[#f96e46]" />
           Discover More
@@ -89,15 +89,15 @@ export default function FavoritesPage() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#f96e46]/10">
             <Heart size={28} className="text-[#f96e46]" />
           </div>
-          <h3 className="text-lg font-semibold text-[#545863]">
+          <h3 className="text-lg font-semibold text-foreground">
             No favorites yet
           </h3>
-          <p className="mt-1 text-sm text-[#7b7f89] max-w-sm">
+          <p className="mt-1 text-sm text-muted max-w-sm">
             Start adding anime to your favorites by clicking the heart icon on any anime card.
           </p>
           <Link
             href="/explore"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#f9c846] px-5 py-2.5 text-sm font-medium text-[#545863] hover:bg-[#f5bd29] transition-colors"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#f9c846] px-5 py-2.5 text-sm font-medium text-foreground hover:bg-[#f5bd29] transition-colors"
           >
             <ArrowLeft size={14} />
             Explore Anime
@@ -113,7 +113,7 @@ export default function FavoritesPage() {
             return (
               <div key={fav.id} className="group relative">
                 <Link href={`/anime/${anime.id}`} className="block">
-                  <div className="relative overflow-hidden rounded-xl border border-[#ececec] bg-white shadow-sm transition-all duration-300 group-hover:border-[#f96e46]/60 group-hover:shadow-xl">
+                  <div className="relative overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition-all duration-300 group-hover:border-[#f96e46]/60 group-hover:shadow-xl">
                     <div className="relative aspect-[2/3] overflow-hidden">
                       <Image
                         src={anime.coverImage.large}
@@ -154,11 +154,11 @@ export default function FavoritesPage() {
                 {/* Title */}
                 <Link href={`/anime/${anime.id}`}>
                   <div className="mt-2 px-0.5">
-                    <h3 className="text-[13px] font-semibold text-[#545863]/70 line-clamp-2 leading-tight group-hover:text-[#f96e46] transition-colors">
+                    <h3 className="text-[13px] font-semibold text-foreground/70 line-clamp-2 leading-tight group-hover:text-[#f96e46] transition-colors">
                       {title}
                     </h3>
                     {anime.genres.length > 0 && (
-                      <p className="mt-0.5 text-[10px] text-[#7b7f89] line-clamp-1">
+                      <p className="mt-0.5 text-[10px] text-muted line-clamp-1">
                         {anime.genres.slice(0, 2).join(" · ")}
                       </p>
                     )}

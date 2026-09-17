@@ -61,12 +61,12 @@ function FeedbackModalInner({
   const ratings = ["loved", "okay", "confused"] as const;
 
   return (
-    <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
+    <div className="w-full max-w-md rounded-2xl bg-surface shadow-2xl overflow-hidden">
       <button
         onClick={onClose}
-        className="absolute right-3 top-3 cursor-pointer p-1 rounded-full hover:bg-gray-100 transition-colors"
+        className="absolute right-3 top-3 cursor-pointer p-1 rounded-full hover:bg-surface-hover transition-colors"
       >
-        <X size={18} className="text-gray-500" />
+        <X size={18} className="text-muted" />
       </button>
 
       <div className="p-6">
@@ -79,7 +79,7 @@ function FeedbackModalInner({
               <h2 className="text-lg font-semibold text-gray-900 mb-1">
                 How was your experience?
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted">
                 Your feedback helps us improve OtakuProfile for everyone.
               </p>
             </div>
@@ -106,13 +106,13 @@ function FeedbackModalInner({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Tell us what you think..."
-              className="w-full h-28 rounded-lg border border-gray-200 p-3 text-sm resize-none focus:border-[#f9c846] focus:ring-1 focus:ring-[#f9c846] outline-none"
+              className="w-full h-28 rounded-lg border border-border p-3 text-sm resize-none focus:border-[#f9c846] focus:ring-1 focus:ring-[#f9c846] outline-none"
               autoFocus
             />
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-3 w-full rounded-lg border border-gray-200 p-2.5 text-sm bg-white"
+              className="mt-3 w-full rounded-lg border border-border p-2.5 text-sm bg-surface"
             >
               <option value="general">General Feedback</option>
               <option value="bug">Bug Report</option>
@@ -125,13 +125,13 @@ function FeedbackModalInner({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email (optional)"
-              className="mt-3 w-full rounded-lg border border-gray-200 p-2.5 text-sm"
+              className="mt-3 w-full rounded-lg border border-border p-2.5 text-sm"
             />
             <div className="flex gap-2 mt-4">
               <button
                 type="button"
                 onClick={() => setStep("rating")}
-                className="flex-1 py-2 rounded-lg border border-gray-200 text-sm font-medium hover:bg-gray-50 cursor-pointer"
+                className="flex-1 py-2 rounded-lg border border-border text-sm font-medium hover:bg-gray-50 cursor-pointer"
               >
                 Back
               </button>
@@ -152,7 +152,7 @@ function FeedbackModalInner({
               <Star size={28} className="text-green-600 fill-current" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Thank you!</h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-muted mb-6">
               Your feedback means a lot to us. It helps make OtakuProfile better every day.
             </p>
             <button

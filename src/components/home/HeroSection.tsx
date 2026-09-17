@@ -64,7 +64,7 @@ export default function HeroSection() {
         />
 
         {/* Layered dark overlays for depth */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-black/80" />
+        <div className="absolute inset-0 bg-black/60" />
 
         {/* Brand color glows */}
         <div
@@ -141,11 +141,11 @@ export default function HeroSection() {
         <div className="mx-auto max-w-4xl text-center">
           {/* Top accent line */}
           <div className="mb-10 flex items-center justify-center gap-3">
-            <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/20" />
+            <div className="h-px w-8 bg-white/20" />
             <span className="text-[11px] uppercase tracking-[0.3em] text-white/50">
               Track · Level Up · Collect
             </span>
-            <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/20" />
+            <div className="h-px w-8 bg-white/20" />
           </div>
 
           {/* Main Heading */}
@@ -155,7 +155,7 @@ export default function HeroSection() {
             Your Anime
             <br />
             <span
-              className="bg-gradient-to-r from-[#f9c846] via-[#f96e46] to-[#f9c846] bg-clip-text text-transparent"
+              className="text-[#f9c846]"
               style={{
                 backgroundSize: "200% auto",
                 animation: "shimmer 3s linear infinite",

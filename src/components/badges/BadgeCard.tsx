@@ -42,7 +42,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
           <div
             className="absolute -inset-[2px] opacity-0 group-hover:opacity-100 transition-all duration-700 blur-md"
             style={{
-              background: `linear-gradient(135deg, ${color}60, ${color}10, ${color}60, ${color}10)`,
+              background: `${color}45`,
               backgroundSize: "400% 400%",
               animation: "borderGlow 2s ease-in-out infinite",
               clipPath:
@@ -53,7 +53,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
 
         {/* Card body with chamfered corners */}
         <div
-          className={`relative overflow-hidden transition-shadow duration-300 ${isEarned ? 'bg-white group-hover:shadow-2xl' : 'bg-gray-100'}`}
+          className={`relative overflow-hidden transition-shadow duration-300 ${isEarned ? 'bg-surface group-hover:shadow-2xl' : 'bg-surface-hover'}`}
           style={{
             clipPath:
               "polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px)",
@@ -71,7 +71,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
             className="absolute inset-0 pointer-events-none opacity-[0.015]"
             style={{
               backgroundImage:
-                "repeating-linear-gradient(0deg, #545863, #545863 1px, transparent 1px, transparent 3px)",
+                "none",
             }}
           />
 
@@ -80,7 +80,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
             <div
               className="absolute inset-0"
               style={{
-                background: `linear-gradient(90deg, transparent, ${isEarned ? color : '#d1d5db'}, ${isEarned ? color : '#d1d5db'}, transparent)`,
+                background: `${isEarned ? color : '#d1d5db'}`,
                 opacity: isEarned ? 0.4 : 0.2,
               }}
             />
@@ -88,7 +88,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 style={{
-                  background: `linear-gradient(90deg, transparent, ${color}, ${color}, ${color}, transparent)`,
+                  background: `${color}`,
                 }}
               />
             )}
@@ -281,7 +281,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
                     />
                     {!isEarned && (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Lock size={32} className="text-gray-400" strokeWidth={2} />
+                        <Lock size={32} className="text-muted" strokeWidth={2} />
                       </div>
                     )}
                   </div>
@@ -305,7 +305,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
                   </span>
                 )}
               </div>
-              <h3 className={`text-xs font-bold uppercase tracking-[0.15em] transition-all duration-300 ${isEarned ? 'text-[#545863] group-hover:text-[#f96e46]' : 'text-gray-400'}`}>
+              <h3 className={`text-xs font-bold uppercase tracking-[0.15em] transition-all duration-300 ${isEarned ? 'text-foreground group-hover:text-[#f96e46]' : 'text-muted'}`}>
                 {badge.name}
               </h3>
               <div className="flex items-center gap-1">
@@ -332,7 +332,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
                   style={{ backgroundColor: `${color}03` }}
                 />
               )}
-              <p className={`relative text-[10px] leading-relaxed max-w-[180px] mx-auto ${isEarned ? 'text-[#7b7f89]' : 'text-gray-400'}`}>
+              <p className={`relative text-[10px] leading-relaxed max-w-[180px] mx-auto ${isEarned ? 'text-muted' : 'text-muted'}`}>
                 {badge.description}
               </p>
             </div>
@@ -347,14 +347,14 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
               )}
               <span
                 className={`relative inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] overflow-hidden ${
-                  isEarned ? rarityColor : 'bg-gray-100 text-gray-400 border-gray-200'
+                  isEarned ? rarityColor : 'bg-surface-hover text-muted border-border'
                 }`}
               >
                 {isEarned && (
                   <div
                     className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
                     style={{
-                      background: `linear-gradient(90deg, transparent, ${color}20, transparent)`,
+                      background: `${color}20`,
                     }}
                   />
                 )}
@@ -436,16 +436,16 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
           {/* Progress bar */}
           {progress && !isEarned && (
             <div className="px-3 pb-3">
-              <div className="relative h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
+              <div className="relative h-1.5 w-full rounded-full bg-surface-hover overflow-hidden">
                 <div
                   className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
                   style={{
                     width: `${progress.percentage}%`,
-                    background: `linear-gradient(90deg, ${color}80, ${color})`,
+                    background: `${color}`,
                   }}
                 />
               </div>
-              <p className="text-[9px] text-gray-500 mt-1 text-center">
+              <p className="text-[9px] text-muted mt-1 text-center">
                 {progress.current} / {progress.required}
               </p>
             </div>
@@ -456,7 +456,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
             <div
               className="absolute inset-0"
               style={{
-                background: `linear-gradient(90deg, transparent, ${isEarned ? color : '#d1d5db'}, ${isEarned ? color : '#d1d5db'}, transparent)`,
+                background: `${isEarned ? color : '#d1d5db'}`,
                 opacity: isEarned ? 0.4 : 0.2,
               }}
             />
@@ -464,7 +464,7 @@ export default function BadgeCard({ badge, color, rarityColor, glow, isEarned = 
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 style={{
-                  background: `linear-gradient(90deg, transparent, ${color}, ${color}, ${color}, transparent)`,
+                  background: `${color}`,
                 }}
               />
             )}

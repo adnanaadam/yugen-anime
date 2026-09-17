@@ -45,7 +45,7 @@ export default function AnimeRow({
       {/* Header */}
       <div className="flex items-end justify-between mb-4 px-4 md:px-0">
         <div>
-          <h2 className="text-base font-bold text-[#545863]">{title}</h2>
+          <h2 className="text-base font-bold text-foreground">{title}</h2>
         </div>
 
         <Link
@@ -62,10 +62,10 @@ export default function AnimeRow({
         {loading || displayList.length === 0
           ? Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="w-full">
-                <div className="aspect-[2/3] rounded-xl bg-[#545863]/15 animate-pulse" />
+                <div className="aspect-[2/3] rounded-xl bg-foreground/15 animate-pulse" />
                 <div className="mt-2 space-y-1.5 p-1">
-                  <div className="h-3 w-3/4 rounded bg-[#545863]/15 animate-pulse" />
-                  <div className="h-2.5 w-1/2 rounded bg-[#545863]/15 animate-pulse" />
+                  <div className="h-3 w-3/4 rounded bg-foreground/15 animate-pulse" />
+                  <div className="h-2.5 w-1/2 rounded bg-foreground/15 animate-pulse" />
                 </div>
               </div>
             ))
@@ -209,14 +209,14 @@ function RowAnimeCard({
           className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
             isHovered
               ? "border-[#f9c846]/60 shadow-xl"
-              : "border-[#ececec] bg-white shadow-sm"
+              : "border-border bg-surface shadow-sm"
           }`}
         >
           <Link href={`/anime/${anime.id}`}>
             {/* Cover Image */}
             <div className="relative aspect-[2/3] overflow-hidden">
               {!imageLoaded && (
-                <div className="absolute inset-0 bg-[#545863]/15 animate-pulse" />
+                <div className="absolute inset-0 bg-foreground/15 animate-pulse" />
               )}
               <Image
                 src={anime.coverImage.large}
@@ -249,7 +249,7 @@ function RowAnimeCard({
                       e.stopPropagation();
                       setShowModal(true);
                     }}
-                    className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-[#ececec] px-3 shadow-sm hover:shadow-md transition-all"
+                    className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-border px-3 shadow-sm hover:shadow-md transition-all"
                     disabled={isUpdating}
                   >
                     <div className="flex items-center gap-2">
@@ -266,7 +266,7 @@ function RowAnimeCard({
                     </div>
                     <ChevronDown
                       size={12}
-                      className={`text-[#7b7f89] transition-transform duration-200`}
+                      className={`text-muted transition-transform duration-200`}
                     />
                   </button>
                 ) : (
@@ -281,7 +281,7 @@ function RowAnimeCard({
                       }
                       setShowModal(true);
                     }}
-                    className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-wait"
+                    className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-foreground border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-wait"
                     disabled={isUpdating}
                   >
                     {isUpdating ? (
@@ -300,7 +300,7 @@ function RowAnimeCard({
           <div className="mt-2 px-0.5">
             <h3
               className={`text-[13px] font-semibold line-clamp-2 leading-tight transition-colors duration-200 ${
-                isHovered ? "text-[#f96e46]" : "text-[#545863]/70"
+                isHovered ? "text-[#f96e46]" : "text-foreground/70"
               }`}
             >
               {title}
@@ -319,7 +319,7 @@ function RowAnimeCard({
             : "right-[calc(100%+12px)]"
         }`}
       >
-        <div className="rounded-xl border border-[#ececec] bg-[#545863] shadow-xl p-5">
+        <div className="rounded-xl border border-border bg-foreground shadow-xl p-5">
           <h4 className="text-sm font-bold text-white leading-tight">
             {title}
           </h4>
@@ -402,7 +402,7 @@ function RowAnimeCard({
             }`}
           >
             <div
-              className={`w-3 h-3 bg-[#545863] border border-white/10 rotate-45 ${
+              className={`w-3 h-3 bg-foreground border border-white/10 rotate-45 ${
                 detailPosition === "right"
                   ? "border-r-0 border-t-0"
                   : "border-l-0 border-b-0"

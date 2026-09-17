@@ -34,11 +34,11 @@ export default function CelebrationModal({ isOpen, onClose, data }: CelebrationM
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300"
+        className="bg-surface rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with gradient */}
-        <div className="bg-gradient-to-br from-[#f9c846] via-[#f96e46] to-[#c084fc] p-8 text-center relative overflow-hidden">
+        <div className="bg-[#f9c846] p-8 text-center relative overflow-hidden">
           {/* Decorative circles */}
           <div className="absolute -top-10 -left-10 w-32 h-32 rounded-full bg-white/10" />
           <div className="absolute -bottom-8 -right-8 w-28 h-28 rounded-full bg-white/10" />
@@ -71,7 +71,7 @@ export default function CelebrationModal({ isOpen, onClose, data }: CelebrationM
                 <Zap size={20} className="text-[#f9c846]" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[#545863]">
+                <p className="text-sm font-semibold text-foreground">
                   XP Earned
                 </p>
                 <p className="text-lg font-bold text-[#f9c846]">
@@ -84,23 +84,23 @@ export default function CelebrationModal({ isOpen, onClose, data }: CelebrationM
           {/* Badges earned */}
           {hasBadges && data.badges && (
             <div>
-              <p className="text-xs font-semibold text-[#7b7f89] uppercase tracking-wider mb-3">
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
                 Badges Earned
               </p>
               <div className="space-y-2">
                 {data.badges.map((badge, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#f9c846]/10 to-[#f96e46]/10 border border-[#f9c846]/20"
+                    className="flex items-center gap-3 p-3 rounded-xl bg-[#f9c846]/10 border border-[#f9c846]/20"
                   >
                     <div className="w-10 h-10 rounded-full bg-[#f9c846]/20 flex items-center justify-center">
                       <Star size={18} className="text-[#f9c846]" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-[#545863]">
+                      <p className="text-sm font-semibold text-foreground">
                         {badge.name}
                       </p>
-                      <p className="text-xs text-[#7b7f89]">
+                      <p className="text-xs text-muted">
                         +{badge.xpReward} XP bonus
                       </p>
                     </div>
@@ -113,7 +113,7 @@ export default function CelebrationModal({ isOpen, onClose, data }: CelebrationM
           {/* Close button */}
           <button
             onClick={onClose}
-            className="w-full py-3 rounded-xl bg-[#545863] text-white text-sm font-semibold hover:bg-[#3d4049] transition-colors"
+            className="w-full py-3 rounded-xl bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-colors"
           >
             Awesome!
           </button>
