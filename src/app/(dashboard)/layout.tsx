@@ -96,7 +96,7 @@ export default function DashboardLayout({
           <div className="flex items-center justify-between sm:h-12 flex-col sm:flex-row gap-4">
             {/* User pill */}
             <div className="flex items-center gap-2">
-              {session.user?.image &&
+              {/* {session.user?.image &&
               session.user.image.includes("cloudinary") ? (
                 <div className="relative size-7 rounded-full overflow-hidden">
                   <CldImage
@@ -118,7 +118,7 @@ export default function DashboardLayout({
               )}
               <span className="text-sm font-medium text-[#545863]">
                 {session.user?.username || "User"}
-              </span>
+              </span> */}
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
                   isProfilePublic
@@ -127,15 +127,15 @@ export default function DashboardLayout({
                 }`}
               >
                 {isProfilePublic ? <Globe size={12} /> : <Lock size={12} />}
-                {isProfilePublic ? "Public Profile" : "Private Profile"}
+                {isProfilePublic ? "Profile is public" : "Profile is private"}
               </span>
-              <button
+              {/* <button
                 onClick={handleShareProfile}
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-[#f9c846] bg-[#f9c846]/10 hover:bg-[#f9c846]/20 transition-colors cursor-pointer"
               >
                 <Share2 size={12} />
                 Share Profile
-              </button>
+              </button> */}
             </div>
 
             {/* Nav tabs */}
