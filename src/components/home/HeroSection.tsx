@@ -38,8 +38,8 @@ export default function HeroSection() {
         <div className="animate-fade-in-up text-center lg:text-left">
           <div className="mb-6 flex items-center justify-center gap-3 lg:justify-start">
             <span className="h-px w-8 bg-[#f9c846]/50" />
-            <span className="text-[11px] font-medium uppercase tracking-[0.3em] text-muted">
-              Track · Level Up · Collect
+            <span className="text-[9px] font-medium uppercase tracking-[0.3em] text-muted">
+              Your Anime · Your Stats · Your Identity
             </span>
             <span className="h-px w-8 bg-[#f9c846]/50" />
           </div>
@@ -47,14 +47,13 @@ export default function HeroSection() {
           <h1
             className={`text-5xl uppercase leading-[0.95] tracking-wide text-foreground md:text-7xl ${lordJuusai.className}`}
           >
-            Your Anime
+            Build Your Otaku
             <br />
-            <span className="text-[#f9c846]">PROFILE</span>
+            <span className="text-[#f9c846]">Profile</span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-muted md:text-lg lg:mx-0">
-            The anime tracker that plays like an RPG. Log episodes, earn XP,
-            unlock badges and climb the otaku ranks.
+            Track what you watch, showcase your favorites, earn badges, and build a profile that represents your anime taste.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
