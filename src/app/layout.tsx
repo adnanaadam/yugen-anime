@@ -21,9 +21,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "OtakuProfile - Track Your Anime Journey Beautifully",
+  title: "OtakuProfile - Build Your Anime Identity",
   description:
-    "A minimalist anime tracking platform with progress tracking, gamification, and social profiles.",
+    "Create your OtakuProfile, showcase your favorite anime, track your journey, earn badges, and build an anime profile that’s uniquely yours.",
 };
 
 export default function RootLayout({
