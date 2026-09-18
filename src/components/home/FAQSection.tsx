@@ -14,12 +14,12 @@ const faqItems: FAQItem[] = [
   {
     question: "What is OtakuProfile?",
     answer:
-      "OtakuProfile is a minimalist anime tracking platform that lets you keep track of what you're watching, plan your next binge, and discover new series. It features progress tracking, gamification through badges and XP, and shareable public profiles so you can show off your anime journey.",
+      "OtakuProfile is a platform where you can build and showcase your anime identity. Add the anime you've watched, track your progress, choose your favorites, earn XP and badges, and create a profile that reflects your unique taste as an otaku.",
   },
   {
     question: "How do I track my anime?",
     answer:
-      "Simply search for any anime on the Explore page, click \"Add to Library,\" and choose your status — Watching, Completed, Plan to Watch, Paused, Dropped, or Rewatching. You can update your progress episode by episode, rate shows, and see everything organized in your Library.",
+      'Simply search for any anime on the Explore page, click "Add to Library," and choose your status — Watching, Completed, Plan to Watch, Paused, Dropped, or Rewatching. You can update your progress episode by episode, rate shows, and see everything organized in your Library.',
   },
   {
     question: "What are badges and how do I earn them?",
@@ -29,7 +29,7 @@ const faqItems: FAQItem[] = [
   {
     question: "Is my profile public by default?",
     answer:
-      "Yes, your profile is public by default so others can discover your anime activity. You can change this anytime in your Settings page by toggling the \"Public Profile\" option off. When set to private, your profile page will show a locked state to visitors.",
+      'Yes, your profile is public by default so others can discover your anime activity. You can change this anytime in your Settings page by toggling the "Public Profile" option off. When set to private, your profile page will show a locked state to visitors.',
   },
   {
     question: "Can I change my username?",
@@ -48,10 +48,13 @@ export default function FAQSection() {
   return (
     <section className="relative py-24 px-4 overflow-hidden">
       {/* Subtle background pattern */}
-      <div className="absolute inset-0 opacity-[0.015] pointer-events-none" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-        backgroundSize: "200px 200px",
-      }} />
+      <div
+        className="absolute inset-0 opacity-[0.015] pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundSize: "200px 200px",
+        }}
+      />
 
       <div className="relative mx-auto max-w-3xl">
         {/* Section heading */}
@@ -73,8 +76,7 @@ export default function FAQSection() {
           <h2
             className={`text-4xl md:text-5xl text-foreground ${lordJuusai.className}`}
           >
-            Frequently Asked{" "}
-            <span className="text-[#f9c846]">Questions</span>
+            Frequently Asked <span className="text-[#f9c846]">Questions</span>
           </h2>
           <p className="mt-3 text-sm text-muted max-w-lg mx-auto leading-relaxed">
             Everything you need to know about tracking your anime journey.
