@@ -95,7 +95,7 @@ export default function AnimeCard({ anime, size = "md", initialFavorited = false
             )}
 
             {/* Hover overlay with genres */}
-            <div className="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 bg-black/70">
+            <div className="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 bg-black/90">
               <div className="flex flex-wrap gap-1">
                 {anime.genres.slice(0, 3).map((genre) => (
                   <span

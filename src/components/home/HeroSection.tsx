@@ -31,7 +31,7 @@ export default function HeroSection() {
       <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border-[24px] border-[#f9c846]/[0.06]" />
       <div className="pointer-events-none absolute -bottom-28 -left-20 h-80 w-80 rounded-full border-[32px] border-[#00e8fc]/[0.05]" />
 
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 md:py-24 lg:grid-cols-2 lg:gap-10">
+      <div className="relative mx-auto grid max-w-5xl items-center gap-12 px-4 py-16 md:py-28 lg:grid-cols-2 lg:gap-10">
         {/* ============================================================ */}
         {/* LEFT — copy                                                  */}
         {/* ============================================================ */}
@@ -49,7 +49,7 @@ export default function HeroSection() {
           >
             Your Anime
             <br />
-            <span className="text-[#f9c846]">Journey</span>
+            <span className="text-[#f9c846]">PROFILE</span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-muted md:text-lg lg:mx-0">
@@ -76,9 +76,9 @@ export default function HeroSection() {
             </Link>
           </div>
 
-          <p className="mt-6 text-xs text-muted">
+          {/* <p className="mt-6 text-xs text-muted">
             Free forever · XP on every episode · 8 badges to earn
-          </p>
+          </p> */}
         </div>
 
         {/* ============================================================ */}
@@ -96,12 +96,12 @@ export default function HeroSection() {
             height={1178}
             priority
             sizes="256px"
-            className="pointer-events-none absolute -top-16 right-0 z-0 hidden w-56 select-none opacity-90 md:block lg:w-64"
+            className="pointer-events-none absolute -bottom-50 -right-60 z-0 hidden w-56 select-none opacity-90 md:block lg:w-64"
           />
 
           {/* Floating chip: XP */}
           <div
-            className="animate-float absolute -left-3 top-8 z-20 hidden sm:block"
+            className="animate-float absolute -right-3 -top-2 z-20 hidden sm:block"
             style={{ animationDelay: "0.6s" }}
           >
             <div className="flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 shadow-lg">

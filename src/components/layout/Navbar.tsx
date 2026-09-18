@@ -140,7 +140,7 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop */}
-      <header className="fixed top-0 left-0 right-0 z-50 hidden md:flex items-center justify-center h-14 bg-[#f96e46]">
+      <header className="fixed top-0 left-0 right-0 z-50 hidden md:flex items-center justify-center h-14 bg-[#242529]">
         {/* Grid layout: 3 equal columns so center stays centered */}
         <div className="grid grid-cols-3 items-center w-full text-[#ffffff] px-8 lg:px-16">
           {/* Left: Logo */}
@@ -166,7 +166,7 @@ export default function Navbar() {
               href="https://discord.gg/jGK4YHzPC"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline underline-offset-4 rounded-md border border-[#ececec] bg-[#ffffff] px-2 py-1 transition-colors hover:bg-[#f7f7f7]"
+              className="hover:underline underline-offset-4 px-2 py-1 transition-colors hover:bg-[#f7f7f7]"
             >
               <DiscordIcon className="size-6" />
             </a>

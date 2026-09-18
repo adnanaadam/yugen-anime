@@ -46,7 +46,7 @@ const previewBadges = [
 
 export default function AchievementsPreview() {
   return (
-    <section className="relative py-24 px-4 bg-foreground/10 overflow-hidden">
+    <section className="relative py-24 px-4 overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -bottom-8 -left-8 md:bottom-0 md:left-0 w-48 h-48 md:w-64 md:h-64">
           <Image

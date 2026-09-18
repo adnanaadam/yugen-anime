@@ -249,7 +249,7 @@ function RowAnimeCard({
                       e.stopPropagation();
                       setShowModal(true);
                     }}
-                    className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-border px-3 shadow-sm hover:shadow-md transition-all"
+                    className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm px-3 shadow-sm hover:shadow-md transition-all"
                     disabled={isUpdating}
                   >
                     <div className="flex items-center gap-2">
@@ -319,7 +319,7 @@ function RowAnimeCard({
             : "right-[calc(100%+12px)]"
         }`}
       >
-        <div className="rounded-xl border border-border bg-foreground shadow-xl p-5">
+        <div className="rounded-xl border border-border bg-[#242529] shadow-xl p-5">
           <h4 className="text-sm font-bold text-white leading-tight">
             {title}
           </h4>
@@ -402,7 +402,7 @@ function RowAnimeCard({
             }`}
           >
             <div
-              className={`w-3 h-3 bg-foreground border border-white/10 rotate-45 ${
+              className={`w-3 h-3 bg-[#242529] border border-white/10 rotate-45 ${
                 detailPosition === "right"
                   ? "border-r-0 border-t-0"
                   : "border-l-0 border-b-0"
