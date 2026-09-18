@@ -1,36 +1,84 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
+/* ============================================================
+   THEME VARIABLES — flipped via [data-theme] on <html>.
+   Dark is the default; light keeps the original palette.
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+
+  --bg: #fffdf8;
+  --fg: #545863;
+  --fg-muted: #7b7f89;
+  --surface: #ffffff;
+  --surface-hover: #f7f7f7;
+  --border: #ececec;
+  --primary: #f9c846;
+  --primary-hover: #f5bd29;
+  --secondary: #f96e46;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #1c1d21;
+  --fg: #e9eaec;
+  --fg-muted: #9a9ca4;
+  --surface: #242529;
+  --surface-hover: #2b2c31;
+  --border: #35363b;
+
+  /* Brand accents stay the same in both themes */
+  --primary: #f9c846;
+  --primary-hover: #f5bd29;
+  --secondary: #f96e46;
+}
+
+/* Legacy aliases — components reference these via var(--color-*).
+   They resolve to the runtime variables above, so they flip too. */
+:root {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-text-secondary: var(--fg-muted);
+  --color-muted: var(--fg-muted);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+}
+
 @theme inline {
   /* Fonts */
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-heading: var(--font-geist-sans), system-ui, sans-serif;
 
-  /* Brand Colors */
+  /* Brand Colors (static) */
   --color-charcoal: #545863;
   --color-electric-aqua: #00e8fc;
   --color-burnt-peach: #f96e46;
   --color-tuscan-sun: #f9c846;
   --color-yellow-green: #97cc04;
 
-  /* Light Theme */
-  --color-background: #fffdf8;
-  --color-foreground: #545863;
-  --color-text-secondary: #7b7f89;
-
-  --color-primary: #f9c846;
-  --color-primary-hover: #f5bd29;
-
-  --color-secondary: #f96e46;
+  /* Semantic Colors (theme-aware) */
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-text-secondary: var(--fg-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
   --color-info: #00e8fc;
   --color-success: #97cc04;
 
-  --color-surface: #ffffff;
-  --color-surface-hover: #f7f7f7;
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
 
-  --color-border: #ececec;
-
-  /* Status Colors */
+  /* Status Colors (static) */
   --color-watching: #00e8fc;
   --color-completed: #97cc04;
   --color-plan-to-watch: #f9c846;
@@ -39,8 +87,8 @@
   --color-rewatching: #c084fc;
 
   /* Card System */
-  --card-bg: var(--color-surface);
-  --card-border: var(--color-border);
+  --card-bg: var(--surface);
+  --card-border: var(--border);
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
   --card-radius: 0.75rem;
@@ -48,19 +96,24 @@
 }
 
 html {
-  color-scheme: light;
-  background: var(--color-background);
+  background: var(--bg);
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font-sans);
+}
+
+/* Slightly deeper shadows read better on dark surfaces */
+[data-theme="dark"] {
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.35);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-charcoal) transparent;
+  scrollbar-color: var(--fg-muted) transparent;
 }
 
 /* Card System Utilities */

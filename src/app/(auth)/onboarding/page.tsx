@@ -175,14 +175,14 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#fffdf8] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className={`text-3xl text-[#545863] ${lordJuusai.className}`}>
+          <h1 className={`text-3xl text-foreground ${lordJuusai.className}`}>
             OtakuProfile
           </h1>
-          <p className="mt-2 text-sm text-[#7b7f89]">
+          <p className="mt-2 text-sm text-muted">
             Set up your profile to get started
           </p>
         </div>
@@ -203,15 +203,15 @@ export default function OnboardingPage() {
 
         {/* Step 1: Username */}
         {step === "username" && (
-          <div className="rounded-2xl border border-[#ececec] bg-white p-8 shadow-sm">
+          <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm">
             <div className="text-center mb-6">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#f9c846]/10">
                 <span className="text-2xl">✏️</span>
               </div>
-              <h2 className="text-xl font-bold text-[#545863]">
+              <h2 className="text-xl font-bold text-foreground">
                 Choose a Username
               </h2>
-              <p className="mt-1 text-sm text-[#7b7f89]">
+              <p className="mt-1 text-sm text-muted">
                 This will be your unique identity on OtakuProfile
               </p>
             </div>
@@ -223,7 +223,7 @@ export default function OnboardingPage() {
                   value={username}
                   onChange={handleUsernameChange}
                   placeholder="Enter your username"
-                  className="h-12 w-full rounded-xl border border-[#ececec] bg-[#fffdf8] px-4 text-sm text-[#545863] outline-none focus:border-[#f9c846]/50 transition-colors"
+                  className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground outline-none focus:border-[#f9c846]/50 transition-colors"
                   maxLength={20}
                   autoFocus
                 />
@@ -231,7 +231,7 @@ export default function OnboardingPage() {
                 {username.trim().length >= 3 && availability !== "idle" && (
                   <div className="flex items-center gap-1 mt-1.5">
                     {availability === "checking" && (
-                      <Loader2 size={11} className="text-[#7b7f89] animate-spin shrink-0" />
+                      <Loader2 size={11} className="text-muted animate-spin shrink-0" />
                     )}
                     {availability === "available" && (
                       <Check size={11} className="text-[#97cc04] shrink-0" />
@@ -245,7 +245,7 @@ export default function OnboardingPage() {
                           ? "text-[#97cc04]"
                           : availability === "taken"
                           ? "text-[#f96e46]"
-                          : "text-[#7b7f89]"
+                          : "text-muted"
                       }`}
                     >
                       {availability === "checking" && "Checking..."}
@@ -260,7 +260,7 @@ export default function OnboardingPage() {
                     <p className="text-[11px] text-[#f96e46]">{usernameError}</p>
                   </div>
                 )}
-                <p className="mt-1.5 text-[11px] text-[#7b7f89]">
+                <p className="mt-1.5 text-[11px] text-muted">
                   3-20 characters · Letters, numbers, and underscores
                 </p>
               </div>
@@ -268,7 +268,7 @@ export default function OnboardingPage() {
               <button
                 type="submit"
                 disabled={saving || !username.trim()}
-                className="flex h-12 w-full items-center cursor-pointer justify-center gap-2 rounded-xl bg-[#f9c846] text-sm font-semibold text-[#545863] hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
+                className="flex h-12 w-full items-center cursor-pointer justify-center gap-2 rounded-xl bg-[#f9c846] text-sm font-semibold text-foreground hover:bg-[#f5bd29] transition-colors disabled:opacity-50"
               >
                 {saving ? (
                   <>
@@ -288,7 +288,7 @@ export default function OnboardingPage() {
 
         {/* Step 2: Avatar */}
         {step === "avatar" && (
-          <div className="rounded-2xl border border-[#ececec] bg-white p-8 shadow-sm">
+          <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm">
             <div className="text-center mb-6">
               <div className="mx-auto mb-4 flex items-center justify-center">
                 {preview ? (
@@ -309,10 +309,10 @@ export default function OnboardingPage() {
                   />
                 )}
               </div>
-              <h2 className="text-xl font-bold text-[#545863]">
+              <h2 className="text-xl font-bold text-foreground">
                 Add a Profile Picture
               </h2>
-              <p className="mt-1 text-sm text-[#7b7f89]">
+              <p className="mt-1 text-sm text-muted">
                 Optional — you can always change it later
               </p>
             </div>
@@ -321,7 +321,7 @@ export default function OnboardingPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="flex h-12 w-full items-center cursor-pointer justify-center gap-2 rounded-xl border-2 border-dashed border-[#ececec] bg-[#fffdf8] text-sm font-medium text-[#545863] hover:border-[#f9c846]/50 hover:bg-[#f9c846]/5 transition-colors disabled:opacity-50"
+                className="flex h-12 w-full items-center cursor-pointer justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-background text-sm font-medium text-foreground hover:border-[#f9c846]/50 hover:bg-[#f9c846]/5 transition-colors disabled:opacity-50"
               >
                 {uploading ? (
                   <>
@@ -354,7 +354,7 @@ export default function OnboardingPage() {
               <div className="pt-2 space-y-2">
                 <button
                   onClick={handleComplete}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#f9c846] text-sm font-semibold text-[#545863] hover:bg-[#f5bd29] transition-colors"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#f9c846] text-sm font-semibold text-foreground hover:bg-[#f5bd29] transition-colors"
                 >
                   <Check size={16} />
                   Complete Setup
@@ -362,7 +362,7 @@ export default function OnboardingPage() {
 
                 <button
                   onClick={handleSkipAvatar}
-                  className="flex h-10 w-full items-center justify-center text-sm text-[#7b7f89] hover:text-[#545863] transition-colors"
+                  className="flex h-10 w-full items-center justify-center text-sm text-muted hover:text-foreground transition-colors"
                 >
                   Skip for now
                 </button>

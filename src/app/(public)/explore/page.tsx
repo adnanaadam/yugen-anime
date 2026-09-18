@@ -319,13 +319,13 @@ function ExploreAnimeCard({
           className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
             isHovered
               ? "border-[#f9c846]/60 shadow-xl"
-              : "border-[#ececec] bg-white shadow-sm"
+              : "border-border bg-surface shadow-sm"
           }`}
         >
           <Link href={`/anime/${anime.id}`}>
             <div className="relative aspect-[2/3] overflow-hidden">
               {!imageLoaded && (
-                <div className="absolute inset-0 bg-[#f7f7f7] animate-pulse" />
+                <div className="absolute inset-0 bg-surface-hover animate-pulse" />
               )}
               <Image
                 src={anime.coverImage.large}
@@ -355,7 +355,7 @@ function ExploreAnimeCard({
                       e.stopPropagation();
                       setShowModal(true);
                     }}
-                    className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm border border-[#ececec] px-3 shadow-sm hover:shadow-md transition-all"
+                    className="flex h-8 w-full items-center justify-between cursor-pointer rounded-lg bg-white/90 backdrop-blur-sm px-3 shadow-sm hover:shadow-md transition-all"
                     disabled={isUpdating}
                   >
                     <div className="flex items-center gap-2">
@@ -372,7 +372,7 @@ function ExploreAnimeCard({
                     </div>
                     <ChevronDown
                       size={12}
-                      className={`text-[#7b7f89] transition-transform duration-200`}
+                      className={`text-muted transition-transform duration-200`}
                     />
                   </button>
                 ) : (
@@ -386,7 +386,7 @@ function ExploreAnimeCard({
                       }
                       setShowModal(true);
                     }}
-                    className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-[#545863] border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
+                    className="flex h-8 w-full items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[#f9c846] text-foreground border border-[#f5bd29] hover:bg-[#f5bd29] hover:scale-[1.02] transition-all"
                     disabled={isUpdating}
                   >
                     <Plus size={13} />
@@ -400,7 +400,7 @@ function ExploreAnimeCard({
         <Link href={`/anime/${anime.id}`}>
           <div className="mt-2 px-0.5">
             <h3
-              className={`text-[13px] font-semibold line-clamp-2 leading-tight transition-colors duration-200 ${isHovered ? "text-[#f96e46]" : "text-[#545863]/70"}`}
+              className={`text-[13px] font-semibold line-clamp-2 leading-tight transition-colors duration-200 ${isHovered ? "text-[#f96e46]" : "text-foreground/70"}`}
             >
               {title}
             </h3>
@@ -414,7 +414,7 @@ function ExploreAnimeCard({
           isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
         } ${detailPosition === "right" ? "left-[calc(100%+12px)]" : "right-[calc(100%+12px)]"}`}
       >
-        <div className="rounded-xl border border-[#ececec] bg-[#545863] shadow-xl p-5">
+        <div className="rounded-xl border border-border bg-[#242529] shadow-xl p-5">
           <h4 className="text-sm font-bold text-white leading-tight">
             {title}
           </h4>
@@ -492,7 +492,7 @@ function ExploreAnimeCard({
             className={`absolute top-6 ${detailPosition === "right" ? "-left-1.5" : "-right-1.5"}`}
           >
             <div
-              className={`w-3 h-3 bg-[#545863] border border-[#ececec] rotate-45 ${detailPosition === "right" ? "border-r-0 border-t-0" : "border-l-0 border-b-0"}`}
+              className={`w-3 h-3 bg-[#242529] border border-border rotate-45 ${detailPosition === "right" ? "border-r-0 border-t-0" : "border-l-0 border-b-0"}`}
             />
           </div>
         </div>
@@ -518,10 +518,10 @@ function ExploreAnimeCard({
 function SkeletonCard() {
   return (
     <div className="w-full relative">
-      <div className="aspect-[2/3] rounded-xl bg-[#545863]/15 animate-pulse" />
+      <div className="aspect-[2/3] rounded-xl bg-foreground/15 animate-pulse" />
       <div className="mt-2 space-y-1.5 p-1">
-        <div className="h-3 w-3/4 rounded bg-[#545863]/15 animate-pulse" />
-        <div className="h-2.5 w-1/2 rounded bg-[#545863]/15 animate-pulse" />
+        <div className="h-3 w-3/4 rounded bg-foreground/15 animate-pulse" />
+        <div className="h-2.5 w-1/2 rounded bg-foreground/15 animate-pulse" />
       </div>
     </div>
   );
@@ -744,28 +744,28 @@ function ExploreContent() {
   };
 
   return (
-    <div className="min-h-screen mx-auto max-w-5xl overflow-hidden bg-[#fffdf8]">
+    <div className="min-h-screen mx-auto max-w-5xl overflow-hidden bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-[#ececec]">
+      <div className="border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-10 md:py-14">
           <h1
-            className={`text-3xl md:text-4xl text-[#545863] ${lordJuusai.className}`}
+            className={`text-3xl md:text-4xl text-foreground ${lordJuusai.className}`}
           >
             Explore Anime
           </h1>
-          <p className="mt-2 text-sm text-[#7b7f89] max-w-lg">
+          <p className="mt-2 text-sm text-muted max-w-lg">
             Discover trending series, seasonal releases, and hidden gems.
           </p>
 
           <div className="mt-6 max-w-md">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7b7f89]" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
               <input
                 type="text"
                 placeholder="Search anime titles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11 w-full rounded-xl border border-[#ececec] bg-[#fffdf8] pl-11 pr-4 text-sm text-[#545863] outline-none placeholder:text-[#7b7f89] focus:border-[#f9c846]/50 focus:bg-white transition-colors"
+                className="h-11 w-full rounded-xl border border-border bg-background pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted focus:border-[#f9c846]/50 focus:bg-surface transition-colors"
               />
             </div>
           </div>
@@ -779,8 +779,8 @@ function ExploreContent() {
                   onClick={() => handleCategoryChange(category.id)}
                   className={`rounded-lg px-4 py-2 cursor-pointer text-sm font-medium transition-colors ${
                     activeCategory === category.id
-                      ? "bg-[#f9c846] text-[#545863]"
-                      : "bg-white border border-[#ececec] text-[#7b7f89] hover:bg-[#f7f7f7]"
+                      ? "bg-[#f9c846] text-foreground"
+                      : "bg-surface border border-border text-muted hover:bg-surface-hover"
                   }`}
                 >
                   {category.label}
@@ -797,7 +797,7 @@ function ExploreContent() {
               }}
               className={`flex items-center gap-1.5 cursor-pointer rounded-lg px-3 py-2 text-xs font-medium border transition-colors ${
                 sfwOnly
-                  ? "bg-white border-[#ececec] text-[#7b7f89] hover:bg-[#f7f7f7]"
+                  ? "bg-surface border-border text-muted hover:bg-surface-hover"
                   : "bg-[#f96e46]/10 text-[#f96e46] border-[#f96e46]/20"
               }`}
             >
@@ -813,13 +813,13 @@ function ExploreContent() {
       {/* Results */}
       <div className="relative px-4 py-8">
         <div className="mb-6 flex items-center relative justify-between">
-          <p className="text-sm text-[#7b7f89]">
+          <p className="text-sm text-muted">
             {loading
               ? "Loading..."
               : `${pageInfo.total || animeList.length} anime found`}
           </p>
           {!loading && totalPages > 1 && (
-            <p className="text-xs text-[#7b7f89]">
+            <p className="text-xs text-muted">
               Page {currentPage} of {totalPages}
             </p>
           )}
@@ -833,10 +833,10 @@ function ExploreContent() {
           </div>
         ) : animeList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <p className="text-lg font-semibold text-[#545863]">
+            <p className="text-lg font-semibold text-foreground">
               No anime found
             </p>
-            <p className="mt-1 text-sm text-[#7b7f89]">
+            <p className="mt-1 text-sm text-muted">
               Try another title or category.
             </p>
           </div>
@@ -871,7 +871,7 @@ function ExploreContent() {
                   <button
                     onClick={handleLoadMore}
                     disabled={loadingMore}
-                    className="flex items-center gap-2 cursor-pointer rounded-lg border border-[#ececec] bg-white px-5 py-2.5 text-sm font-medium text-[#545863] hover:bg-[#f7f7f7] transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 cursor-pointer rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover transition-colors disabled:opacity-50"
                   >
                     {loadingMore ? (
                       <>
@@ -892,7 +892,7 @@ function ExploreContent() {
                     pageNum === "..." ? (
                       <span
                         key={`dots-${i}`}
-                        className="px-2 py-1 text-xs text-[#7b7f89]"
+                        className="px-2 py-1 text-xs text-muted"
                       >
                         ...
                       </span>
@@ -908,8 +908,8 @@ function ExploreContent() {
                         }}
                         className={`min-w-[36px] h-9 rounded-lg cursor-pointer text-sm font-medium transition-colors ${
                           pageNum === currentPage
-                            ? "bg-[#f9c846] text-[#545863]"
-                            : "bg-white border border-[#ececec] text-[#7b7f89] hover:bg-[#f7f7f7]"
+                            ? "bg-[#f9c846] text-foreground"
+                            : "bg-surface border border-border text-muted hover:bg-surface-hover"
                         }`}
                       >
                         {pageNum}
@@ -926,7 +926,7 @@ function ExploreContent() {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 flex cursor-pointer h-11 w-11 items-center justify-center rounded-full bg-[#f9c846] text-[#545863] shadow-lg hover:bg-[#f5bd29] hover:shadow-xl transition-all"
+          className="fixed bottom-8 right-8 z-50 flex cursor-pointer h-11 w-11 items-center justify-center rounded-full bg-[#f9c846] text-foreground shadow-lg hover:bg-[#f5bd29] hover:shadow-xl transition-all"
         >
           <ArrowUp size={18} />
         </button>
@@ -939,8 +939,8 @@ export default function ExplorePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#fffdf8] flex items-center justify-center">
-          <div className="text-[#7b7f89] text-sm">Loading...</div>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-muted text-sm">Loading...</div>
         </div>
       }
     >

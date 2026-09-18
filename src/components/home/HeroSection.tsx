@@ -3,189 +3,64 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Award, Flame, Library, Trophy, Tv } from "lucide-react";
+import { Navii } from "@usenavii/react";
 import { lordJuusai } from "@/fonts/fonts";
 
-const badges = [
-  {
-    title: "First Episode",
-    xp: "+10 XP",
-    icon: "/icons/battle.png",
-    color: "#00e8fc",
-    bg: "rgba(0,232,252,0.12)",
-    position:
-      "top-[10%] left-[6%] md:top-[14%] md:left-[10%]",
-    delay: "0s",
-  },
-  {
-    title: "Series Complete",
-    xp: "+50 XP",
-    icon: "/icons/achievements.png",
-    color: "#f9c846",
-    bg: "rgba(249,200,70,0.12)",
-    position:
-      "top-[18%] right-[6%] md:top-[16%] md:right-[12%]",
-    delay: "1.5s",
-  },
-  {
-    title: "Otaku Rank",
-    xp: "Level 8",
-    icon: "/icons/fire-eye.png",
-    color: "#f96e46",
-    bg: "rgba(249,110,70,0.12)",
-    position:
-      "bottom-[20%] left-[4%] md:bottom-[18%] md:left-[8%]",
-    delay: "3s",
-  },
-  {
-    title: "Legend Badge",
-    xp: "+100 XP",
-    icon: "/icons/dagger-fire.png",
-    color: "#97cc04",
-    bg: "rgba(151,204,4,0.12)",
-    position:
-      "bottom-[14%] right-[6%] md:bottom-[16%] md:right-[10%]",
-    delay: "4.5s",
-  },
+const HEX_CLIP = "polygon(50% 3%, 93% 28%, 93% 72%, 50% 97%, 7% 72%, 7% 28%)";
+
+const stats = [
+  { icon: Library, value: "128", label: "Anime" },
+  { icon: Tv, value: "2,340", label: "Episodes" },
+  { icon: Award, value: "6/8", label: "Badges" },
 ];
+
+const badgeIcons = [
+  "/icons/trophy.png",
+  "/icons/medal.png",
+  "/icons/fire-crystal.png",
+  "/icons/spellbook.png",
+];
+
+const BADGE_SLOTS = 8;
 
 export default function HeroSection() {
   return (
-    <section className="relative max-h-screen overflow-hidden bg-black py-20">
-      {/* Full Anime Background */}
-      <div className="absolute inset-0">
-        <Image
-          src="/images/luffy.jpg"
-          alt="Anime background"
-          fill
-          priority
-          className="object-cover object-center"
-          sizes="100vw"
-        />
+    <section className="relative overflow-hidden bg-background">
+      {/* Flat backdrop accents */}
+      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border-[24px] border-[#f9c846]/[0.06]" />
+      <div className="pointer-events-none absolute -bottom-28 -left-20 h-80 w-80 rounded-full border-[32px] border-[#00e8fc]/[0.05]" />
 
-        {/* Layered dark overlays for depth */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-black/80" />
-
-        {/* Brand color glows */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `
-              radial-gradient(ellipse at 30% 20%, rgba(249,200,70,0.12) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 60%, rgba(249,110,70,0.10) 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 80%, rgba(0,232,252,0.06) 0%, transparent 40%)
-            `,
-          }}
-        />
-
-        {/* Subtle grain texture */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
-            backgroundSize: "256px 256px",
-          }}
-        />
-      </div>
-
-      {/* Floating Badges */}
-      {/* <div className="absolute inset-0 hidden md:block pointer-events-none">
-        {badges.map((badge) => (
-          <div
-            key={badge.title}
-            className={`absolute ${badge.position}`}
-            style={{
-              animation: `float 6s ease-in-out ${badge.delay} infinite`,
-            }}
-          >
-            <div
-              className="rounded-2xl border border-white/[0.08] p-4 backdrop-blur-xl transition-transform duration-500 hover:scale-105"
-              style={{ backgroundColor: badge.bg }}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-11 w-11 items-center justify-center rounded-xl"
-                  style={{
-                    backgroundColor: `${badge.color}20`,
-                  }}
-                >
-                  <Image
-                    src={badge.icon}
-                    alt={badge.title}
-                    width={22}
-                    height={22}
-                    className="object-contain"
-                  />
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-white/90 leading-tight">
-                    {badge.title}
-                  </p>
-                  <p
-                    className="text-xs font-semibold mt-0.5"
-                    style={{ color: badge.color }}
-                  >
-                    {badge.xp}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div> */}
-
-      {/* Center Content */}
-      <div className="relative z-10 flex max-h-screen items-center justify-center px-4">
-        <div className="mx-auto max-w-4xl text-center">
-          {/* Top accent line */}
-          <div className="mb-10 flex items-center justify-center gap-3">
-            <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/20" />
-            <span className="text-[11px] uppercase tracking-[0.3em] text-white/50">
+      <div className="relative mx-auto grid max-w-5xl items-center gap-12 px-4 py-16 md:py-28 lg:grid-cols-2 lg:gap-10">
+        {/* ============================================================ */}
+        {/* LEFT — copy                                                  */}
+        {/* ============================================================ */}
+        <div className="animate-fade-in-up text-center lg:text-left">
+          <div className="mb-6 flex items-center justify-center gap-3 lg:justify-start">
+            <span className="h-px w-8 bg-[#f9c846]/50" />
+            <span className="text-[11px] font-medium uppercase tracking-[0.3em] text-muted">
               Track · Level Up · Collect
             </span>
-            <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/20" />
+            <span className="h-px w-8 bg-[#f9c846]/50" />
           </div>
 
-          {/* Main Heading */}
           <h1
-            className={`text-5xl uppercase leading-[0.9] tracking-wide text-white md:text-7xl lg:text-8xl ${lordJuusai.className}`}
+            className={`text-5xl uppercase leading-[0.95] tracking-wide text-foreground md:text-7xl ${lordJuusai.className}`}
           >
             Your Anime
             <br />
-            <span
-              className="bg-gradient-to-r from-[#f9c846] via-[#f96e46] to-[#f9c846] bg-clip-text text-transparent"
-              style={{
-                backgroundSize: "200% auto",
-                animation: "shimmer 3s linear infinite",
-              }}
-            >
-              Journey
-            </span>
+            <span className="text-[#f9c846]">PROFILE</span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/90 md:text-lg">
-            Discover anime, track every episode, build your profile,
-            earn XP, unlock badges, and become the ultimate otaku.
+          <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-muted md:text-lg lg:mx-0">
+            The anime tracker that plays like an RPG. Log episodes, earn XP,
+            unlock badges and climb the otaku ranks.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/explore"
-              className="group inline-flex items-center gap-2 rounded-full bg-[#f9c846] px-7 py-3.5 text-sm font-semibold text-black transition-all duration-300 hover:bg-[#f5bd29] hover:shadow-lg hover:shadow-[#f9c846]/20 active:scale-[0.97]"
-            >
-              Explore Anime
-              <ArrowRight
-                size={16}
-                className="transition-transform duration-300 group-hover:translate-x-0.5"
-              />
-            </Link>
-
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
             <Link
               href="/signin"
-              className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:bg-white/10 hover:border-white/25 active:scale-[0.97]"
+              className="group inline-flex items-center gap-2 rounded-full bg-[#f9c846] px-7 py-3.5 text-sm font-semibold text-black transition-all duration-300 hover:bg-[#f5bd29] active:scale-[0.97]"
             >
               Start Tracking
               <ArrowRight
@@ -193,35 +68,143 @@ export default function HeroSection() {
                 className="transition-transform duration-300 group-hover:translate-x-0.5"
               />
             </Link>
+            <Link
+              href="/explore"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-7 py-3.5 text-sm font-semibold text-foreground transition-all duration-300 hover:bg-surface-hover active:scale-[0.97]"
+            >
+              Explore Anime
+            </Link>
           </div>
 
-          {/* Bottom hint */}
-          {/* <p className="mt-12 text-xs text-white/25">
-            Free forever · No credit card required
+          {/* <p className="mt-6 text-xs text-muted">
+            Free forever · XP on every episode · 8 badges to earn
           </p> */}
         </div>
-      </div>
 
-      {/* Animations */}
-      <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-14px);
-          }
-        }
-        @keyframes shimmer {
-          0% {
-            background-position: 0% center;
-          }
-          100% {
-            background-position: 200% center;
-          }
-        }
-      `}</style>
+        {/* ============================================================ */}
+        {/* RIGHT — player card                                          */}
+        {/* ============================================================ */}
+        <div
+          className="animate-fade-in-up relative mx-auto w-full max-w-md"
+          style={{ animationDelay: "0.15s" }}
+        >
+          {/* Character art peeking behind the card */}
+          <Image
+            src="/images/anime-char2.png"
+            alt=""
+            width={736}
+            height={1178}
+            priority
+            sizes="256px"
+            className="pointer-events-none absolute -bottom-50 -right-60 z-0 hidden w-56 select-none opacity-90 md:block lg:w-64"
+          />
+
+          {/* Floating chip: XP */}
+          <div
+            className="animate-float absolute -right-3 -top-2 z-20 hidden sm:block"
+            style={{ animationDelay: "0.6s" }}
+          >
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 shadow-lg">
+              <Flame size={16} className="text-[#f96e46]" />
+              <span className="text-sm font-bold text-foreground">+120 XP</span>
+            </div>
+          </div>
+
+          {/* Floating chip: badge */}
+          <div
+            className="animate-float absolute -left-6 bottom-16 z-20 hidden sm:block"
+            style={{ animationDelay: "2.4s" }}
+          >
+            <div className="flex items-center gap-2 rounded-xl border border-[#97cc04]/30 bg-surface px-3.5 py-2 shadow-lg">
+              <Trophy size={16} className="text-[#97cc04]" />
+              <span className="text-sm font-semibold text-foreground">Badge unlocked</span>
+            </div>
+          </div>
+
+          {/* Player card */}
+          <div className="relative z-10 rounded-2xl border border-border bg-surface p-5 shadow-xl">
+            {/* Header */}
+            <div className="flex items-center gap-4">
+              <div className="relative shrink-0">
+                <div
+                  className="flex h-14 w-12 items-center justify-center overflow-hidden bg-[#f9c846]/15"
+                  style={{ clipPath: HEX_CLIP }}
+                >
+                  <Navii seed="otaku-hero" size={52} title="Adventurer" animated />
+                </div>
+                <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#f9c846]/40 bg-surface px-2 py-0.5 text-[10px] font-bold text-foreground">
+                  Lv.24
+                </span>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-foreground">Adventurer</p>
+                <p className="text-[11px] text-muted">Rank · Rising Star</p>
+              </div>
+
+              <span className="shrink-0 rounded-full border border-[#f9c846]/30 bg-[#f9c846]/10 px-2.5 py-1 text-[10px] font-bold text-[#f9c846]">
+                STREAK 12
+              </span>
+            </div>
+
+            {/* XP progress */}
+            <div className="mt-5">
+              <div className="mb-1.5 flex items-center justify-between text-[11px]">
+                <span className="font-semibold text-foreground">12,480 / 18,000 XP</span>
+                <span className="text-muted">Next: Lv.25</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-surface-hover">
+                <div className="h-full w-[68%] rounded-full bg-[#f9c846]" />
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-5 grid grid-cols-3 gap-2">
+              {stats.map((s) => (
+                <div key={s.label} className="rounded-xl bg-surface-hover px-2 py-3 text-center">
+                  <s.icon size={14} className="mx-auto text-[#f9c846]" />
+                  <p className="mt-1.5 text-sm font-bold text-foreground tabular-nums">{s.value}</p>
+                  <p className="mt-0.5 text-[10px] text-muted">{s.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Badge collection */}
+            <div className="mt-5 border-t border-border pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
+                  Badges
+                </span>
+                <span className="text-[10px] font-bold text-[#97cc04]">6/8</span>
+              </div>
+              <div className="mt-2.5 grid grid-cols-8 gap-1.5">
+                {Array.from({ length: BADGE_SLOTS }).map((_, i) => {
+                  const earned = i < badgeIcons.length;
+                  return (
+                    <div
+                      key={i}
+                      className={`flex h-9 w-full items-center justify-center overflow-hidden ${
+                        earned ? "bg-[#f9c846]/10" : "bg-surface-hover"
+                      }`}
+                      style={{ clipPath: HEX_CLIP }}
+                    >
+                      {earned ? (
+                        <Image
+                          src={badgeIcons[i]}
+                          alt=""
+                          width={24}
+                          height={24}
+                          className="h-5 w-5 object-contain"
+                        />
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

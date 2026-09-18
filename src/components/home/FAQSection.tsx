@@ -46,7 +46,7 @@ export default function FAQSection() {
   };
 
   return (
-    <section className="relative py-24 px-4 bg-white overflow-hidden">
+    <section className="relative py-24 px-4 overflow-hidden">
       {/* Subtle background pattern */}
       <div className="absolute inset-0 opacity-[0.015] pointer-events-none" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
@@ -58,25 +58,25 @@ export default function FAQSection() {
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="flex items-center gap-1">
-              <div className="h-px w-8 bg-gradient-to-r from-transparent to-[#f9c846]/50" />
+              <div className="h-px w-8 bg-[#f9c846]/40" />
               <span className="text-[#f9c846]/50 text-[6px]">◆</span>
             </div>
-            <span className="text-[11px] uppercase tracking-[0.3em] text-[#7b7f89] font-semibold">
+            <span className="text-[11px] uppercase tracking-[0.3em] text-muted font-semibold">
               Got Questions?
             </span>
             <div className="flex items-center gap-1">
               <span className="text-[#f9c846]/50 text-[6px]">◆</span>
-              <div className="h-px w-8 bg-gradient-to-l from-transparent to-[#f9c846]/50" />
+              <div className="h-px w-8 bg-[#f9c846]/40" />
             </div>
           </div>
 
           <h2
-            className={`text-4xl md:text-5xl text-[#545863] ${lordJuusai.className}`}
+            className={`text-4xl md:text-5xl text-foreground ${lordJuusai.className}`}
           >
             Frequently Asked{" "}
             <span className="text-[#f9c846]">Questions</span>
           </h2>
-          <p className="mt-3 text-sm text-[#7b7f89] max-w-lg mx-auto leading-relaxed">
+          <p className="mt-3 text-sm text-muted max-w-lg mx-auto leading-relaxed">
             Everything you need to know about tracking your anime journey.
           </p>
         </div>
@@ -89,18 +89,18 @@ export default function FAQSection() {
             return (
               <div
                 key={index}
-                className="rounded-xl border border-[#ececec] bg-[#fffdf8] overflow-hidden transition-all duration-200 hover:border-[#f9c846]/30"
+                className="rounded-xl border border-border bg-background overflow-hidden transition-all duration-200 hover:border-[#f9c846]/30"
               >
                 <button
                   onClick={() => toggleFAQ(index)}
                   className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left cursor-pointer"
                 >
-                  <span className="text-sm font-medium text-[#545863] leading-snug pr-4">
+                  <span className="text-sm font-medium text-foreground leading-snug pr-4">
                     {item.question}
                   </span>
                   <ChevronDown
                     size={16}
-                    className={`shrink-0 text-[#7b7f89] transition-transform duration-200 ${
+                    className={`shrink-0 text-muted transition-transform duration-200 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />
@@ -113,7 +113,7 @@ export default function FAQSection() {
                 >
                   <div className="px-5 pb-4 pt-0">
                     <div className="h-px bg-[#f9c846]/20 mb-3" />
-                    <p className="text-sm text-[#7b7f89] leading-relaxed">
+                    <p className="text-sm text-muted leading-relaxed">
                       {item.answer}
                     </p>
                   </div>

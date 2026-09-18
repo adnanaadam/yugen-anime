@@ -73,7 +73,7 @@ export default function SignUpPage() {
               <div className="w-full border-t border-gray-700"></div>
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-gray-700 px-2 text-gray-500"></span>
+              <span className="bg-gray-700 px-2 text-muted"></span>
             </div>
           </div>
 
@@ -93,18 +93,18 @@ export default function SignUpPage() {
         </div>
 
         {/* Footer note */}
-        <p className="mt-6 text-center text-xs text-gray-600">
+        <p className="mt-6 text-center text-xs text-muted">
           By continuing, you agree to our{" "}
           <a
             href="/terms"
-            className="text-gray-500 underline hover:text-gray-400 transition-colors"
+            className="text-muted underline hover:text-muted transition-colors"
           >
             Terms
           </a>{" "}
           and{" "}
           <a
             href="/privacy"
-            className="text-gray-500 underline hover:text-gray-400 transition-colors"
+            className="text-muted underline hover:text-muted transition-colors"
           >
             Privacy Policy
           </a>

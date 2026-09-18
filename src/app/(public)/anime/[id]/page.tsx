@@ -221,18 +221,18 @@ export default function AnimeDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#545863]/15">
+      <div className="min-h-screen bg-foreground/15">
         <div className="animate-pulse">
-          <div className="h-[250px] md:h-[300px] bg-[#545863]/15" />
+          <div className="h-[250px] md:h-[300px] bg-foreground/15" />
           <div className="mx-auto max-w-7xl px-4 py-8">
             <div className="flex flex-col lg:flex-row gap-8">
               <div className="lg:w-[280px] shrink-0">
-                <div className="aspect-[2/3] rounded-2xl bg-[#545863]/15" />
+                <div className="aspect-[2/3] rounded-2xl bg-foreground/15" />
               </div>
               <div className="flex-1 space-y-4">
-                <div className="h-8 w-64 rounded bg-[#545863]/15" />
-                <div className="h-4 w-full rounded bg-[#545863]/15" />
-                <div className="h-4 w-3/4 rounded bg-[#545863]/15" />
+                <div className="h-8 w-64 rounded bg-foreground/15" />
+                <div className="h-4 w-full rounded bg-foreground/15" />
+                <div className="h-4 w-3/4 rounded bg-foreground/15" />
               </div>
             </div>
           </div>
@@ -243,9 +243,9 @@ export default function AnimeDetailPage() {
 
   if (!anime) {
     return (
-      <div className="min-h-screen bg-[#fffdf8] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-[#545863]">Anime not found</h2>
+          <h2 className="text-2xl font-bold text-foreground">Anime not found</h2>
           <Link href="/explore" className="mt-4 inline-block text-[#f96e46] hover:underline">
             Back to Explore
           </Link>
@@ -258,7 +258,7 @@ export default function AnimeDetailPage() {
   const imageSrc = "/images/anime-bg4.jpg";
 
   return (
-    <div className="min-h-screen bg-[#fffdf8]">
+    <div className="min-h-screen bg-background">
       {/* Banner */}
       <div className="relative h-[200px] md:h-[300px] bg-black">
         {anime.bannerImage && (
@@ -278,7 +278,7 @@ export default function AnimeDetailPage() {
           {/* Sidebar - Cover */}
           <div className="lg:w-[200px] shrink-0">
             <div className="sticky top-24">
-              <div className="rounded-2xl border border-[#ececec] bg-white overflow-hidden shadow-sm">
+              <div className="rounded-2xl border border-border bg-surface overflow-hidden shadow-sm">
                 <div className="relative aspect-[2/3]">
                   <Image
                     src={anime.coverImage.extraLarge}
@@ -293,57 +293,57 @@ export default function AnimeDetailPage() {
               <div className="mt-4 space-y-2">
                 {anime.format && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#7b7f89]">Format</span>
-                    <span className="text-[#545863] font-medium">{anime.format}</span>
+                    <span className="text-muted">Format</span>
+                    <span className="text-foreground font-medium">{anime.format}</span>
                   </div>
                 )}
                 {anime.episodes > 0 && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#7b7f89]">Episodes</span>
-                    <span className="text-[#545863] font-medium">{anime.episodes}</span>
+                    <span className="text-muted">Episodes</span>
+                    <span className="text-foreground font-medium">{anime.episodes}</span>
                   </div>
                 )}
                 {anime.duration > 0 && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#7b7f89]">Duration</span>
-                    <span className="text-[#545863] font-medium">{anime.duration} min</span>
+                    <span className="text-muted">Duration</span>
+                    <span className="text-foreground font-medium">{anime.duration} min</span>
                   </div>
                 )}
                 {anime.status && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#7b7f89]">Status</span>
+                    <span className="text-muted">Status</span>
                     <span className="text-[#97cc04] font-medium">{anime.status}</span>
                   </div>
                 )}
                 {anime.seasonYear && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#7b7f89]">Season</span>
-                    <span className="text-[#545863] font-medium capitalize">
+                    <span className="text-muted">Season</span>
+                    <span className="text-foreground font-medium capitalize">
                       {anime.season} {anime.seasonYear}
                     </span>
                   </div>
                 )}
                 {anime.source && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#7b7f89]">Source</span>
-                    <span className="text-[#545863] font-medium">{anime.source}</span>
+                    <span className="text-muted">Source</span>
+                    <span className="text-foreground font-medium">{anime.source}</span>
                   </div>
                 )}
 
                 {/* Favorite button */}
-                <div className="pt-2 mt-2 border-t border-[#ececec] flex items-center gap-2">
+                <div className="pt-2 mt-2 border-t border-border flex items-center gap-2">
                   <FavoriteButton
                     animeId={anime.id}
                     initialFavorited={isFavorited}
                     size={18}
                     className="h-9 w-9"
                   />
-                  <span className="text-xs text-[#7b7f89]">
+                  <span className="text-xs text-muted">
                     {isFavorited ? "Favorited" : "Add to favorites"}
                   </span>
                 </div>
 
-                <div className="pt-2 border-t border-[#ececec]">
+                <div className="pt-2 border-t border-border">
                   {session ? (
                     <Link
                       href="/library"
@@ -371,18 +371,18 @@ export default function AnimeDetailPage() {
             {/* Back link */}
             <Link
               href="/explore"
-              className="inline-flex items-center gap-1.5 text-sm text-[#7b7f89] hover:text-[#f96e46] transition-colors mb-4"
+              className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-[#f96e46] transition-colors mb-4"
             >
               <ArrowLeft size={14} />
               Back to Explore
             </Link>
 
             {/* Title */}
-            <h1 className={`text-2xl md:text-3xl lg:text-4xl text-[#545863] ${lordJuusai.className}`}>
+            <h1 className={`text-2xl md:text-3xl lg:text-4xl text-foreground ${lordJuusai.className}`}>
               {title}
             </h1>
             {anime.title.native && anime.title.native !== title && (
-              <p className="mt-1 text-sm text-[#7b7f89]">{anime.title.native}</p>
+              <p className="mt-1 text-sm text-muted">{anime.title.native}</p>
             )}
 
             {/* Stats row */}
@@ -390,29 +390,29 @@ export default function AnimeDetailPage() {
               {anime.averageScore > 0 && (
                 <div className="flex items-center gap-1.5 rounded-lg bg-[#f9c846]/10 px-3 py-1.5">
                   <Star size={14} className="text-[#f9c846]" fill="#f9c846" />
-                  <span className="font-semibold text-[#545863]">{(anime.averageScore / 10).toFixed(1)}</span>
+                  <span className="font-semibold text-foreground">{(anime.averageScore / 10).toFixed(1)}</span>
                 </div>
               )}
               {anime.popularity > 0 && (
-                <div className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f7] px-3 py-1.5 text-[#7b7f89]">
+                <div className="flex items-center gap-1.5 rounded-lg bg-surface-hover px-3 py-1.5 text-muted">
                   <Users size={14} />
                   {anime.popularity.toLocaleString()}
                 </div>
               )}
               {anime.episodes > 0 && (
-                <div className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f7] px-3 py-1.5 text-[#7b7f89]">
+                <div className="flex items-center gap-1.5 rounded-lg bg-surface-hover px-3 py-1.5 text-muted">
                   <Tv size={14} />
                   {anime.episodes} eps
                 </div>
               )}
               {anime.duration > 0 && (
-                <div className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f7] px-3 py-1.5 text-[#7b7f89]">
+                <div className="flex items-center gap-1.5 rounded-lg bg-surface-hover px-3 py-1.5 text-muted">
                   <Clock size={14} />
                   {anime.duration}m
                 </div>
               )}
               {anime.seasonYear && (
-                <div className="flex items-center gap-1.5 rounded-lg bg-[#f7f7f7] px-3 py-1.5 text-[#7b7f89]">
+                <div className="flex items-center gap-1.5 rounded-lg bg-surface-hover px-3 py-1.5 text-muted">
                   <Calendar size={14} />
                   {anime.season} {anime.seasonYear}
                 </div>
@@ -424,7 +424,7 @@ export default function AnimeDetailPage() {
               {anime.genres.map((genre) => (
                 <span
                   key={genre}
-                  className="rounded-full border border-[#ececec] bg-white px-3 py-1 text-xs text-[#545863]"
+                  className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-foreground"
                 >
                   {genre}
                 </span>
@@ -433,20 +433,20 @@ export default function AnimeDetailPage() {
 
             {/* Tracking Section */}
             <div className="mt-6">
-              <h3 className="text-sm font-semibold text-[#545863] mb-4">Your Progress</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-4">Your Progress</h3>
 
               {/* Update Button */}
               {session ? (
                 <button
                   onClick={() => setShowModal(true)}
-                  className="w-full rounded-lg border border-[#ececec] cursor-pointer bg-[#fffdf8] px-4 py-2.5 text-sm font-medium text-[#545863] hover:border-[#f9c846]/30 transition-colors"
+                  className="w-full rounded-lg border border-border cursor-pointer bg-background px-4 py-2.5 text-sm font-medium text-foreground hover:border-[#f9c846]/30 transition-colors"
                 >
                   {userStatus ? "Update Progress" : "Add to Library"}
                 </button>
               ) : (
                 <button
                   onClick={() => signIn()}
-                  className="w-full rounded-lg border border-[#ececec] cursor-pointer bg-[#fffdf8] px-4 py-2.5 text-sm font-medium text-[#545863] hover:border-[#f9c846]/30 transition-colors"
+                  className="w-full rounded-lg border border-border cursor-pointer bg-background px-4 py-2.5 text-sm font-medium text-foreground hover:border-[#f9c846]/30 transition-colors"
                 >
                   Sign in to track
                 </button>
@@ -454,7 +454,7 @@ export default function AnimeDetailPage() {
 
               {/* Current Status Display */}
               {userStatus && (
-                <div className="mt-4 p-4 rounded-lg border border-[#ececec] bg-white">
+                <div className="mt-4 p-4 rounded-lg border border-border bg-surface">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full" style={{ 
@@ -464,9 +464,9 @@ export default function AnimeDetailPage() {
                                        userStatus === "PAUSED" ? "#f96e46" :
                                        userStatus === "DROPPED" ? "#ff4444" : "#c084fc"
                       }} />
-                      <span className="text-sm font-medium text-[#545863]">{userStatus}</span>
+                      <span className="text-sm font-medium text-foreground">{userStatus}</span>
                     </div>
-                    <span className="text-sm text-[#7b7f89]">
+                    <span className="text-sm text-muted">
                       {userProgress} / {anime.episodes || "?"} eps
                     </span>
                   </div>
@@ -476,9 +476,9 @@ export default function AnimeDetailPage() {
 
             {/* Description */}
             <div className="mt-8">
-              <h3 className="text-lg font-semibold text-[#545863] mb-3">Synopsis</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-3">Synopsis</h3>
               <div
-                className="text-base text-[#7b7f89] leading-relaxed prose prose-sm max-w-none"
+                className="text-base text-muted leading-relaxed prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{
                   __html: anime.description?.replace(/\n/g, "<br />") || "No description available.",
                 }}
@@ -488,10 +488,10 @@ export default function AnimeDetailPage() {
             {/* Studios */}
             {anime.studios.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-sm font-semibold text-[#545863] mb-2">Studios</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Studios</h3>
                 <div className="flex flex-wrap gap-2">
                   {anime.studios.map((studio, i) => (
-                    <span key={i} className="rounded-lg border border-[#ececec] bg-white px-3 py-1 text-xs text-[#545863]">
+                    <span key={i} className="rounded-lg border border-border bg-surface px-3 py-1 text-xs text-foreground">
                       {studio.name}
                     </span>
                   ))}
@@ -502,10 +502,10 @@ export default function AnimeDetailPage() {
             {/* Characters */}
             {anime.characters.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-lg font-semibold text-[#545863] mb-4">Characters</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-4">Characters</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {anime.characters.slice(0, 8).map((char, i) => (
-                    <div key={char.id || i} className="flex items-center gap-3 rounded-xl border border-[#ececec] bg-white p-3 shadow-sm">
+                    <div key={char.id || i} className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 shadow-sm">
                       {char.image && (
                         <Image
                           src={char.image}
@@ -516,8 +516,8 @@ export default function AnimeDetailPage() {
                         />
                       )}
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-[#545863]">{char.name}</p>
-                        <p className="text-xs text-[#7b7f89]">{char.role}</p>
+                        <p className="text-sm font-medium text-foreground">{char.name}</p>
+                        <p className="text-xs text-muted">{char.role}</p>
                       </div>
                     </div>
                   ))}
@@ -528,11 +528,11 @@ export default function AnimeDetailPage() {
             {/* Recommendations */}
             {anime.recommendations.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-lg font-semibold text-[#545863] mb-4">You Might Also Like</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-4">You Might Also Like</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                   {anime.recommendations.slice(0, 10).map((rec, i) => (
                     <Link key={rec.id || i} href={`/anime/${rec.id}`} className="group">
-                      <div className="relative aspect-[2/3] rounded-xl border border-[#ececec] overflow-hidden bg-white">
+                      <div className="relative aspect-[2/3] rounded-xl border border-border overflow-hidden bg-surface">
                         <Image
                           src={rec.coverImage}
                           alt={rec.title}
@@ -540,7 +540,7 @@ export default function AnimeDetailPage() {
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                       </div>
-                      <p className="mt-2 text-xs text-[#545863] line-clamp-2 group-hover:text-[#f96e46] transition-colors">
+                      <p className="mt-2 text-xs text-foreground line-clamp-2 group-hover:text-[#f96e46] transition-colors">
                         {rec.title}
                       </p>
                     </Link>

@@ -114,7 +114,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       />
       <button
         onClick={() => openFeedback("general")}
-        className="fixed bottom-6 left-6 z-[9998] flex items-center gap-2 rounded-full bg-[#545863] px-4 py-2.5 text-sm font-medium text-white shadow-lg hover:bg-[#3d424d] transition-all active:scale-95 cursor-pointer"
+        className="fixed bottom-6 left-6 z-[9998] flex items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-medium text-background shadow-lg hover:opacity-90 transition-all active:scale-95 cursor-pointer"
         title="Send feedback"
       >
         <MessageSquare size={16} />
